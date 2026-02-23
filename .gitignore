@@ -1,0 +1,20 @@
+# ==========================================
+# 1. Fichiers compilés (Ne JAMAIS partager)
+# ==========================================
+target/
+out/
+*.class
+
+# ==========================================
+# 2. Configuration IntelliJ IDEA (Ton environnement local)
+# ==========================================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ==========================================
+# 3. Fichiers systèmes (Windows / Mac)
+# ==========================================
+.DS_Store
+Thumbs.db
