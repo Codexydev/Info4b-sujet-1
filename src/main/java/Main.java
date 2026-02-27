@@ -7,4 +7,8 @@ public class Main {
         System.out.println("antoine");
         System.out.printf("Hello, World!%n");
     }
+
+    public void test() {
+        System.out.println("4");
+    }
 }
