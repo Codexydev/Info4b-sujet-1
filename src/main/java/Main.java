@@ -1,5 +1,6 @@
 import java.io.IOException;
-import java.util.Scanner;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,7 +11,11 @@ public class Main {
 
         try {
             Files.walk(start).forEach(path -> {
-                indexFile(path.toString(), documentStore, invertedIndex);
+                if (path.toString().endsWith(".txt")) {
+                    System.out.println("\nIndexation du fichier : " + path.toString());
+                    indexFile(path.toString(), documentStore, invertedIndex);
+                }
+
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -18,18 +23,45 @@ public class Main {
     }
 
     public static void indexFile(String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex) {
+        documentStore.ajouterDocument(cheminFichier, 1, 1); // poids et date de modification à revoir
+
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
 
+        System.out.println("Texte extrait : " + texte);
+
+        String[] bypassMotInit = {"le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"};
+        List<String> bypassMot = new ArrayList<>();
+        bypassMot = Arrays.asList(bypassMotInit);
+
+        for (String mot : texte.split("\\s+")) {
+            if (mot.length() > 4) {
+                invertedIndex.indexerMot(mot, cheminFichier);
+                System.out.println("Indexation du mot : " + mot);
+
+            } else if (!bypassMot.contains(mot)) {
+                invertedIndex.indexerMot(mot, cheminFichier);
+                System.out.println("Indexation du mot : " + mot);
+            } else {
+                System.out.println("Mot ignoré : " + mot);
+            }
+        }
     }
 
     public static void main(String[] args) {
-        System.out.println("Chemin du repertoire à indexer : ");
+        System.out.print("Chemin du repertoire à indexer : ");
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();
+
+        // Initialisation du DocumentStore et de l'InvertedIndex
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
 
+        // parcours du repertoire et indexation des fichiers
         walkFile(path, documentStore, invertedIndex);
+
+        System.out.println("DocumentStore : " + documentStore.getDocumentStore());
+        System.out.println("Index global : " + invertedIndex.getIndexGlobal());
+        System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
     }
 }
