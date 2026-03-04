@@ -25,8 +25,11 @@ public class ExtractText {
                 try {
                     ProcessBuilder processBuilder = new ProcessBuilder("pdftotext", this.cheminFichier, "-");
                     Process process = processBuilder.start();
-                    return new String(process.getInputStream().readAllBytes());
-                } catch (IOException e) {
+                    String texteExtrait = new String(process.getInputStream().readAllBytes());
+                    process.waitFor();
+
+                    return texteExtrait;
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
