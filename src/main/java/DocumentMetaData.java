@@ -1,7 +1,7 @@
 public class DocumentMetaData {
     private String chemin;
-    private int poids;
-    private int dateModification;
+    private long poids;
+    private long dateModification;
 
     public DocumentMetaData(String chemin, int poids, int dateModification) {
         this.chemin = chemin;
@@ -13,11 +13,11 @@ public class DocumentMetaData {
         return chemin;
     }
 
-    public int getPoids() {
+    public long getPoids() {
         return poids;
     }
 
-    public int getDateModification() {
+    public long getDateModification() {
         return dateModification;
     }
 }

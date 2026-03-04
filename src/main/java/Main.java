@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -10,12 +11,12 @@ public class Main {
         Path start = Paths.get(cheminRepertoire);
 
         try {
-            Files.walk(start).forEach(path -> {
-                if (path.toString().endsWith(".txt")) {
-                    System.out.println("\nIndexation du fichier : " + path.toString());
-                    indexFile(path.toString(), documentStore, invertedIndex);
-                }
 
+            Files.walk(start)
+                    .filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        System.out.println("\nIndexation du fichier : " + path.toString());
+                        indexFile(path.toString(), documentStore, invertedIndex);
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -23,18 +24,20 @@ public class Main {
     }
 
     public static void indexFile(String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex) {
-        documentStore.ajouterDocument(cheminFichier, 1, 1); // poids et date de modification à revoir
+        File file = new File(cheminFichier);
+        documentStore.ajouterDocument(cheminFichier, 1, (int) file.lastModified()); // poids et date de modification à revoir
 
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
 
+        System.out.println("date de modification : " + file.lastModified());
         System.out.println("Texte extrait : " + texte);
 
         String[] bypassMotInit = {"le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"};
         List<String> bypassMot = new ArrayList<>();
         bypassMot = Arrays.asList(bypassMotInit);
 
-        for (String mot : texte.split("\\s+")) {
+        for (String mot : texte.split("[^\\p{L}\\p{N}]+")) {
             if (mot.length() > 4) {
                 invertedIndex.indexerMot(mot, cheminFichier);
                 System.out.println("Indexation du mot : " + mot);
