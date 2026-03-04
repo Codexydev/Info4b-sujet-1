@@ -30,23 +30,30 @@ public class Main {
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
 
+        // Sécurité si le PDF est vide ou illisible
+        if (texte == null || texte.isEmpty()) {
+            return;
+        }
+
         System.out.println("date de modification : " + file.lastModified());
         System.out.println("Texte extrait : " + texte);
 
         String[] bypassMotInit = {"le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"};
-        List<String> bypassMot = new ArrayList<>();
-        bypassMot = Arrays.asList(bypassMotInit);
+        List<String> bypassMot = Arrays.asList(bypassMotInit);
 
-        for (String mot : texte.split("[^\\p{L}\\p{N}]+")) {
-            if (mot.length() > 4) {
-                invertedIndex.indexerMot(mot, cheminFichier);
-                System.out.println("Indexation du mot : " + mot);
+        String texteMinuscule = texte.toLowerCase();
+        String[] motsExtraits = texteMinuscule.split("[^\\p{L}\\p{N}]+");
 
-            } else if (!bypassMot.contains(mot)) {
-                invertedIndex.indexerMot(mot, cheminFichier);
-                System.out.println("Indexation du mot : " + mot);
-            } else {
+        for (String mot : motsExtraits) {
+            if (mot.isEmpty()) {
+                continue;
+            }
+
+            if (bypassMot.contains(mot)) {
                 System.out.println("Mot ignoré : " + mot);
+            } else {
+                invertedIndex.indexerMot(mot, cheminFichier);
+                System.out.println("Indexation du mot : " + mot);
             }
         }
     }
