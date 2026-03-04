@@ -21,6 +21,15 @@ public class ExtractText {
                     e.printStackTrace();
                 }
             }
+            case "pdf" -> {
+                try {
+                    ProcessBuilder processBuilder = new ProcessBuilder("pdftotext", this.cheminFichier, "-");
+                    Process process = processBuilder.start();
+                    return new String(process.getInputStream().readAllBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return "";
     }
