@@ -25,7 +25,6 @@ public class Main {
 
     public static void indexFile(String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex) {
         File file = new File(cheminFichier);
-        documentStore.ajouterDocument(cheminFichier, 1, (int) file.lastModified()); // poids et date de modification à revoir
 
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
@@ -35,14 +34,17 @@ public class Main {
             return;
         }
 
-        System.out.println("date de modification : " + file.lastModified());
-        System.out.println("Texte extrait : " + texte);
-
         String[] bypassMotInit = {"le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"};
         List<String> bypassMot = Arrays.asList(bypassMotInit);
 
         String texteMinuscule = texte.toLowerCase();
         String[] motsExtraits = texteMinuscule.split("[^\\p{L}\\p{N}]+");
+
+        System.out.printf("poids : %d octets\n", file.length());
+        System.out.println("date de modification : " + file.lastModified());
+        System.out.println("Texte extrait : " + texte);
+
+        int nbMots = 0;
 
         for (String mot : motsExtraits) {
             if (mot.isEmpty()) {
@@ -53,9 +55,13 @@ public class Main {
                 System.out.println("Mot ignoré : " + mot);
             } else {
                 invertedIndex.indexerMot(mot, cheminFichier);
+                nbMots+=1;
                 System.out.println("Indexation du mot : " + mot);
             }
         }
+
+        System.out.println("nombre de mots : " + nbMots);
+        documentStore.ajouterDocument(cheminFichier, file.length(), file.lastModified(),nbMots);
     }
 
     public static void main(String[] args) {

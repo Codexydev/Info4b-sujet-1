@@ -3,8 +3,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DocumentStore {
         private final ConcurrentHashMap<String, DocumentMetaData> documentStore = new ConcurrentHashMap<>();
 
-        public void ajouterDocument(String chemin, int poids, int dateModification) {
-            DocumentMetaData metaData = new DocumentMetaData(chemin, poids, dateModification);
+        public void ajouterDocument(String chemin, long poids, long dateModification, long totalMots) {
+            DocumentMetaData metaData = new DocumentMetaData(chemin, poids, dateModification, totalMots); // totalMots à revoir
             documentStore.put(chemin, metaData);
         }
 
