@@ -1,6 +1,7 @@
+package Serveur;
+
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,14 +70,14 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();
 
-        // Initialisation du DocumentStore et de l'InvertedIndex
+        // Initialisation du Serveur.DocumentStore et de l'Serveur.InvertedIndex
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
 
         // parcours du repertoire et indexation des fichiers
         walkFile(path, documentStore, invertedIndex);
 
-        System.out.println("DocumentStore : " + documentStore.getDocumentStore());
+        System.out.println("Serveur.DocumentStore : " + documentStore.getDocumentStore());
         System.out.println("Index global : " + invertedIndex.getIndexGlobal());
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
     }

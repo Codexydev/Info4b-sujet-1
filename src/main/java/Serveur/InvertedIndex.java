@@ -1,3 +1,5 @@
+package Serveur;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InvertedIndex {

@@ -1,3 +1,5 @@
+package Serveur;
+
 public class DocumentMetaData {
     private String chemin;
     private long poids;
