@@ -10,28 +10,30 @@ import java.nio.file.Paths;
 public class Main {
     public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex) {
         Path start = Paths.get(cheminRepertoire);
+        IdToPath idToPath = new IdToPath();
 
         try {
-
             Files.walk(start)
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
+                        idToPath.addPath(path.toString());
                         System.out.println("\nIndexation du fichier : " + path.toString());
-                        indexFile(path.toString(), documentStore, invertedIndex);
+                        indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex);
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void indexFile(String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex) {
+    public static void indexFile(int id, String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex) {
         File file = new File(cheminFichier);
-
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
 
-        // Sécurité si le PDF est vide ou illisible
+        System.out.println(texte);
+
         if (texte == null || texte.isEmpty()) {
+            System.out.println("heyrrry");
             return;
         }
 
@@ -55,14 +57,14 @@ public class Main {
             if (bypassMot.contains(mot)) {
                 System.out.println("Mot ignoré : " + mot);
             } else {
-                invertedIndex.indexerMot(mot, cheminFichier);
+                invertedIndex.indexerMot(mot, id);
                 nbMots+=1;
                 System.out.println("Indexation du mot : " + mot);
             }
         }
 
         System.out.println("nombre de mots : " + nbMots);
-        documentStore.ajouterDocument(cheminFichier, file.length(), file.lastModified(),nbMots);
+        documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(),nbMots);
     }
 
     public static void main(String[] args) {
@@ -70,11 +72,9 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();
 
-        // Initialisation du Serveur.DocumentStore et de l'Serveur.InvertedIndex
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
 
-        // parcours du repertoire et indexation des fichiers
         walkFile(path, documentStore, invertedIndex);
 
         System.out.println("Serveur.DocumentStore : " + documentStore.getDocumentStore());
