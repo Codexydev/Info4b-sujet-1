@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
+    public static boolean DEBUG = false;
 
     public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex, IdToPath idToPath) {
         Path start = Paths.get(cheminRepertoire);
@@ -18,7 +19,7 @@ public class Main {
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         idToPath.addPath(path.toString());
-                        System.out.println("\nIndexation du fichier : " + path.toString());
+                        if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
                         indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex);
             });
         } catch (IOException e) {
@@ -31,10 +32,10 @@ public class Main {
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
 
-        System.out.println(texte);
+        if (DEBUG) System.out.println(texte);
 
         if (texte == null || texte.isEmpty()) {
-            System.out.println("-- text vide");
+            if (DEBUG) System.out.println("-- text vide");
             return;
         }
 
@@ -44,10 +45,10 @@ public class Main {
         String texteMinuscule = texte.toLowerCase();
         String[] motsExtraits = texteMinuscule.split("[^\\p{L}\\p{N}]+");
 
-        System.out.println("id : " + id);
-        System.out.printf("poids : %d octets\n", file.length());
-        System.out.println("date de modification : " + file.lastModified());
-        System.out.println("Texte extrait : " + texte);
+        if (DEBUG) System.out.println("id : " + id);
+        if (DEBUG) System.out.printf("poids : %d octets\n", file.length());
+        if (DEBUG) System.out.println("date de modification : " + file.lastModified());
+        if (DEBUG) System.out.println("Texte extrait : " + texte);
 
         int nbMots = 0;
 
@@ -57,15 +58,15 @@ public class Main {
             }
 
             if (bypassMot.contains(mot)) {
-                System.out.println("Mot ignoré : " + mot);
+                if (DEBUG) System.out.println("Mot ignoré : " + mot);
             } else {
                 invertedIndex.indexerMot(mot, id);
                 nbMots+=1;
-                System.out.println("Indexation du mot : " + mot);
+                if (DEBUG) System.out.println("Indexation du mot : " + mot);
             }
         }
 
-        System.out.println("nombre de mots : " + nbMots);
+        if (DEBUG) System.out.println("nombre de mots : " + nbMots);
         documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(),nbMots);
     }
 
@@ -146,8 +147,8 @@ public class Main {
 
         walkFile(path, documentStore, invertedIndex,idToPath);
 
-        System.out.println("\nServeur.DocumentStore : " + documentStore.getDocumentStore());
-        System.out.println("Index global : " + invertedIndex.getIndexGlobal());
+        if (DEBUG) System.out.println("\nServeur.DocumentStore : " + documentStore.getDocumentStore());
+        if (DEBUG) System.out.println("Index global : " + invertedIndex.getIndexGlobal());
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
 
         server(invertedIndex,documentStore,idToPath);
