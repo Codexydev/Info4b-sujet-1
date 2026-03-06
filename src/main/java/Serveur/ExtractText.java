@@ -1,3 +1,5 @@
+package Serveur;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,6 +20,18 @@ public class ExtractText {
                 try {
                     return new String(Files.readAllBytes(Paths.get(this.cheminFichier)));
                 } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            case "pdf" -> {
+                try {
+                    ProcessBuilder processBuilder = new ProcessBuilder("pdftotext", this.cheminFichier, "-");
+                    Process process = processBuilder.start();
+                    String texteExtrait = new String(process.getInputStream().readAllBytes());
+                    process.waitFor();
+
+                    return texteExtrait;
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }

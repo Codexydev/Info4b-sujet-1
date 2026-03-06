@@ -1,10 +1,12 @@
+package Serveur;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DocumentStore {
         private final ConcurrentHashMap<String, DocumentMetaData> documentStore = new ConcurrentHashMap<>();
 
-        public void ajouterDocument(String chemin, int poids, int dateModification) {
-            DocumentMetaData metaData = new DocumentMetaData(chemin, poids, dateModification);
+        public void ajouterDocument(int id, String chemin, long poids, long dateModification, long totalMots) {
+            DocumentMetaData metaData = new DocumentMetaData(id, chemin, poids, dateModification, totalMots); // totalMots à revoir
             documentStore.put(chemin, metaData);
         }
 
