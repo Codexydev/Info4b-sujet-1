@@ -1,7 +1,8 @@
 package Serveur;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +68,33 @@ public class Main {
         documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(),nbMots);
     }
 
+    public static void server() {
+        try {
+            System.out.println("Server is running...");
+            ServerSocket server = new ServerSocket(12345);
+            Socket socket = server.accept();
+            System.out.println("Client connected");
+
+            boolean running = true;
+            while (running) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String str = in.readLine();
+
+                if (str.equals("q")) {
+                    running = false;
+                    System.out.println("Client disconnected");
+                    break;
+                }
+
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                out.println("Message reçu : " + str);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public static void main(String[] args) {
         System.out.print("Chemin du repertoire à indexer : ");
         Scanner scanner = new Scanner(System.in);
@@ -80,5 +108,7 @@ public class Main {
         System.out.println("Serveur.DocumentStore : " + documentStore.getDocumentStore());
         System.out.println("Index global : " + invertedIndex.getIndexGlobal());
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
+
+        server();
     }
 }
