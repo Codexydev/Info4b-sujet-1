@@ -30,4 +30,15 @@ public class DocumentMetaData {
     public long getDateModification() {
         return dateModification;
     }
+
+    @Override
+    public String toString() {
+        return "DocumentMetaData{" +
+                "id=" + id +
+                ", chemin='" + chemin + '\'' +
+                ", poids=" + poids +
+                ", dateModification=" + dateModification +
+                ", totalMots=" + totalMots +
+                '}';
+    }
 }

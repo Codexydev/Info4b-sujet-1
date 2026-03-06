@@ -22,7 +22,7 @@ public class Journal {
         return builder.toString();
     }
 
-    //sauvegarde immédiate sur disque dur
+    // sauvegarde immédiate sur disque dur
     public void ecrireAjout(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) throws IOException {
         String motsformat = formaterMots(mots) ; // transforme en string pr pouboir etre ecrit proprement ensuite
         writer.write("AJOUT" + ";" + chemin +";" + datemodif + ";" + taille + ";" + motsformat); // écrit dans journal.csv

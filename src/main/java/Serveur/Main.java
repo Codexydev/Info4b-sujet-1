@@ -9,9 +9,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
-    public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex) {
+
+    public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex, IdToPath idToPath) {
         Path start = Paths.get(cheminRepertoire);
-        IdToPath idToPath = new IdToPath();
 
         try {
             Files.walk(start)
@@ -34,7 +34,7 @@ public class Main {
         System.out.println(texte);
 
         if (texte == null || texte.isEmpty()) {
-            System.out.println("heyrrry");
+            System.out.println("-- text vide");
             return;
         }
 
@@ -44,6 +44,7 @@ public class Main {
         String texteMinuscule = texte.toLowerCase();
         String[] motsExtraits = texteMinuscule.split("[^\\p{L}\\p{N}]+");
 
+        System.out.println("id : " + id);
         System.out.printf("poids : %d octets\n", file.length());
         System.out.println("date de modification : " + file.lastModified());
         System.out.println("Texte extrait : " + texte);
@@ -68,7 +69,7 @@ public class Main {
         documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(),nbMots);
     }
 
-    public static void server() {
+    public static void server(InvertedIndex invertedIndex, DocumentStore documentStore, IdToPath idToPath) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -80,14 +81,53 @@ public class Main {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String str = in.readLine();
 
+                String command = str.split(" ")[0];
+
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+                switch (command) {
+                    case "-h" :
+                        out.println("""
+                                Commandes disponibles :
+                                -h : Afficher l'aide
+                                -t <message> : Afficher le message reçu pour tester la communication
+                                -q : Quitter la connexion
+                                -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
+                                -m <chemin du document> : Afficher les métadonnées d'un document donné
+                               END_OF_MESSAGE""");
+                        break;
+
+                    case "-t" :
+                        out.println("Message reçu : " + str.substring(3));
+                        out.println("END_OF_MESSAGE");
+                        break;
+
+                    case "-s" :
+                        String[] mots = str.split(" ")[1].split(",");
+
+                        Recherche recherche = new Recherche(invertedIndex,documentStore,idToPath,mots);
+                        out.println(recherche.effectuerRecherche());
+                        out.println("END_OF_MESSAGE");
+                        break;
+
+                    case "-m" :
+                        String path = str.split(" ")[1];
+                        out.println(documentStore.getDocumentMetaData(path));
+                        break;
+
+                    default:
+                        out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
+                        out.println("END_OF_MESSAGE");
+                        break;
+                }
+
                 if (str.equals("q")) {
                     running = false;
                     System.out.println("Client disconnected");
                     break;
                 }
 
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                out.println("Message reçu : " + str);
+
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -102,14 +142,15 @@ public class Main {
 
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
+        IdToPath idToPath = new IdToPath();
 
-        walkFile(path, documentStore, invertedIndex);
+        walkFile(path, documentStore, invertedIndex,idToPath);
 
-        System.out.println("Serveur.DocumentStore : " + documentStore.getDocumentStore());
+        System.out.println("\nServeur.DocumentStore : " + documentStore.getDocumentStore());
         System.out.println("Index global : " + invertedIndex.getIndexGlobal());
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
 
-        server();
+        server(invertedIndex,documentStore,idToPath);
     }
 
 }

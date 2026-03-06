@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class IdToPath {
     private ArrayList idToPath = new ArrayList<>();
-    private int currentId = 0;
+    private int currentId = -1;
 
     public IdToPath() {
     }
 
     public void addPath(String path) {
         idToPath.add(path);
-        currentId+=1;
+        currentId++;
     }
 
     public int getCurrentId() {
@@ -25,4 +25,7 @@ public class IdToPath {
         return null;
     }
 
+    public ArrayList getIdToPath() {
+        return this.idToPath;
+    }
 }
