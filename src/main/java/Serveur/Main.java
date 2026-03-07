@@ -114,6 +114,7 @@ public class Main {
                     case "-m" :
                         String path = str.split(" ")[1];
                         out.println(documentStore.getDocumentMetaData(path));
+                        out.println("END_OF_MESSAGE");
                         break;
 
                     default:
