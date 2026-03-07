@@ -86,41 +86,61 @@ public class Main {
 
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                switch (command) {
-                    case "-h" :
-                        out.println("""
-                                Commandes disponibles :
-                                -h : Afficher l'aide
-                                -t <message> : Afficher le message reçu pour tester la communication
-                                -q : Quitter la connexion
-                                -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
-                                -m <chemin du document> : Afficher les métadonnées d'un document donné
-                               END_OF_MESSAGE""");
-                        break;
+                if (str.length()>2 || str.equals("-h")) {
 
-                    case "-t" :
-                        out.println("Message reçu : " + str.substring(3));
-                        out.println("END_OF_MESSAGE");
-                        break;
+                    switch (command) {
+                        case "-h":
+                            out.println("""
+                                     Commandes disponibles :
+                                     -h : Afficher l'aide
+                                     -t <message> : Afficher le message reçu pour tester la communication
+                                     -q : Quitter la connexion
+                                     -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
+                                     -s <mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : separateur de mot ","
+                                     -m <chemin du document> : Afficher les métadonnées d'un document donné
+                                    END_OF_MESSAGE""");
+                            break;
 
-                    case "-s" :
-                        String[] mots = str.split(" ")[1].split(",");
+                        case "-t":
+                            out.println("Message reçu : " + str.substring(3));
+                            out.println("END_OF_MESSAGE");
+                            break;
 
-                        Recherche recherche = new Recherche(invertedIndex,documentStore,idToPath,mots);
-                        out.println(recherche.effectuerRecherche());
-                        out.println("END_OF_MESSAGE");
-                        break;
+                        case "-s":
+                            String[] arguments = str.split(" ");
+                            if (arguments.length < 2) {
+                                out.println("Erreur: Veuillez spécifier un mot à chercher.");
+                                out.println("END_OF_MESSAGE");
+                                break;
+                            }
 
-                    case "-m" :
-                        String path = str.split(" ")[1];
-                        out.println(documentStore.getDocumentMetaData(path));
-                        out.println("END_OF_MESSAGE");
-                        break;
+                            String[] mots = arguments[1].split(",");
 
-                    default:
-                        out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
-                        out.println("END_OF_MESSAGE");
-                        break;
+                            if (arguments.length >= 4 && arguments[2].equals("--")) {
+                                String[] motsNonRecherches = arguments[3].split(",");
+                                Recherche recherche = new Recherche(invertedIndex, documentStore, idToPath, mots, motsNonRecherches);
+                                out.println(recherche.effectuerRecherche());
+                            } else {
+                                Recherche recherche = new Recherche(invertedIndex, documentStore, idToPath, mots);
+                                out.println(recherche.effectuerRecherche());
+                            }
+                            out.println("END_OF_MESSAGE");
+                            break;
+
+                        case "-m":
+                            String path = str.split(" ")[1];
+                            out.println(documentStore.getDocumentMetaData(path));
+                            out.println("END_OF_MESSAGE");
+                            break;
+
+                        default:
+                            out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
+                            out.println("END_OF_MESSAGE");
+                            break;
+                    }
+                } else {
+                    out.println("donnez le(s) parametre(s)");
+                    out.println("END_OF_MESSAGE");
                 }
 
                 if (str.equals("q")) {
