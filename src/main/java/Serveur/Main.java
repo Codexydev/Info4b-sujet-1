@@ -81,6 +81,7 @@ public class Main {
             while (running) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String str = in.readLine();
+                String path;
 
                 String command = str.split(" ")[0];
 
@@ -98,6 +99,7 @@ public class Main {
                                      -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
                                      -s <mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : separateur de mot ","
                                      -m <chemin du document> : Afficher les métadonnées d'un document donné
+                                     -p <chemin du document> : affiche le texte du document
                                     END_OF_MESSAGE""");
                             break;
 
@@ -128,8 +130,16 @@ public class Main {
                             break;
 
                         case "-m":
-                            String path = str.split(" ")[1];
+                            path = str.split(" ")[1];
                             out.println(documentStore.getDocumentMetaData(path));
+                            out.println("END_OF_MESSAGE");
+                            break;
+
+                        case "-p":
+                            path = str.split(" ")[1];
+                            ExtractText extractText = new ExtractText(path);
+                            String texte = extractText.extraireTexte();
+                            out.println("\n"+texte);
                             out.println("END_OF_MESSAGE");
                             break;
 
