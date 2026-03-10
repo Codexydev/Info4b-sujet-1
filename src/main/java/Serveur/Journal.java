@@ -13,11 +13,10 @@ public class Journal {
     private final ArrayList<String> fileOperations = new ArrayList<>();
     private static final int CAPACITE_MAX = 100; // taille max du buffer borné
 
-    // sans utiliser stop() qui est déprécié depuis Java 1.5
+    // sans utiliser stop()
     private boolean actif = true;
 
-    // créa thread via "implements Runnable"
-    // setName() pour nommer le thread
+    // setName() pr nommer le thread
     private final Thread threadEcrivain;
 
     public Journal(String chemin) throws IOException {
@@ -31,25 +30,19 @@ public class Journal {
         threadEcrivain.start();
     }
 
-    // Strat "implements Runnable" pour déf code du thread
     // Ce thread est le CONSOMMATEUR du buffer
     private class EcrivainJournal implements Runnable {
         @Override
         public void run() {
             while (actif || !fileOperations.isEmpty()) {
                 String operation = null;
-
-                // Synchronized protège l'accès concurrent au buffer partagé
-                // Syntaxe synchronized(o) { <section critique> }
                 synchronized (fileOperations) {
 
                     // si buffer vide -> consommateur attend que producteurs produisent
-                    // o.wait() libère accès exclusif et bloque le thread en attente d'un notify()
                     while (fileOperations.isEmpty() && actif) {
                         try {
-                            fileOperations.wait(); // attente passive
+                            fileOperations.wait();
                         } catch (InterruptedException e) {
-                            // InterruptedException à capturer lors d'une attente
                             Thread.currentThread().interrupt();
                             return;
                         }
@@ -58,20 +51,17 @@ public class Journal {
                     if (!fileOperations.isEmpty()) {
                         operation = fileOperations.remove(0); // consomme le 1er élmt du buffer
 
-                        // o.notifyAll() réveille tt les threads bloqués sur objt
-                        // ici -> réveil les producteurs potentiellement bloqués car buffer était plein
+                        // réveil les producteurs potentiellement bloqués car buffer était plein
                         fileOperations.notifyAll();
                     }
                 }
 
-                // Écriture effectuée hors du verrou sur fileOperations pr minimiser section critique
-                // Synchronized sur writer = section critique pr l'accès fichier
                 if (operation != null) {
                     synchronized (writer) {
                         try {
-                            writer.write(operation);
+                            writer.write(operation); // String in buffer mémoire
                             writer.newLine();
-                            writer.flush();
+                            writer.flush(); // Force écriture sur le disque
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -110,6 +100,8 @@ public class Journal {
     // formate les occurrences de mots + utilise ConcurrentHashMap
     public String formaterMots(ConcurrentHashMap<String, Integer> mots) {
         if (mots == null || mots.isEmpty()) return "";
+        // StringBuilder c'est un outil pour construire un String morceau
+        // par morceau sans créer plein de Strings intermédiaires -> couvre 1 seul espace mémoire au lieu de 4 avec un String classique
         StringBuilder builder = new StringBuilder();
         for (ConcurrentHashMap.Entry<String, Integer> entry : mots.entrySet()) {
             builder.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
@@ -137,7 +129,6 @@ public class Journal {
     }
 
     // arrêt propre d'un thread sans utiliser stop() (again)
-    // join() bloque le thread appelant jusqu'à la fin du thread écrivain
     public void fermer() {
 
         // notifyAll() pr débloquer thread s'il est en wait()
@@ -146,15 +137,13 @@ public class Journal {
             fileOperations.notifyAll();
         }
 
-        // t1.join() bloque le thread appelant jusqu'à la terminaison du thread cible
-        // garantit que ttes les opérations en attente sont écrites avant de fermer le fichier
         try {
             threadEcrivain.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
-        // synchronized pour protéger la fermeture du writer
+        // synchronized pr protéger la fermeture du writer
         synchronized (writer) {
             try {
                 writer.close();
@@ -165,7 +154,6 @@ public class Journal {
     }
 
     // lecture ligne à ligne avec BufferedReader
-    // restauration de l'état depuis un fichier persistant (sérialisation)
     public static void restaurerDepuisJournal(String cheminJournal,
                                               DocumentStore documentStore,
                                               InvertedIndex invertedIndex) {
@@ -178,9 +166,6 @@ public class Journal {
             while ((ligne = br.readLine()) != null) {
                 String[] champs = ligne.split(";");
                 if (champs[0].equals("AJOUT") || champs[0].equals("MISE_A_JOUR")) {
-
-                    // ConcurrentHashMap : structure thread-safe pr stocker les fréquences
-                    // justifiée ici car documentStore et invertedIndex peuvent être accédés par plusieurs threads (TP2)
                     ConcurrentHashMap<String, Integer> frequence = new ConcurrentHashMap<>();
                     if (champs.length > 4 && !champs[4].isEmpty()) {
                         for (String motFreq : champs[4].split(",")) {
@@ -190,12 +175,14 @@ public class Journal {
                             }
                         }
                     }
-                    documentStore.ajouterDocument(id, champs[1],
-                            Long.parseLong(champs[3]),
-                            Long.parseLong(champs[2]),
+                    documentStore.ajouterDocument(id, champs[1], //chemin du fichier
+                            Long.parseLong(champs[3]), //taille
+                            Long.parseLong(champs[2]), //date modif
                             frequence.size());
+                    // Pr chaque mot + sa fq dans la map
                     for (ConcurrentHashMap.Entry<String, Integer> entry : frequence.entrySet()) {
-                        invertedIndex.indexerMot(entry.getKey(), Integer.parseInt(champs[2]));
+                        //indexation du mot avec l'id du doc
+                        invertedIndex.indexerMot(entry.getKey(), id);
                     }
                     id++;
                 } else if (champs[0].equals("SUPPRESSION")) {
@@ -207,7 +194,6 @@ public class Journal {
         }
     }
 
-    // "static synchronized" = verrou sur classe entière
     // empêche 2 appels simultanés à reconcilier() de provoquer des incohérences sur documentStore
     public static synchronized void reconcilier(DocumentStore documentStore,
                                                 InvertedIndex invertedIndex,
@@ -216,12 +202,12 @@ public class Journal {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
                 documentStore.supprimerDocument(chemin);
-                journal.ecrireSuppression(chemin, 0); // TP2 - Exercice 2 : appel producteur
+                journal.ecrireSuppression(chemin, 0); // appel producteur
             } else {
                 long dateOS = fichier.lastModified();
                 long dateStockee = documentStore.getDocumentMetaData(chemin).getDateModification();
                 if (dateOS > dateStockee) {
-                    Main.indexFile(0, chemin, documentStore, invertedIndex);
+                    Main.indexFile(0, chemin, documentStore, invertedIndex, journal);
                     journal.ecrireMiseAJour(chemin, dateOS, fichier.length(), new ConcurrentHashMap<>());
                 }
             }

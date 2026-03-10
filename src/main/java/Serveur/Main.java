@@ -7,11 +7,14 @@ import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
     public static boolean DEBUG = false;
 
-    public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex, IdToPath idToPath) {
+
+
+    public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex, IdToPath idToPath, Journal journal) {
         Path start = Paths.get(cheminRepertoire);
 
         try {
@@ -20,14 +23,14 @@ public class Main {
                     .forEach(path -> {
                         idToPath.addPath(path.toString());
                         if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
-                        indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex);
+                        indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex, journal);
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void indexFile(int id, String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex) {
+    public static void indexFile(int id, String cheminFichier, DocumentStore documentStore, InvertedIndex invertedIndex, Journal journal) {
         File file = new File(cheminFichier);
         ExtractText extractText = new ExtractText(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
@@ -68,6 +71,11 @@ public class Main {
 
         if (DEBUG) System.out.println("nombre de mots : " + nbMots);
         documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(),nbMots);
+        // enregistre dans journal chaque fichier indexer (= sauvegarde)
+        if (journal != null) {
+            ConcurrentHashMap<String, Integer> mots = invertedIndex.getMotsDocument(id);
+            journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
+        }
     }
 
     public static void server(InvertedIndex invertedIndex, DocumentStore documentStore, IdToPath idToPath) {
@@ -175,14 +183,30 @@ public class Main {
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
         IdToPath idToPath = new IdToPath();
+        Journal journal = null;
+        String cheminJournal = "journal.csv";
+        try {
+            journal = new Journal(cheminJournal);
+        } catch (IOException e) {
+            System.out.println("Impossible d'ouvrir journal : " + e.getMessage());
+            return;
+        }
 
-        walkFile(path, documentStore, invertedIndex,idToPath);
-
+        // restauration + réconciliation + walkFile
+        Journal.restaurerDepuisJournal(cheminJournal, documentStore, invertedIndex);
+        Journal.reconcilier(documentStore, invertedIndex, journal);
+        if (documentStore.getNombreDocuments() == 0) {
+            System.out.println("1er lancement : indexation ");
+            walkFile(path, documentStore, invertedIndex, idToPath, journal);
+        }else {
+            System.out.println("Restauration depuis journal.csv : " + documentStore.getNombreDocuments() + " documents rechargés, pas de réindexation");
+        }
         if (DEBUG) System.out.println("\nServeur.DocumentStore : " + documentStore.getDocumentStore());
         if (DEBUG) System.out.println("Index global : " + invertedIndex.getIndexGlobal());
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
 
         server(invertedIndex,documentStore,idToPath);
+        journal.fermer(); //ferme proprement le journal
     }
 
 }
