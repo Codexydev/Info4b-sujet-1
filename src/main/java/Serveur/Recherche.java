@@ -34,7 +34,6 @@ public class Recherche {
             if (motsNonRecherches.contains(mot)) continue;
 
             ConcurrentHashMap<Integer, Integer> indexDuMot = invertedIndex.getIndexDuMot(mot);
-
             for (Integer id : indexDuMot.keySet()) {
                 boolean aExclure = false;
 

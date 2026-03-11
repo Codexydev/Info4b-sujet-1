@@ -12,8 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Main {
     public static boolean DEBUG = false;
 
-
-
     public static void walkFile(String cheminRepertoire, DocumentStore documentStore, InvertedIndex invertedIndex, IdToPath idToPath, Journal journal) {
         Path start = Paths.get(cheminRepertoire);
 
@@ -199,7 +197,7 @@ public class Main {
         }
 
         // restauration + réconciliation + walkFile
-        Journal.restaurerDepuisJournal(cheminJournal, documentStore, invertedIndex);
+        Journal.restaurerDepuisJournal(cheminJournal, documentStore, invertedIndex, idToPath);
         Journal.reconcilier(documentStore, invertedIndex, journal);
         if (documentStore.getNombreDocuments() == 0) {
             System.out.println("1er lancement : indexation ");
