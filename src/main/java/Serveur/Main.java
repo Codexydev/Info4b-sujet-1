@@ -124,14 +124,16 @@ public class Main {
 
                             String[] mots = arguments[1].split(",");
 
+                            Recherche recherche;
                             if (arguments.length >= 4 && arguments[2].equals("--")) {
                                 String[] motsNonRecherches = arguments[3].split(",");
-                                Recherche recherche = new Recherche(invertedIndex, documentStore, idToPath, mots, motsNonRecherches);
-                                out.println(recherche.effectuerRecherche());
+                                recherche = new Recherche(invertedIndex, documentStore, idToPath, mots, motsNonRecherches);
+
                             } else {
-                                Recherche recherche = new Recherche(invertedIndex, documentStore, idToPath, mots);
-                                out.println(recherche.effectuerRecherche());
+                                recherche = new Recherche(invertedIndex, documentStore, idToPath, mots);
+                                /*out.println(recherche.effectuerRecherche());*/
                             }
+                            out.println(recherche.effectuerRecherche());
                             out.println("END_OF_MESSAGE");
                             break;
 
