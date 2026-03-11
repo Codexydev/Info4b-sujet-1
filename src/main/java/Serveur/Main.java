@@ -138,8 +138,14 @@ public class Main {
                             break;
 
                         case "-m":
-                            path = str.split(" ")[1];
-                            out.println(documentStore.getDocumentMetaData(path));
+                            String arg = str.split(" ")[1];
+
+                            if (arg.equals("update")) {
+                                UpdateFile update = new UpdateFile();
+                            }
+
+
+                            out.println(documentStore.getDocumentMetaData(arg));
                             out.println("END_OF_MESSAGE");
                             break;
 
