@@ -73,7 +73,7 @@ public class MainBis {
         // TP4 - Exercice 3 question 4 : restauration de l'état depuis un fichier persistant
         // ============================================================
         System.out.println("\n=== TEST 4 : restaurerDepuisJournal() ===");
-        Journal.restaurerDepuisJournal(cheminJournal, documentStore, invertedIndex);
+        Journal.restaurerDepuisJournal(cheminJournal, documentStore, invertedIndex, new IdToPath());
 
         System.out.println("Documents restaurés : " + documentStore.getNombreDocuments());
         System.out.println("Contenu du DocumentStore : " + documentStore.getDocumentStore());

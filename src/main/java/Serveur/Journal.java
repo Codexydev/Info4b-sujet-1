@@ -156,7 +156,8 @@ public class Journal {
     // lecture ligne à ligne avec BufferedReader
     public static void restaurerDepuisJournal(String cheminJournal,
                                               DocumentStore documentStore,
-                                              InvertedIndex invertedIndex) {
+                                              InvertedIndex invertedIndex,
+                                              IdToPath idToPath) {
         File fichier = new File(cheminJournal);
         if (!fichier.exists()) return;
 
@@ -179,6 +180,7 @@ public class Journal {
                             Long.parseLong(champs[3]), //taille
                             Long.parseLong(champs[2]), //date modif
                             frequence.size());
+                    idToPath.addPath(champs[1]);
                     // Pr chaque mot + sa fq dans la map
                     for (ConcurrentHashMap.Entry<String, Integer> entry : frequence.entrySet()) {
                         //indexation du mot avec l'id du doc
