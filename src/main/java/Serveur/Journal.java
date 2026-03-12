@@ -200,7 +200,7 @@ public class Journal {
     public static synchronized void reconcilier(DocumentStore documentStore,
                                                 InvertedIndex invertedIndex,
                                                 Journal journal) {
-        for (String chemin : documentStore.getDocumentStore().keySet()) {
+        for (String chemin : new java.util.ArrayList<>(documentStore.getDocumentStore().keySet())) {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
                 documentStore.supprimerDocument(chemin);
