@@ -68,14 +68,11 @@ public class Main {
         }
 
         if (DEBUG) System.out.println("nombre de mots : " + nbMots);
-        System.out.println("77777777777");
         documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(), nbMots);
         // enregistre dans journal chaque fichier indexer (= sauvegarde)
-        if (journal != null) { // condition toujours vraie nan ??
-            System.out.println("66666666666666");
-            ConcurrentHashMap<String, Integer> mots = invertedIndex.getMotsDocument(id);
-            journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
-        }
+
+        ConcurrentHashMap<String, Integer> mots = invertedIndex.getMotsDocument(id);
+        journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
     }
 
     public static void server(InvertedIndex invertedIndex, DocumentStore documentStore, IdToPath idToPath) {
@@ -184,9 +181,12 @@ public class Main {
 
 
     public static void main(String[] args) {
-        System.out.print("Chemin du repertoire à indexer : ");
+
+        /*System.out.print("Chemin du repertoire à indexer : ");
         Scanner scanner = new Scanner(System.in);
-        String path = scanner.nextLine();
+        String path = scanner.nextLine();*/
+
+        String path = "testIndexed/";
 
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
