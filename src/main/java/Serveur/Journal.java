@@ -171,21 +171,18 @@ public class Journal {
                     if (champs.length > 4 && !champs[4].isEmpty()) {
                         for (String motFreq : champs[4].split(",")) {
                             String[] paire = motFreq.split(":");
+                            /*System.out.println(paire[0]+" "+paire[1]+"  "); debug*/
                             if (paire.length == 2) {
                                 frequence.put(paire[0], Integer.parseInt(paire[1]));
+                                for (int i = 0; i < Integer.parseInt(paire[1]); i++)
+                                    invertedIndex.indexerMot(paire[0], id);
                             }
                         }
                     }
-                    documentStore.ajouterDocument(id, champs[1], //chemin du fichier
-                            Long.parseLong(champs[3]), //taille
-                            Long.parseLong(champs[2]), //date modif
-                            frequence.size());
+
+                    documentStore.ajouterDocument(id, champs[1], Long.parseLong(champs[3]), Long.parseLong(champs[2]), frequence.size());
                     idToPath.addPath(champs[1]);
-                    // Pr chaque mot + sa fq dans la map
-                    for (ConcurrentHashMap.Entry<String, Integer> entry : frequence.entrySet()) {
-                        //indexation du mot avec l'id du doc
-                        invertedIndex.indexerMot(entry.getKey(), id);
-                    }
+
                     id++;
                 } else if (champs[0].equals("SUPPRESSION")) {
                     documentStore.supprimerDocument(champs[1]);
@@ -197,9 +194,7 @@ public class Journal {
     }
 
     // empêche 2 appels simultanés à reconcilier() de provoquer des incohérences sur documentStore
-    public static synchronized void reconcilier(DocumentStore documentStore,
-                                                InvertedIndex invertedIndex,
-                                                Journal journal) {
+    public static synchronized void reconcilier(DocumentStore documentStore, InvertedIndex invertedIndex, Journal journal) {
         for (String chemin : new java.util.ArrayList<>(documentStore.getDocumentStore().keySet())) {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
