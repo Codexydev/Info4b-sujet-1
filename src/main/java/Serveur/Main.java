@@ -181,9 +181,12 @@ public class Main {
 
 
     public static void main(String[] args) {
-        System.out.print("Chemin du repertoire à indexer : ");
+
+        /*System.out.print("Chemin du repertoire à indexer : ");
         Scanner scanner = new Scanner(System.in);
-        String path = scanner.nextLine();
+        String path = scanner.nextLine();*/
+
+        String path = "testIndexed/";
 
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
