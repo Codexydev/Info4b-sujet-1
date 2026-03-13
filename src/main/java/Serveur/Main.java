@@ -3,10 +3,12 @@ package Serveur;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
@@ -16,12 +18,10 @@ public class Main {
         Path start = Paths.get(cheminRepertoire);
 
         try {
-            Files.walk(start)
-                    .filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        idToPath.addPath(path.toString());
-                        if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
-                        indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex, journal);
+            Files.walk(start).filter(Files::isRegularFile).forEach(path -> {
+                idToPath.addPath(path.toString());
+                if (DEBUG) System.out.println("\nIndexation du fichier : " + path);
+                indexFile(idToPath.getCurrentId(), path.toString(), documentStore, invertedIndex, journal);
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,15 +62,17 @@ public class Main {
                 if (DEBUG) System.out.println("Mot ignoré : " + mot);
             } else {
                 invertedIndex.indexerMot(mot, id);
-                nbMots+=1;
+                nbMots += 1;
                 if (DEBUG) System.out.println("Indexation du mot : " + mot);
             }
         }
 
         if (DEBUG) System.out.println("nombre de mots : " + nbMots);
-        documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(),nbMots);
+        System.out.println("77777777777");
+        documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(), nbMots);
         // enregistre dans journal chaque fichier indexer (= sauvegarde)
-        if (journal != null) {
+        if (journal != null) { // condition toujours vraie nan ??
+            System.out.println("66666666666666");
             ConcurrentHashMap<String, Integer> mots = invertedIndex.getMotsDocument(id);
             journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
         }
@@ -93,7 +95,7 @@ public class Main {
 
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                if (str.length()>2 || str.equals("-h")) {
+                if (str.length() > 2 || str.equals("-h")) {
 
                     switch (command) {
                         case "-h":
@@ -124,14 +126,16 @@ public class Main {
 
                             String[] mots = arguments[1].split(",");
 
+                            Recherche recherche;
                             if (arguments.length >= 4 && arguments[2].equals("--")) {
                                 String[] motsNonRecherches = arguments[3].split(",");
-                                Recherche recherche = new Recherche(invertedIndex, documentStore, idToPath, mots, motsNonRecherches);
-                                out.println(recherche.effectuerRecherche());
+                                recherche = new Recherche(invertedIndex, documentStore, idToPath, mots, motsNonRecherches);
+
                             } else {
-                                Recherche recherche = new Recherche(invertedIndex, documentStore, idToPath, mots);
-                                out.println(recherche.effectuerRecherche());
+                                recherche = new Recherche(invertedIndex, documentStore, idToPath, mots);
+                                /*out.println(recherche.effectuerRecherche());*/
                             }
+                            out.println(recherche.effectuerRecherche());
                             out.println("END_OF_MESSAGE");
                             break;
 
@@ -151,7 +155,7 @@ public class Main {
                             path = str.split(" ")[1];
                             ExtractText extractText = new ExtractText(path);
                             String texte = extractText.extraireTexte();
-                            out.println("\n"+texte);
+                            out.println("\n" + texte);
                             out.println("END_OF_MESSAGE");
                             break;
 
@@ -205,11 +209,13 @@ public class Main {
         }else {
             System.out.println("Restauration depuis journal.csv : " + documentStore.getNombreDocuments() + " documents rechargés, pas de réindexation");
         }
+
         if (DEBUG) System.out.println("\nServeur.DocumentStore : " + documentStore.getDocumentStore());
         if (DEBUG) System.out.println("Index global : " + invertedIndex.getIndexGlobal());
+
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
 
-        server(invertedIndex,documentStore,idToPath);
+        server(invertedIndex, documentStore, idToPath);
         journal.fermer(); //ferme proprement le journal
     }
 

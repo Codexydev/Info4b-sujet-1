@@ -3,7 +3,7 @@ package Serveur;
 import java.util.ArrayList;
 
 public class IdToPath {
-    private ArrayList idToPath = new ArrayList<>();
+    private final ArrayList idToPath = new ArrayList<>();
     private int currentId = -1;
 
     public IdToPath() {

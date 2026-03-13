@@ -5,8 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ExtractText {
-    private String cheminFichier;
-    private String extension;
+    private final String cheminFichier;
+    private final String extension;
 
     public ExtractText(String cheminFichier) {
         this.cheminFichier = cheminFichier;
