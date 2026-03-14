@@ -3,27 +3,36 @@ package Serveur;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DocumentStore {
-    private final ConcurrentHashMap<String, DocumentMetaData> documentStore = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String, DocumentMetaData> documentStore = new ConcurrentHashMap<>();
 
-    public void ajouterDocument(int id, String chemin, long poids, long dateModification, long totalMots) {
-        DocumentMetaData metaData = new DocumentMetaData(id, chemin, poids, dateModification, totalMots); // totalMots à revoir
-        documentStore.put(chemin, metaData);
+        public void ajouterDocument(int id, String chemin, long poids, long dateModification, long totalMots) {
+            DocumentMetaData metaData = new DocumentMetaData(id, chemin, poids, dateModification, totalMots); // totalMots à revoir
+            documentStore.put(chemin, metaData);
+        }
+
+        public DocumentMetaData getDocumentMetaData(String chemin) {
+            return documentStore.get(chemin);
+        }
+
+        public DocumentMetaData getDocumentMetaDataById(int id) {
+        for (DocumentMetaData metaData : documentStore.values()) {
+            if (metaData.getId() == id) {
+                return metaData;
+            }
+        }
+        return null;
     }
 
-    public DocumentMetaData getDocumentMetaData(String chemin) {
-        return documentStore.get(chemin);
-    }
+        public ConcurrentHashMap<String, DocumentMetaData> getDocumentStore() {
+            return documentStore;
+        }
 
-    public ConcurrentHashMap<String, DocumentMetaData> getDocumentStore() {
-        return documentStore;
-    }
+        public void supprimerDocument(String chemin) {
+            documentStore.remove(chemin);
+        }
 
-    public void supprimerDocument(String chemin) {
-        documentStore.remove(chemin);
-    }
-
-    public int getNombreDocuments() {
-        return documentStore.size();
-    }
+        public int getNombreDocuments() {
+            return documentStore.size();
+        }
 
 }

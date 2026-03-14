@@ -19,6 +19,10 @@ public class DocumentMetaData {
         return id;
     }
 
+    public long getTotalMots() {
+        return totalMots;
+    }
+
     public String getChemin() {
         return chemin;
     }
