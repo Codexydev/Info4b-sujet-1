@@ -14,7 +14,7 @@ public class test {
                     .forEach(
                             path -> {
                                 if (Files.isRegularFile(path)) {
-                                    System.out.println(path.toString());
+                                    System.out.println(path);
                                 }
                             }
                     );

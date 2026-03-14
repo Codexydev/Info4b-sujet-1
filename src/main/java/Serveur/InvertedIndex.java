@@ -39,5 +39,12 @@ public class InvertedIndex {
             }
         }
         return mots;
-    }}
+    }
+
+    public void restaurerFrequenceMot(String mot, int id, int frequence) {
+        ConcurrentHashMap<Integer, Integer> indexDuMot = indexGlobal.computeIfAbsent(mot, k -> new ConcurrentHashMap<>());
+        indexDuMot.put(id, frequence);
+    }
+
+}
 

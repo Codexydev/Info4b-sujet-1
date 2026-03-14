@@ -14,7 +14,7 @@ public class Journal {
     private static final int CAPACITE_MAX = 100; // taille max du buffer borné
 
     // sans utiliser stop()
-    private boolean actif = true;
+    private volatile boolean actif = true;
 
     // setName() pr nommer le thread
     private final Thread threadEcrivain;
@@ -174,8 +174,7 @@ public class Journal {
                             /*System.out.println(paire[0]+" "+paire[1]+"  "); debug*/
                             if (paire.length == 2) {
                                 frequence.put(paire[0], Integer.parseInt(paire[1]));
-                                for (int i = 0; i < Integer.parseInt(paire[1]); i++)
-                                    invertedIndex.indexerMot(paire[0], id);
+                                invertedIndex.restaurerFrequenceMot(paire[0], id, Integer.parseInt(paire[1]));
                             }
                         }
                     }
