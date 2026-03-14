@@ -18,11 +18,13 @@ public class Main {
         Path start = Paths.get(cheminRepertoire);
 
         try {
-            Files.walk(start).filter(Files::isRegularFile).forEach(path -> {
-                idToPath.addPath(path.toString());
-                if (DEBUG) System.out.println("\nIndexation du fichier : " + path);
-                indexFile(idToPath.getCurrentId(), path.toString(), documentStore, invertedIndex, journal);
-            });
+            Files.walk(start)
+                    .filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        idToPath.addPath(path.toString());
+                        if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
+                        indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex, journal);
+                    });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -186,7 +188,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();*/
 
-        String path = "testIndexed/";
+        String path = "src/testIndexed/";
 
         DocumentStore documentStore = new DocumentStore();
         InvertedIndex invertedIndex = new InvertedIndex();
