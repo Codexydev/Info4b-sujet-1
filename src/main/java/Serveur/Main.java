@@ -10,8 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 public class Main {
     public static boolean DEBUG = false;
+
+    public static final String ANSI_BLEU = "\u001B[34m";
+    public static final String ANSI_VERT = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal) {
         Path start = Paths.get(cheminRepertoire);
@@ -110,20 +115,19 @@ public class Main {
                     if (str.length() > 2 || str.equals("-h")) {
                         switch (command) {
                             case "-h":
-                                out.println("""
-                                         Commandes disponibles :
-                                         -h : Afficher l'aide
-                                         -t <message> : Afficher le message reçu pour tester la communication
-                                         -q : Quitter la connexion
-                                         -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
-                                         -s <mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : separateur de mot ","
-                                         -m <chemin du document> : Afficher les métadonnées d'un document donné
-                                         -p <chemin du document> : affiche le texte du document
-                                        END_OF_MESSAGE""");
+                                out.println(" Commandes disponibles :\n"+
+                                         "-h : "+ANSI_BLEU+"afficher l'aide\n"+ANSI_RESET+
+                                         "-t"+ANSI_VERT +" <message> : "+ANSI_BLEU+"Afficher le message reçu pour tester la communication\n"+ANSI_RESET+
+                                         "-q : "+ANSI_BLEU+"Quitter la connexion\n"+ANSI_RESET+
+                                         "-s"+ANSI_VERT +" <mot(s) (sépration (,) ) > : "+ANSI_BLEU+"Rechercher un mot dans l'index et afficher les documents associés\n"+ANSI_RESET+
+                                         "-s "+ANSI_VERT +"<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : "+ANSI_BLEU+"separateur de mot ,\n"+ANSI_RESET+
+                                         "-m "+ANSI_VERT +"<chemin du document> : "+ANSI_BLEU+"Afficher les métadonnées d'un document donné\n"+ANSI_RESET+
+                                         "-p"+ANSI_VERT +" <chemin du document> : "+ANSI_BLEU+"affiche le texte du document\n"+ANSI_RESET);
+                                out.println("END_OF_MESSAGE");
                                 break;
 
                             case "-t":
-                                out.println("Message reçu : " + str.substring(3));
+                                out.println("Message reçu : " +ANSI_BLEU+ str.substring(3)+ANSI_RESET);
                                 out.println("END_OF_MESSAGE");
                                 break;
 
