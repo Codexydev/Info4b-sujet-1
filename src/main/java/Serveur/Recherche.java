@@ -13,6 +13,10 @@ public class Recherche {
     private final String[] motsRecherches;
     private final ArrayList<String> motsNonRecherches = new ArrayList<>();
 
+    public static final String ANSI_BLEU = "\u001B[34m";
+    public static final String ANSI_VERT = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
     public Recherche(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idVersChemin, String[] motsRecherches, String[] motsNonRecherches) {
         this.indexInverse = indexInverse;
         this.stockagesDocuments = stockagesDocuments;
@@ -74,7 +78,7 @@ public class Recherche {
         }
         for (ConcurrentHashMap.Entry<String, Double> entry : scoresParChemin.entrySet()) {
             double scoreArrondi = Math.round(entry.getValue() * 10000.0) / 10000.0;
-            scores.put(entry.getValue(), "Document: " + entry.getKey() + ", Score TF-IDF: " + scoreArrondi);
+            scores.put(entry.getValue(), "Document: " + ANSI_VERT + entry.getKey() + ANSI_RESET + ", Score TF-IDF: " + ANSI_BLEU +scoreArrondi + ANSI_RESET);
         }
         //Itération sur score.values (TreeMap) au lieu de l'ArrayList
         String reponseText = "";
