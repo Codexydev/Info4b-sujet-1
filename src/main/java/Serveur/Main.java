@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Main {
     public static boolean DEBUG = false;
 
-    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments documentStore, InvertedIndex invertedIndex, IdToPath idToPath, Journal journal) {
+    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments documentStore, InvertedIndex invertedIndex, IdVersChemin idToPath, Journal journal) {
         Path start = Paths.get(cheminRepertoire);
 
         try {
@@ -22,7 +22,7 @@ public class Main {
                     .forEach(path -> {
                         idToPath.addPath(path.toString());
                         if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
-                        indexFile(idToPath.getCurrentId(),path.toString(), documentStore, invertedIndex, journal);
+                        indexFile(idToPath.getIdCourant(),path.toString(), documentStore, invertedIndex, journal);
                     });
         } catch (IOException e) {
             e.printStackTrace();
@@ -76,7 +76,7 @@ public class Main {
         journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
     }
 
-    public static void server(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdToPath idToPath) {
+    public static void server(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdVersChemin idToPath) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -191,7 +191,7 @@ public class Main {
 
         StockagesDocuments documentStore = new StockagesDocuments();
         InvertedIndex invertedIndex = new InvertedIndex();
-        IdToPath idToPath = new IdToPath();
+        IdVersChemin idToPath = new IdVersChemin();
         Journal journal = null;
         String cheminJournal = "journal.csv";
         try {

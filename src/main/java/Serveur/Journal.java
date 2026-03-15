@@ -157,7 +157,7 @@ public class Journal {
     public static void restaurerDepuisJournal(String cheminJournal,
                                               StockagesDocuments documentStore,
                                               InvertedIndex invertedIndex,
-                                              IdToPath idToPath) {
+                                              IdVersChemin idToPath) {
         File fichier = new File(cheminJournal);
         if (!fichier.exists()) return;
 

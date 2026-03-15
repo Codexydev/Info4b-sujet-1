@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Recherche {
     private final InvertedIndex invertedIndex;
     private final StockagesDocuments documentStore;
-    private final IdToPath idToPath;
+    private final IdVersChemin idToPath;
     private final String[] motsRecherches;
     private final ArrayList<String> motsNonRecherches = new ArrayList<>();
 
-    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdToPath idToPath, String[] motsRecherches, String[] motsNonRecherches) {
+    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdVersChemin idToPath, String[] motsRecherches, String[] motsNonRecherches) {
         this.invertedIndex = invertedIndex;
         this.documentStore = documentStore;
         this.idToPath = idToPath;
@@ -21,7 +21,7 @@ public class Recherche {
         this.motsNonRecherches.addAll(Arrays.asList(motsNonRecherches));
     }
 
-    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdToPath idToPath, String[] motsRecherches) {
+    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdVersChemin idToPath, String[] motsRecherches) {
         this.invertedIndex = invertedIndex;
         this.documentStore = documentStore;
         this.idToPath = idToPath;
@@ -59,7 +59,7 @@ public class Recherche {
                     double score = tf * idf; // TF * IDF
                     double scoreArrondi = Math.round(score * 10000.0) / 10000.0; // arrondi 4 décimales (affichage)
                     // Chgment pr pas écraser le score a chaque fois
-                    String chemin = idToPath.getPath(id);
+                    String chemin = idToPath.getChemin(id);
                     scoresParChemin.merge(chemin, score, Double::sum);
                 }
             }
