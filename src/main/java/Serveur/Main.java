@@ -85,96 +85,106 @@ public class Main {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
-            Socket socket = server.accept();
-            System.out.println("Client connected");
 
-            boolean running = true;
-            while (running) {
+            while (true) {
+                Socket socket = server.accept();
+                System.out.println("Client connected");
+
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String str = in.readLine();
-                String path;
-
-                String command = str.split(" ")[0];
-
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                if (str.length() > 2 || str.equals("-h")) {
-                    switch (command) {
-                        case "-h":
-                            out.println("""
-                                     Commandes disponibles :
-                                     -h : Afficher l'aide
-                                     -t <message> : Afficher le message reçu pour tester la communication
-                                     -q : Quitter la connexion
-                                     -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
-                                     -s <mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : separateur de mot ","
-                                     -m <chemin du document> : Afficher les métadonnées d'un document donné
-                                     -p <chemin du document> : affiche le texte du document
-                                    END_OF_MESSAGE""");
-                            break;
+                boolean clientConnected = true;
 
-                        case "-t":
-                            out.println("Message reçu : " + str.substring(3));
-                            out.println("END_OF_MESSAGE");
-                            break;
+                while (clientConnected) {
+                    String str = in.readLine();
 
-                        case "-s":
-                            String[] arguments = str.split(" ");
-                            if (arguments.length < 2) {
-                                out.println("Erreur: Veuillez spécifier un mot à chercher.");
-                                out.println("END_OF_MESSAGE");
-                                break;
-                            }
-
-                            String[] mots = arguments[1].split(",");
-
-                            Recherche recherche;
-                            if (arguments.length >= 4 && arguments[2].equals("--")) {
-                                String[] motsNonRecherches = arguments[3].split(",");
-                                recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
-
-                            } else {
-                                recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
-                            }
-
-                            out.println(recherche.effectuerRecherche());
-                            out.println("END_OF_MESSAGE");
-                            break;
-
-                        case "-m":
-                            String arg = str.split(" ")[1];
-
-                            if (arg.equals("update")) {
-                                UpdateFile update = new UpdateFile();
-                            }
-
-                            out.println(stockagesDocuments.getMetaData(arg));
-                            out.println("END_OF_MESSAGE");
-                            break;
-
-                        case "-p":
-                            path = str.split(" ")[1];
-                            ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
-                            String texte = extracteurTexte.extraireTexte();
-                            out.println("\n" + texte);
-                            out.println("END_OF_MESSAGE");
-                            break;
-
-                        case "q":
-                            running = false;
-                            System.out.println("Client disconnected");
-                            break;
-
-                        default:
-                            out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
-                            out.println("END_OF_MESSAGE");
-                            break;
+                    if (str == null || str.equals("-q") || str.equals("q")) {
+                        clientConnected = false;
+                        System.out.println("\nClient disconnected");
+                        break;
                     }
 
-                } else {
-                    if (!command.equals("q")) out.println("donnez le(s) parametre(s)");
-                    out.println("END_OF_MESSAGE");
+                    String path;
+                    String command = str.split(" ")[0];
+
+                    if (str.length() > 2 || str.equals("-h")) {
+                        switch (command) {
+                            case "-h":
+                                out.println("""
+                                         Commandes disponibles :
+                                         -h : Afficher l'aide
+                                         -t <message> : Afficher le message reçu pour tester la communication
+                                         -q : Quitter la connexion
+                                         -s <mot(s) (sépration (,) ) > : Rechercher un mot dans l'index et afficher les documents associés
+                                         -s <mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : separateur de mot ","
+                                         -m <chemin du document> : Afficher les métadonnées d'un document donné
+                                         -p <chemin du document> : affiche le texte du document
+                                        END_OF_MESSAGE""");
+                                break;
+
+                            case "-t":
+                                out.println("Message reçu : " + str.substring(3));
+                                out.println("END_OF_MESSAGE");
+                                break;
+
+                            case "-s":
+                                String[] arguments = str.split(" ");
+                                if (arguments.length < 2) {
+                                    out.println("Erreur: Veuillez spécifier un mot à chercher.");
+                                    out.println("END_OF_MESSAGE");
+                                    break;
+                                }
+
+                                String[] mots = arguments[1].split(",");
+
+                                Recherche recherche;
+                                if (arguments.length >= 4 && arguments[2].equals("--")) {
+                                    String[] motsNonRecherches = arguments[3].split(",");
+                                    recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
+
+                                } else {
+                                    recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
+                                }
+
+                                out.println(recherche.effectuerRecherche());
+                                out.println("END_OF_MESSAGE");
+                                break;
+
+                            case "-m":
+                                String arg = str.split(" ")[1];
+
+                                if (arg.equals("update")) {
+                                    UpdateFile update = new UpdateFile();
+                                }
+
+                                out.println(stockagesDocuments.getMetaData(arg));
+                                out.println("END_OF_MESSAGE");
+                                break;
+
+                            case "-p":
+                                path = str.split(" ")[1];
+                                ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
+                                String texte = extracteurTexte.extraireTexte();
+                                out.println("\n" + texte);
+                                out.println("END_OF_MESSAGE");
+                                break;
+
+                            case "q":
+                                clientConnected = false;
+                                System.out.println("Client disconnected");
+                                break;
+
+                            default:
+                                out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
+                                out.println("END_OF_MESSAGE");
+                                break;
+                        }
+                    } else {
+                        out.println("donnez le(s) parametre(s)");
+                        out.println("END_OF_MESSAGE");
+                    }
                 }
+                socket.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -206,7 +216,6 @@ public class Main {
         Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin);
         Journal.reconcilier(stockagesDocuments, indexInverse, journal);
 
-        System.out.println("1er lancement : indexation ");
         parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal);
         System.out.println("Restauration depuis journal.csv : " + stockagesDocuments.getNombreDocuments() + " documents rechargés, pas de réindexation");
 
