@@ -20,16 +20,22 @@ public class Main {
             Files.walk(start)
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
-                        idVersChemin.addPath(path.toString());
-                        if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
-                        indexerFichier(idVersChemin.getIdCourant(), path.toString(), stockagesDocuments, indexInverse, journal);
+                        String cheminFichier = path.toString();
+
+                        if (stockagesDocuments.getMetaData(cheminFichier) == null) {
+                            idVersChemin.addPath(cheminFichier);
+                            int nouvelId = idVersChemin.getIdCourant();
+
+                            if (DEBUG) System.out.println("\nIndexation du NOUVEAU fichier : " + cheminFichier);
+                            indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true);
+                        }
                     });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void indexerFichier(int id, String cheminFichier, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal) {
+    public static void indexerFichier(int id, String cheminFichier, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, boolean estUnAjout) {
         File file = new File(cheminFichier);
         ExtracteurTexte extracteurTexte = new ExtracteurTexte(cheminFichier);
         String texte = extracteurTexte.extraireTexte();
@@ -55,16 +61,11 @@ public class Main {
         int nbMots = 0;
 
         for (String mot : motsExtraits) {
-            if (mot.isEmpty()) {
-                continue;
-            }
+            if (mot.isEmpty()) continue;
 
-            if (bypassMot.contains(mot)) {
-                if (DEBUG) System.out.println("Mot ignoré : " + mot);
-            } else {
+            if (!bypassMot.contains(mot)) {
                 indexInverse.indexerMot(mot, id);
                 nbMots += 1;
-                if (DEBUG) System.out.println("Indexation du mot : " + mot);
             }
         }
 
@@ -73,7 +74,11 @@ public class Main {
         // enregistre dans journal chaque fichier indexer (= sauvegarde)
 
         ConcurrentHashMap<String, Integer> mots = indexInverse.getMotsDocument(id);
-        journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
+        if (estUnAjout) {
+            journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
+        } else {
+            journal.ecrireMiseAJour(cheminFichier, file.lastModified(), file.length(), mots);
+        }
     }
 
     public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath) {
@@ -94,7 +99,6 @@ public class Main {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
                 if (str.length() > 2 || str.equals("-h")) {
-
                     switch (command) {
                         case "-h":
                             out.println("""
@@ -156,23 +160,21 @@ public class Main {
                             out.println("END_OF_MESSAGE");
                             break;
 
+                        case "q":
+                            running = false;
+                            System.out.println("Client disconnected");
+                            break;
+
                         default:
                             out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
                             out.println("END_OF_MESSAGE");
                             break;
                     }
+
                 } else {
-                    out.println("donnez le(s) parametre(s)");
+                    if (!command.equals("q")) out.println("donnez le(s) parametre(s)");
                     out.println("END_OF_MESSAGE");
                 }
-
-                if (str.equals("q")) {
-                    running = false;
-                    System.out.println("Client disconnected");
-                    break;
-                }
-
-
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -204,12 +206,9 @@ public class Main {
         Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin);
         Journal.reconcilier(stockagesDocuments, indexInverse, journal);
 
-        if (stockagesDocuments.getNombreDocuments() == 0) {
-            System.out.println("1er lancement : indexation ");
-            parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal);
-        } else {
-            System.out.println("Restauration depuis journal.csv : " + stockagesDocuments.getNombreDocuments() + " documents rechargés, pas de réindexation");
-        }
+        System.out.println("1er lancement : indexation ");
+        parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal);
+        System.out.println("Restauration depuis journal.csv : " + stockagesDocuments.getNombreDocuments() + " documents rechargés, pas de réindexation");
 
         if (DEBUG) System.out.println("\nServeur.DocumentStore : " + stockagesDocuments.getStockagesDocuments());
         if (DEBUG) System.out.println("Index global : " + indexInverse.getIndexInverse());

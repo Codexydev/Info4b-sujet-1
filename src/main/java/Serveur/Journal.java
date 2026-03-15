@@ -233,8 +233,7 @@ public class Journal {
                     if (dateOS > dateStockee) {
                         int vraiId = meta.getId();
 
-                        Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal);
-                        journal.ecrireMiseAJour(chemin, dateOS, fichier.length(), new ConcurrentHashMap<>());
+                        Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false);
                     }
                 }
             }

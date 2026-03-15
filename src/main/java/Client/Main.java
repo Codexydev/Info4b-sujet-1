@@ -33,7 +33,7 @@ public class Main {
                 }
             }
             while(!str.equals("q"));
-            System.out.println("Fermeture du client...");
+            System.out.println("\nFermeture du client...");
             socket.close();
         } catch (Exception e) {
             System.err.println("Erreur de connexion au serveur : " + e.getMessage());
