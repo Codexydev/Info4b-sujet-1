@@ -20,13 +20,13 @@ public class Main {
 
             do {
                 System.out.print("\n > ");
-                str = userInput.readLine();
+                str = userInput.readLine(); // lecture entrée utilisateur
 
-                out.println(str);
+                out.println(str); // envoie str au server
 
-                String reponse;
+                String reponse; // reponse server
                 while ((reponse = in.readLine()) != null) {
-                    if (reponse.equals("END_OF_MESSAGE")) {
+                    if (reponse.equals("END_OF_MESSAGE")) { // vérifie la fin de la réponse du server
                         break;
                     }
                     System.out.println(reponse);
@@ -36,7 +36,7 @@ public class Main {
             System.out.println("Fermeture du client...");
             socket.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Erreur de connexion au serveur : " + e.getMessage());
 
         }
     }
