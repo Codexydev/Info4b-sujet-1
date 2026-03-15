@@ -72,6 +72,7 @@ public class Journal {
 
     /**
      * Ajoute une opération dans le buffer borné. Bloque le thread appelant si le buffer est plein.
+     *
      * @param operation La chaîne de caractères formatée représentant l'opération à loguer.
      */
     private void ajouterOperation(String operation) {
@@ -101,6 +102,7 @@ public class Journal {
 
     /**
      * Formatage map
+     *
      * @param mots La map contenant les mots et leurs occurrences.
      * @return (ex: "mot1:2,mot2:5") ou une chaîne vide si la map est nulle/vide.
      */
@@ -148,14 +150,14 @@ public class Journal {
     }
 
 
-
     /**
      * Lit le journal.csv au démarrage pour restaurer l'état en mémoire.
      * Reconstruit le StockageDocument et l'IndexInverse
-     * @param cheminJournal chemin journal
+     *
+     * @param cheminJournal      chemin journal
      * @param stockagesDocuments stockageDocuments
-     * @param indexInverse indexinversé
-     * @param idVersChemin idVersChemin
+     * @param indexInverse       indexinversé
+     * @param idVersChemin       idVersChemin
      */
     public static void restaurerDepuisJournal(String cheminJournal, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin) {
         File fichier = new File(cheminJournal);
@@ -210,9 +212,10 @@ public class Journal {
 
     /**
      * Détecte les fichiers supprimés ou modifiés hors ligne et met à jour le système
+     *
      * @param stockagesDocuments stockageDocument
-     * @param indexInverse indexinverse
-     * @param journal journal
+     * @param indexInverse       indexinverse
+     * @param journal            journal
      */
     public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal) {
         for (String chemin : new java.util.ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
