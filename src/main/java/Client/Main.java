@@ -32,7 +32,7 @@ public class Main {
                     System.out.println(reponse);
                 }
             }
-            while(!str.equals("q"));
+            while (!str.equals("q"));
             System.out.println("\nFermeture du client...");
             socket.close();
         } catch (Exception e) {
