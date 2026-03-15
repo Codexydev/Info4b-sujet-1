@@ -31,7 +31,7 @@ public class Main {
 
     public static void indexFile(int id, String cheminFichier, StockagesDocuments documentStore, InvertedIndex invertedIndex, Journal journal) {
         File file = new File(cheminFichier);
-        ExtractText extractText = new ExtractText(cheminFichier);
+        ExtracteurTexte extractText = new ExtracteurTexte(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
 
         if (DEBUG) System.out.println(texte);
@@ -151,7 +151,7 @@ public class Main {
 
                         case "-p":
                             path = str.split(" ")[1];
-                            ExtractText extractText = new ExtractText(path);
+                            ExtracteurTexte extractText = new ExtracteurTexte(path);
                             String texte = extractText.extraireTexte();
                             out.println("\n" + texte);
                             out.println("END_OF_MESSAGE");

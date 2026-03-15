@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class ExtractText {
+public class ExtracteurTexte {
     private final String cheminFichier;
     private final String extension;
 
-    public ExtractText(String cheminFichier) {
+    public ExtracteurTexte(String cheminFichier) {
         this.cheminFichier = cheminFichier;
         this.extension = cheminFichier.substring(cheminFichier.lastIndexOf(".") + 1).toLowerCase();
     }
