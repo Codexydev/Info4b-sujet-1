@@ -8,12 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Recherche {
     private final InvertedIndex invertedIndex;
-    private final DocumentStore documentStore;
+    private final StockagesDocuments documentStore;
     private final IdToPath idToPath;
     private final String[] motsRecherches;
     private final ArrayList<String> motsNonRecherches = new ArrayList<>();
 
-    public Recherche(InvertedIndex invertedIndex, DocumentStore documentStore, IdToPath idToPath, String[] motsRecherches, String[] motsNonRecherches) {
+    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdToPath idToPath, String[] motsRecherches, String[] motsNonRecherches) {
         this.invertedIndex = invertedIndex;
         this.documentStore = documentStore;
         this.idToPath = idToPath;
@@ -21,7 +21,7 @@ public class Recherche {
         this.motsNonRecherches.addAll(Arrays.asList(motsNonRecherches));
     }
 
-    public Recherche(InvertedIndex invertedIndex, DocumentStore documentStore, IdToPath idToPath, String[] motsRecherches) {
+    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdToPath idToPath, String[] motsRecherches) {
         this.invertedIndex = invertedIndex;
         this.documentStore = documentStore;
         this.idToPath = idToPath;
@@ -53,7 +53,7 @@ public class Recherche {
                 }
 
                 if (!aExclure) {
-                    DocumentMetaData metaData = documentStore.getDocumentMetaDataById(id);
+                    DocumentMetaData metaData = documentStore.getMetaDataById(id);
                     if (metaData == null) continue;
                     double tf = (double) indexDuMot.get(id) / metaData.getTotalMots(); // TF = occurrences du mot dans ce doc / total mots du doc
                     double score = tf * idf; // TF * IDF

@@ -155,7 +155,7 @@ public class Journal {
 
     // lecture ligne à ligne avec BufferedReader
     public static void restaurerDepuisJournal(String cheminJournal,
-                                              DocumentStore documentStore,
+                                              StockagesDocuments documentStore,
                                               InvertedIndex invertedIndex,
                                               IdToPath idToPath) {
         File fichier = new File(cheminJournal);
@@ -193,15 +193,15 @@ public class Journal {
     }
 
     // empêche 2 appels simultanés à reconcilier() de provoquer des incohérences sur documentStore
-    public static synchronized void reconcilier(DocumentStore documentStore, InvertedIndex invertedIndex, Journal journal) {
-        for (String chemin : new java.util.ArrayList<>(documentStore.getDocumentStore().keySet())) {
+    public static synchronized void reconcilier(StockagesDocuments documentStore, InvertedIndex invertedIndex, Journal journal) {
+        for (String chemin : new java.util.ArrayList<>(documentStore.getStockagesDocuments().keySet())) {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
                 documentStore.supprimerDocument(chemin);
                 journal.ecrireSuppression(chemin, 0); // appel producteur
             } else {
                 long dateOS = fichier.lastModified();
-                long dateStockee = documentStore.getDocumentMetaData(chemin).getDateModification();
+                long dateStockee = documentStore.getMetaData(chemin).getDateModification();
                 if (dateOS > dateStockee) {
                     Main.indexFile(0, chemin, documentStore, invertedIndex, journal);
                     journal.ecrireMiseAJour(chemin, dateOS, fichier.length(), new ConcurrentHashMap<>());
