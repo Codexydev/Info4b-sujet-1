@@ -37,6 +37,7 @@ public class Recherche {
      * IDF -> log( totalDocsConcerné / nbDocsAvecMotDedans )<br>
      * TF -> occurrences du mot dans ce doc / total mots du doc<br>
      * TF-IDF = Score -> IDF * TF
+     *
      * @return
      */
     public String effectuerRecherche() {
@@ -78,12 +79,12 @@ public class Recherche {
         }
         for (ConcurrentHashMap.Entry<String, Double> entry : scoresParChemin.entrySet()) {
             double scoreArrondi = Math.round(entry.getValue() * 10000.0) / 10000.0;
-            scores.put(entry.getValue(), "Document: " + ANSI_VERT + entry.getKey() + ANSI_RESET + ", Score TF-IDF: " + ANSI_BLEU +scoreArrondi + ANSI_RESET);
+            scores.put(entry.getValue(), "Document: " + ANSI_VERT + entry.getKey() + ANSI_RESET + ", Score TF-IDF: " + ANSI_BLEU + scoreArrondi + ANSI_RESET);
         }
         //Itération sur score.values (TreeMap) au lieu de l'ArrayList
         String reponseText = "";
         for (String resultat : scores.values()) {
-            reponseText += resultat+"\n";
+            reponseText += resultat + "\n";
         }
 
         if (reponseText.equals("")) return "Aucun résultat trouvé pour le(s) mot(s) recherché(s).";
