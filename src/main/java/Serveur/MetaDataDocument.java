@@ -1,13 +1,13 @@
 package Serveur;
 
-public class DocumentMetaData {
+public class MetaDataDocument {
     private final String chemin;
     private final long poids;
     private final long dateModification;
     private final long totalMots;
     private final int id;
 
-    public DocumentMetaData(int id,String chemin, long poids, long dateModification, long totalMots) {
+    public MetaDataDocument(int id, String chemin, long poids, long dateModification, long totalMots) {
         this.chemin = chemin;
         this.poids = poids;
         this.dateModification = dateModification;

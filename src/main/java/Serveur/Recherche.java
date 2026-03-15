@@ -53,7 +53,7 @@ public class Recherche {
                 }
 
                 if (!aExclure) {
-                    DocumentMetaData metaData = documentStore.getMetaDataById(id);
+                    MetaDataDocument metaData = documentStore.getMetaDataById(id);
                     if (metaData == null) continue;
                     double tf = (double) indexDuMot.get(id) / metaData.getTotalMots(); // TF = occurrences du mot dans ce doc / total mots du doc
                     double score = tf * idf; // TF * IDF
