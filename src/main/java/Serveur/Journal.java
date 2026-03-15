@@ -218,7 +218,7 @@ public class Journal {
      * @param journal            journal
      */
     public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal) {
-        for (String chemin : new java.util.ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
+        for (String chemin : new ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
                 stockagesDocuments.supprimerDocument(chemin);
@@ -233,7 +233,7 @@ public class Journal {
                     if (dateOS > dateStockee) {
                         int vraiId = meta.getId();
 
-                        Main.indexFile(vraiId, chemin, stockagesDocuments, indexInverse, journal);
+                        Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal);
                         journal.ecrireMiseAJour(chemin, dateOS, fichier.length(), new ConcurrentHashMap<>());
                     }
                 }
