@@ -38,7 +38,7 @@ public class Recherche {
      * TF -> occurrences du mot dans ce doc / total mots du doc<br>
      * TF-IDF = Score -> IDF * TF
      *
-     * @return
+     * @return String
      */
     public String effectuerRecherche() {
         TreeMap<Double, String> scores = new TreeMap<>(Collections.reverseOrder());
