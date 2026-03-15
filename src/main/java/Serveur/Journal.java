@@ -156,7 +156,7 @@ public class Journal {
     // lecture ligne à ligne avec BufferedReader
     public static void restaurerDepuisJournal(String cheminJournal,
                                               StockagesDocuments documentStore,
-                                              InvertedIndex invertedIndex,
+                                              IndexInverse indexInverse,
                                               IdVersChemin idToPath) {
         File fichier = new File(cheminJournal);
         if (!fichier.exists()) return;
@@ -174,7 +174,7 @@ public class Journal {
                             /*System.out.println(paire[0]+" "+paire[1]+"  "); debug*/
                             if (paire.length == 2) {
                                 frequence.put(paire[0], Integer.parseInt(paire[1]));
-                                invertedIndex.restaurerFrequenceMot(paire[0], id, Integer.parseInt(paire[1]));
+                                indexInverse.restaurerFrequenceMot(paire[0], id, Integer.parseInt(paire[1]));
                             }
                         }
                     }
@@ -193,7 +193,7 @@ public class Journal {
     }
 
     // empêche 2 appels simultanés à reconcilier() de provoquer des incohérences sur documentStore
-    public static synchronized void reconcilier(StockagesDocuments documentStore, InvertedIndex invertedIndex, Journal journal) {
+    public static synchronized void reconcilier(StockagesDocuments documentStore, IndexInverse indexInverse, Journal journal) {
         for (String chemin : new java.util.ArrayList<>(documentStore.getStockagesDocuments().keySet())) {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
@@ -203,7 +203,7 @@ public class Journal {
                 long dateOS = fichier.lastModified();
                 long dateStockee = documentStore.getMetaData(chemin).getDateModification();
                 if (dateOS > dateStockee) {
-                    Main.indexFile(0, chemin, documentStore, invertedIndex, journal);
+                    Main.indexFile(0, chemin, documentStore, indexInverse, journal);
                     journal.ecrireMiseAJour(chemin, dateOS, fichier.length(), new ConcurrentHashMap<>());
                 }
             }

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Main {
     public static boolean DEBUG = false;
 
-    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments documentStore, InvertedIndex invertedIndex, IdVersChemin idToPath, Journal journal) {
+    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments documentStore, IndexInverse indexInverse, IdVersChemin idToPath, Journal journal) {
         Path start = Paths.get(cheminRepertoire);
 
         try {
@@ -22,14 +22,14 @@ public class Main {
                     .forEach(path -> {
                         idToPath.addPath(path.toString());
                         if (DEBUG) System.out.println("\nIndexation du fichier : " + path.toString());
-                        indexFile(idToPath.getIdCourant(),path.toString(), documentStore, invertedIndex, journal);
+                        indexFile(idToPath.getIdCourant(),path.toString(), documentStore, indexInverse, journal);
                     });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void indexFile(int id, String cheminFichier, StockagesDocuments documentStore, InvertedIndex invertedIndex, Journal journal) {
+    public static void indexFile(int id, String cheminFichier, StockagesDocuments documentStore, IndexInverse indexInverse, Journal journal) {
         File file = new File(cheminFichier);
         ExtracteurTexte extractText = new ExtracteurTexte(cheminFichier);
         String texte = extractText.extraireTexte(); // renvoie le texte du fichier
@@ -62,7 +62,7 @@ public class Main {
             if (bypassMot.contains(mot)) {
                 if (DEBUG) System.out.println("Mot ignoré : " + mot);
             } else {
-                invertedIndex.indexerMot(mot, id);
+                indexInverse.indexerMot(mot, id);
                 nbMots += 1;
                 if (DEBUG) System.out.println("Indexation du mot : " + mot);
             }
@@ -72,11 +72,11 @@ public class Main {
         documentStore.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(), nbMots);
         // enregistre dans journal chaque fichier indexer (= sauvegarde)
 
-        ConcurrentHashMap<String, Integer> mots = invertedIndex.getMotsDocument(id);
+        ConcurrentHashMap<String, Integer> mots = indexInverse.getMotsDocument(id);
         journal.ecrireAjout(cheminFichier, file.lastModified(), file.length(), mots);
     }
 
-    public static void server(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdVersChemin idToPath) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments documentStore, IdVersChemin idToPath) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -127,10 +127,10 @@ public class Main {
                             Recherche recherche;
                             if (arguments.length >= 4 && arguments[2].equals("--")) {
                                 String[] motsNonRecherches = arguments[3].split(",");
-                                recherche = new Recherche(invertedIndex, documentStore, idToPath, mots, motsNonRecherches);
+                                recherche = new Recherche(indexInverse, documentStore, idToPath, mots, motsNonRecherches);
 
                             } else {
-                                recherche = new Recherche(invertedIndex, documentStore, idToPath, mots);
+                                recherche = new Recherche(indexInverse, documentStore, idToPath, mots);
                                 /*out.println(recherche.effectuerRecherche());*/
                             }
                             out.println(recherche.effectuerRecherche());
@@ -190,7 +190,7 @@ public class Main {
         String path = "src/testIndexed/";
 
         StockagesDocuments documentStore = new StockagesDocuments();
-        InvertedIndex invertedIndex = new InvertedIndex();
+        IndexInverse indexInverse = new IndexInverse();
         IdVersChemin idToPath = new IdVersChemin();
         Journal journal = null;
         String cheminJournal = "journal.csv";
@@ -202,21 +202,21 @@ public class Main {
         }
 
         // restauration + réconciliation + parcoursFichiers
-        Journal.restaurerDepuisJournal(cheminJournal, documentStore, invertedIndex, idToPath);
-        Journal.reconcilier(documentStore, invertedIndex, journal);
+        Journal.restaurerDepuisJournal(cheminJournal, documentStore, indexInverse, idToPath);
+        Journal.reconcilier(documentStore, indexInverse, journal);
         if (documentStore.getNombreDocuments() == 0) {
             System.out.println("1er lancement : indexation ");
-            parcoursFichiers(path, documentStore, invertedIndex, idToPath, journal);
+            parcoursFichiers(path, documentStore, indexInverse, idToPath, journal);
         }else {
             System.out.println("Restauration depuis journal.csv : " + documentStore.getNombreDocuments() + " documents rechargés, pas de réindexation");
         }
 
         if (DEBUG) System.out.println("\nServeur.DocumentStore : " + documentStore.getStockagesDocuments());
-        if (DEBUG) System.out.println("Index global : " + invertedIndex.getIndexGlobal());
+        if (DEBUG) System.out.println("Index global : " + indexInverse.getIndexInverse());
 
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + documentStore.getNombreDocuments());
 
-        server(invertedIndex, documentStore, idToPath);
+        server(indexInverse, documentStore, idToPath);
         journal.fermer(); //ferme proprement le journal
     }
 

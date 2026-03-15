@@ -7,22 +7,22 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Recherche {
-    private final InvertedIndex invertedIndex;
+    private final IndexInverse indexInverse;
     private final StockagesDocuments documentStore;
     private final IdVersChemin idToPath;
     private final String[] motsRecherches;
     private final ArrayList<String> motsNonRecherches = new ArrayList<>();
 
-    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdVersChemin idToPath, String[] motsRecherches, String[] motsNonRecherches) {
-        this.invertedIndex = invertedIndex;
+    public Recherche(IndexInverse indexInverse, StockagesDocuments documentStore, IdVersChemin idToPath, String[] motsRecherches, String[] motsNonRecherches) {
+        this.indexInverse = indexInverse;
         this.documentStore = documentStore;
         this.idToPath = idToPath;
         this.motsRecherches = motsRecherches;
         this.motsNonRecherches.addAll(Arrays.asList(motsNonRecherches));
     }
 
-    public Recherche(InvertedIndex invertedIndex, StockagesDocuments documentStore, IdVersChemin idToPath, String[] motsRecherches) {
-        this.invertedIndex = invertedIndex;
+    public Recherche(IndexInverse indexInverse, StockagesDocuments documentStore, IdVersChemin idToPath, String[] motsRecherches) {
+        this.indexInverse = indexInverse;
         this.documentStore = documentStore;
         this.idToPath = idToPath;
         this.motsRecherches = motsRecherches;
@@ -36,7 +36,7 @@ public class Recherche {
         for (String mot : motsRecherches) {
             if (motsNonRecherches.contains(mot)) continue;
 
-            ConcurrentHashMap<Integer, Integer> indexDuMot = invertedIndex.getIndexDuMot(mot);
+            ConcurrentHashMap<Integer, Integer> indexDuMot = indexInverse.getDocumentsByMot(mot);
             //Ajout pr calcul IDF
             int nbDocsAvecMot = indexDuMot.size();
             if (nbDocsAvecMot == 0) continue;
@@ -46,7 +46,7 @@ public class Recherche {
                 boolean aExclure = false;
 
                 for (String motExclu : motsNonRecherches) {
-                    if (invertedIndex.getIndexDuMot(motExclu).containsKey(id)) {
+                    if (indexInverse.getDocumentsByMot(motExclu).containsKey(id)) {
                         aExclure = true;
                         break;
                     }
