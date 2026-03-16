@@ -116,9 +116,11 @@ public class Main {
                     if (str.length() > 2 || str.equals("-h") || str.equals("-l")) {
                         switch (command) {
                             case "-l":
+                                out.println(ANSI_BLEU);
                                 for (String file : stockagesDocuments.getStockagesDocuments().keySet()) {
                                     out.println(file);
                                 }
+                                out.println(ANSI_RESET);
                                 out.println("END_OF_MESSAGE");
                                 break;
 
@@ -164,7 +166,9 @@ public class Main {
                                 break;
 
                             case "-m":
-                                String chemin = arg[2];
+                                String chemin;
+                                if (arg.length >3) chemin = arg[2];
+                                else chemin = arg[1];
                                 UpdateFile updateFile = new UpdateFile(chemin);
                                 switch (arg[1]) {
                                     case "-rn":
@@ -172,9 +176,7 @@ public class Main {
                                             String nouveauChemin = arg[3];
 
                                             String resultat = updateFile.renomerFichier(nouveauChemin);
-                                            System.out.println("ef");
                                             if (resultat.equals("Fichier renommé")) {
-                                                System.out.println("hey");
                                                 stockagesDocuments.supprimerDocument(chemin);
                                                 journal.ecrireSuppression(chemin, System.currentTimeMillis());
 
