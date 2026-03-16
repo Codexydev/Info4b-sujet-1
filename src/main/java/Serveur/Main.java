@@ -86,7 +86,7 @@ public class Main {
         }
     }
 
-    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -111,39 +111,49 @@ public class Main {
 
                     String path;
                     String command = str.split(" ")[0];
+                    String[] arg = str.split(" ");
 
-                    if (str.length() > 2 || str.equals("-h")) {
+                    if (str.length() > 2 || str.equals("-h") || str.equals("-l")) {
                         switch (command) {
+                            case "-l":
+                                System.out.println("hhdfsqv");
+                                for (String file : stockagesDocuments.getStockagesDocuments().keySet()) {
+                                    out.println(file);
+                                }
+                                out.println("END_OF_MESSAGE");
+                                break;
+
                             case "-h":
-                                out.println(" Commandes disponibles :\n"+
-                                         "-h : "+ANSI_BLEU+"afficher l'aide\n"+ANSI_RESET+
-                                         "-t"+ANSI_VERT +" <message> : "+ANSI_BLEU+"Afficher le message reçu pour tester la communication\n"+ANSI_RESET+
-                                         "-q : "+ANSI_BLEU+"Quitter la connexion\n"+ANSI_RESET+
-                                         "-s"+ANSI_VERT +" <mot(s) (sépration (,) ) > : "+ANSI_BLEU+"Rechercher un mot dans l'index et afficher les documents associés\n"+ANSI_RESET+
-                                         "-s "+ANSI_VERT +"<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : "+ANSI_BLEU+"separateur de mot ,\n"+ANSI_RESET+
-                                         "-m "+ANSI_VERT +"<chemin du document> : "+ANSI_BLEU+"Afficher les métadonnées d'un document donné\n"+ANSI_RESET+
-                                         "-p"+ANSI_VERT +" <chemin du document> : "+ANSI_BLEU+"affiche le texte du document\n"+ANSI_RESET);
+                                out.println(" Commandes disponibles :\n" +
+                                        "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
+                                        "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
+                                        "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
+                                        "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
+                                        "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
+                                        "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
+                                        "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
+                                        "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
+                                        "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET);
                                 out.println("END_OF_MESSAGE");
                                 break;
 
                             case "-t":
-                                out.println("Message reçu : " +ANSI_BLEU+ str.substring(3)+ANSI_RESET);
+                                out.println("Message reçu : " + ANSI_BLEU + str.substring(3) + ANSI_RESET);
                                 out.println("END_OF_MESSAGE");
                                 break;
 
                             case "-s":
-                                String[] arguments = str.split(" ");
-                                if (arguments.length < 2) {
+                                if (arg.length < 2) {
                                     out.println("Erreur: Veuillez spécifier un mot à chercher.");
                                     out.println("END_OF_MESSAGE");
                                     break;
                                 }
 
-                                String[] mots = arguments[1].split(",");
+                                String[] mots = arg[1].split(",");
 
                                 Recherche recherche;
-                                if (arguments.length >= 4 && arguments[2].equals("--")) {
-                                    String[] motsNonRecherches = arguments[3].split(",");
+                                if (arg.length >= 4 && arg[2].equals("--")) {
+                                    String[] motsNonRecherches = arg[3].split(",");
                                     recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
 
                                 } else {
@@ -155,13 +165,33 @@ public class Main {
                                 break;
 
                             case "-m":
-                                String arg = str.split(" ")[1];
+                                switch (arg[1]) {
+                                    case "-rn":
+                                        if (arg.length >= 4) {
+                                            String ancienChemin = arg[2];
+                                            String nouveauChemin = arg[3];
 
-                                if (arg.equals("update")) {
-                                    UpdateFile update = new UpdateFile();
+                                            UpdateFile updateFile = new UpdateFile(ancienChemin);
+                                            String resultat = updateFile.renomerFichier(nouveauChemin);
+
+                                            if (resultat.equals("Fichier Renommé")) {
+                                                stockagesDocuments.supprimerDocument(ancienChemin);
+                                                journal.ecrireSuppression(ancienChemin, System.currentTimeMillis());
+
+                                                idToPath.addPath(nouveauChemin);
+                                                indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true);
+                                            }
+
+                                            out.println(resultat);
+                                        } else {
+                                            out.println("Erreur: arg manquants. Utilisation: -m -rn <ancien> <nouveau>");
+                                        }
+                                        break;
+
+                                    default:
+                                        out.println(stockagesDocuments.getMetaData(arg[1]));
+                                        break;
                                 }
-
-                                out.println(stockagesDocuments.getMetaData(arg));
                                 out.println("END_OF_MESSAGE");
                                 break;
 
@@ -228,7 +258,7 @@ public class Main {
 
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + stockagesDocuments.getNombreDocuments());
 
-        server(indexInverse, stockagesDocuments, idVersChemin);
+        server(indexInverse, stockagesDocuments, idVersChemin, journal);
         journal.fermer();
     }
 }
