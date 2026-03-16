@@ -22,9 +22,20 @@ public class UpdateFile {
             return "Erreur : Le fichier source n'existe pas.";
         }
 
-        boolean statut = file.renameTo(file2);
-        if (statut) {
-            return "Fichier Renommé";
+        boolean status = file.renameTo(file2);
+        if (status) {
+            return "Fichier renommé";
+        }
+        return "erreur";
+    }
+
+    public String supprimerFichier() {
+        if (!file.exists()) {
+            return "Erreur : Le fichier source n'existe pas.";
+        }
+        boolean status = file.delete();
+        if (status) {
+            return "Fichier supprimé";
         }
         return "erreur";
     }

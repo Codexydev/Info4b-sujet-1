@@ -116,7 +116,6 @@ public class Main {
                     if (str.length() > 2 || str.equals("-h") || str.equals("-l")) {
                         switch (command) {
                             case "-l":
-                                System.out.println("hhdfsqv");
                                 for (String file : stockagesDocuments.getStockagesDocuments().keySet()) {
                                     out.println(file);
                                 }
@@ -165,18 +164,19 @@ public class Main {
                                 break;
 
                             case "-m":
+                                String chemin = arg[2];
+                                UpdateFile updateFile = new UpdateFile(chemin);
                                 switch (arg[1]) {
                                     case "-rn":
                                         if (arg.length >= 4) {
-                                            String ancienChemin = arg[2];
                                             String nouveauChemin = arg[3];
 
-                                            UpdateFile updateFile = new UpdateFile(ancienChemin);
                                             String resultat = updateFile.renomerFichier(nouveauChemin);
-
-                                            if (resultat.equals("Fichier Renommé")) {
-                                                stockagesDocuments.supprimerDocument(ancienChemin);
-                                                journal.ecrireSuppression(ancienChemin, System.currentTimeMillis());
+                                            System.out.println("ef");
+                                            if (resultat.equals("Fichier renommé")) {
+                                                System.out.println("hey");
+                                                stockagesDocuments.supprimerDocument(chemin);
+                                                journal.ecrireSuppression(chemin, System.currentTimeMillis());
 
                                                 idToPath.addPath(nouveauChemin);
                                                 indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true);
@@ -188,6 +188,17 @@ public class Main {
                                         }
                                         break;
 
+                                    case "-rm":
+                                        String resultat = updateFile.supprimerFichier();
+
+                                        if (resultat.equals("Fichier supprimé")) {
+                                            stockagesDocuments.supprimerDocument(chemin);
+                                            journal.ecrireSuppression(chemin, System.currentTimeMillis());
+                                        } else {
+                                            out.println("erreur");
+                                        }
+                                        break;
+
                                     default:
                                         out.println(stockagesDocuments.getMetaData(arg[1]));
                                         break;
@@ -195,7 +206,7 @@ public class Main {
                                 out.println("END_OF_MESSAGE");
                                 break;
 
-                            case "-p":
+                            case "-r":
                                 path = str.split(" ")[1];
                                 ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
                                 String texte = extracteurTexte.extraireTexte();
