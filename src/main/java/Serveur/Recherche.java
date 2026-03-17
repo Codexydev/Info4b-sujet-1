@@ -1,9 +1,6 @@
 package Serveur;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Recherche {
@@ -89,5 +86,47 @@ public class Recherche {
 
         if (reponseText.equals("")) return "Aucun résultat trouvé pour le(s) mot(s) recherché(s).";
         return reponseText;
+    }
+
+    public String RechercheAvance(){
+        java.util.HashSet<Integer> resultat = new java.util.HashSet<>(); //le HashSet évite les doublons
+        java.util.HashSet<Integer> resultatFinal = new java.util.HashSet<>();
+        String operateur = "OU"; //je passe le OU comme opérateur par défauts
+        boolean premierMot = true;
+        for(String mot : motsRecherches){
+            if(mot.equals("ET") || mot.equals("OU") || mot.equals("SAUF")){
+                operateur = mot;
+                continue;
+            }
+            if(premierMot){
+                resultatFinal.addAll(indexInverse.getDocumentsByMot(mot).keySet());
+                premierMot = false;
+            } else{
+                resultat.addAll(indexInverse.getDocumentsByMot(mot).keySet());
+                if(operateur.equals("ET")){
+                    resultatFinal.retainAll(resultat);
+                }
+                if(operateur.equals("OU")){
+                    resultatFinal.addAll(resultat);
+                }
+                if(operateur.equals("SAUF")){
+                    resultatFinal.removeAll(resultat);
+                }
+                operateur = "OU";
+                resultat.clear();
+            }
+
+
+            operateur = "OU"; //remet le ou par defaut
+        }
+        if(resultatFinal.isEmpty()){
+            return "Aucun resultat trouvé!";
+        }
+        String reponse= "";
+        for(Integer id: resultatFinal){
+            reponse += idVersChemin.getChemin(id) + "\n";
+        }
+        return reponse;
+
     }
 }

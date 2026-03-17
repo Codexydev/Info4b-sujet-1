@@ -165,6 +165,21 @@ public class Main {
                                 out.println("END_OF_MESSAGE");
                                 break;
 
+                            case "-as":
+                                if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
+                                    out.println("Erreur: Specifiez un/des mot(s) à chercher");
+                                    out.println("END_OF_MESSAGE");
+                                    break;
+                                }
+                                String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
+                                String[] motsAvances = requete.split(" "); //découpage avec les espaces
+
+                                Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0]);
+                                out.println(maRecherche.RechercheAvance());
+
+                                out.println("END_OF_MESSAGE");
+                                break;
+
                             case "-m":
                                 String chemin;
                                 if (arg.length >3) chemin = arg[2];
