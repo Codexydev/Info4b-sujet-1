@@ -116,7 +116,6 @@ public class Recherche {
                 resultat.clear();
             }
 
-
             operateur = "OU"; //remet le ou par defaut
         }
         if(resultatFinal.isEmpty()){

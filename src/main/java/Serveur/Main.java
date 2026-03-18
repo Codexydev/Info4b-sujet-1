@@ -134,7 +134,8 @@ public class Main {
                                         "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
                                         "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
                                         "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
-                                        "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET);
+                                        "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
+                                        "-as" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET);
                                 out.println("END_OF_MESSAGE");
                                 break;
 
