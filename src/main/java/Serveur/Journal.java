@@ -219,24 +219,27 @@ public class Journal {
      */
     public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal) {
         for (String chemin : new ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
-            File fichier = new File(chemin);
-            if (!fichier.exists()) {
-                stockagesDocuments.supprimerDocument(chemin);
-                journal.ecrireSuppression(chemin, 0); // appel producteur
-            } else {
-                long dateOS = fichier.lastModified();
-                MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
+            // Ajout de threads pour un démarrage plus rapide (vérification de plusieurs fichiers en parallèle)
+            new Thread(() -> {
+                File fichier = new File(chemin);
+                if (!fichier.exists()) {
+                    stockagesDocuments.supprimerDocument(chemin);
+                    journal.ecrireSuppression(chemin, 0); // appel producteur
+                } else {
+                    long dateOS = fichier.lastModified();
+                    MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
 
-                if (meta != null) {
-                    long dateStockee = meta.getDateModification();
+                    if (meta != null) {
+                        long dateStockee = meta.getDateModification();
 
-                    if (dateOS > dateStockee) {
-                        int vraiId = meta.getId();
+                        if (dateOS > dateStockee) {
+                            int vraiId = meta.getId();
 
-                        Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false);
+                            Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false);
+                        }
                     }
                 }
-            }
+            }).start();
         }
     }
 }

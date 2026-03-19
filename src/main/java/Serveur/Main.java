@@ -28,11 +28,16 @@ public class Main {
                         String cheminFichier = path.toString();
 
                         if (stockagesDocuments.getMetaData(cheminFichier) == null) {
-                            idVersChemin.addPath(cheminFichier);
-                            int nouvelId = idVersChemin.getIdCourant();
+                            // Ajout de threads pour indexer plusieurs fichiers en même temps
+                            new Thread(() -> {
+                                synchronized (idVersChemin) {
+                                    idVersChemin.addPath(cheminFichier);
+                                }
+                                int nouvelId = idVersChemin.getIdCourant();
 
-                            if (DEBUG) System.out.println("\nIndexation du NOUVEAU fichier : " + cheminFichier);
-                            indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true);
+                                if (DEBUG) System.out.println("\nIndexation du NOUVEAU fichier : " + cheminFichier);
+                                indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true);
+                            }).start();
                         }
                     });
         } catch (IOException e) {
@@ -94,7 +99,9 @@ public class Main {
             while (true) {
                 Socket socket = server.accept();
                 System.out.println("Client connected");
-
+                // Ajout de threads pour gérer plusieurs clients au lieu d'un seul
+                new Thread(() -> {
+                    try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -247,7 +254,11 @@ public class Main {
                         out.println("END_OF_MESSAGE");
                     }
                 }
-                socket.close();
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
