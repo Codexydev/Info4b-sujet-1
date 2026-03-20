@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,10 @@ public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
+    public static final List<String> bypassMot = new ArrayList<>(Arrays.asList(
+            "le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"
+    ));
+    public static final List<String> motsClesUtilisateur = new ArrayList<>();
 
     public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal) {
         Path start = Paths.get(cheminRepertoire);
@@ -56,9 +61,6 @@ public class Main {
             if (DEBUG) System.out.println("-- text vide");
             return;
         }
-
-        String[] bypassMotInit = {"le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"};
-        List<String> bypassMot = Arrays.asList(bypassMotInit);
 
         String texteMinuscule = texte.toLowerCase();
         String[] motsExtraits = texteMinuscule.split("[^\\p{L}\\p{N}]+");
@@ -142,7 +144,10 @@ public class Main {
                                         "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
                                         "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
                                         "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
-                                        "-as" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET);
+                                        "-as" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
+                                        "-kw " + ANSI_VERT + "add/remove/list/search : " + ANSI_BLEU + "Gérer les mots-clés utilisateur\n" + ANSI_RESET +
+                                        "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
+                                        "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET );
                                 out.println("END_OF_MESSAGE");
                                 break;
 
@@ -242,6 +247,93 @@ public class Main {
                             case "q":
                                 clientConnected = false;
                                 System.out.println("Client disconnected");
+                                break;
+
+                            case "-kw":
+                                if (arg.length < 2) {
+                                    out.println("Erreur: Utilisation: -kw add <mot> / -kw remove <mot> / -kw list / -kw search");
+                                    out.println("END_OF_MESSAGE");
+                                    break;
+                                }
+                                switch (arg[1]) {
+                                    case "add":
+                                        if (arg.length < 3) {
+                                            out.println("Erreur: Spécifiez un mot.");
+                                            break;
+                                        }
+                                        if (!motsClesUtilisateur.contains(arg[2])) {
+                                            motsClesUtilisateur.add(arg[2]);
+                                            out.println("Mot-clé ajouté : " + arg[2]);
+                                        } else {
+                                            out.println("Ce mot-clé existe déjà.");
+                                        }
+                                        break;
+
+                                    case "remove":
+                                        if (arg.length < 3) {
+                                            out.println("Erreur: Spécifiez un mot.");
+                                            break;
+                                        }
+                                        if (motsClesUtilisateur.remove(arg[2])) {
+                                            out.println("Mot-clé supprimé : " + arg[2]);
+                                        } else {
+                                            out.println("Ce mot-clé n'existe pas.");
+                                        }
+                                        break;
+
+                                    case "list":
+                                        if (motsClesUtilisateur.isEmpty()) {
+                                            out.println("Aucun mot-clé utilisateur défini.");
+                                        } else {
+                                            out.println("Mots-clés utilisateur :");
+                                            for (String motCle : motsClesUtilisateur) {
+                                                out.println("  → " + ANSI_VERT + motCle + ANSI_RESET);
+                                            }
+                                        }
+                                        break;
+
+                                    case "search":
+                                        if (motsClesUtilisateur.isEmpty()) {
+                                            out.println("Aucun mot-clé utilisateur défini.");
+                                            break;
+                                        }
+                                        String[] motsAChercher = motsClesUtilisateur.toArray(new String[0]);
+                                        Recherche rechercheKw = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAChercher);
+                                        out.println(rechercheKw.effectuerRecherche());
+                                        break;
+
+                                    default:
+                                        out.println("Action inconnue. Utilisez add, remove, list ou search.");
+                                        break;
+                                }
+                                out.println("END_OF_MESSAGE");
+                                break;
+
+                            case "-sw":
+                                if (arg.length < 3) {
+                                    out.println("Erreur: Utilisation: -sw add <mot> ou -sw remove <mot>");
+                                    out.println("END_OF_MESSAGE");
+                                    break;
+                                }
+                                String action = arg[1];
+                                String mot = arg[2];
+                                if (action.equals("add")) {
+                                    if (!bypassMot.contains(mot)) {
+                                        bypassMot.add(mot);
+                                        out.println("Stop-word ajouté : " + mot);
+                                    } else {
+                                        out.println("Ce mot est déjà un stop-word.");
+                                    }
+                                } else if (action.equals("remove")) {
+                                    if (bypassMot.remove(mot)) {
+                                        out.println("Stop-word supprimé : " + mot);
+                                    } else {
+                                        out.println("Ce mot n'est pas dans la liste des stop-words.");
+                                    }
+                                } else {
+                                    out.println("Action inconnue. Utilisez add ou remove.");
+                                }
+                                out.println("END_OF_MESSAGE");
                                 break;
 
                             default:
