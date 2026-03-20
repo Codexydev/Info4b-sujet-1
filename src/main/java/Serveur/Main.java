@@ -104,221 +104,221 @@ public class Main {
                 // Ajout de threads pour gérer plusieurs clients au lieu d'un seul
                 new Thread(() -> {
                     try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                boolean clientConnected = true;
+                        boolean clientConnected = true;
 
-                while (clientConnected) {
-                    String str = in.readLine();
+                        while (clientConnected) {
+                            String str = in.readLine();
 
-                    if (str == null || str.equals("-q") || str.equals("q")) {
-                        clientConnected = false;
-                        System.out.println("\nClient disconnected");
-                        break;
-                    }
-
-                    String path;
-                    String command = str.split(" ")[0];
-                    String[] arg = str.split(" ");
-
-                    if (str.length() > 2 || str.equals("-h") || str.equals("-l")) {
-                        switch (command) {
-                            case "-l":
-                                out.println(ANSI_BLEU);
-                                for (String file : stockagesDocuments.getStockagesDocuments().keySet()) {
-                                    out.println(file);
-                                }
-                                out.println(ANSI_RESET);
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "-h":
-                                out.println(" Commandes disponibles :\n" +
-                                        "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
-                                        "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
-                                        "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
-                                        "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
-                                        "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
-                                        "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
-                                        "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
-                                        "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
-                                        "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
-                                        "-as" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
-                                        "-kw " + ANSI_VERT + "add/remove/list/search : " + ANSI_BLEU + "Gérer les mots-clés utilisateur\n" + ANSI_RESET +
-                                        "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
-                                        "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET );
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "-t":
-                                out.println("Message reçu : " + ANSI_BLEU + str.substring(3) + ANSI_RESET);
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "-s":
-                                if (arg.length < 2) {
-                                    out.println("Erreur: Veuillez spécifier un mot à chercher.");
-                                    out.println("END_OF_MESSAGE");
-                                    break;
-                                }
-
-                                String[] mots = arg[1].split(",");
-
-                                Recherche recherche;
-                                if (arg.length >= 4 && arg[2].equals("--")) {
-                                    String[] motsNonRecherches = arg[3].split(",");
-                                    recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
-
-                                } else {
-                                    recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
-                                }
-
-                                out.println(recherche.effectuerRecherche());
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "-as":
-                                if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
-                                    out.println("Erreur: Specifiez un/des mot(s) à chercher");
-                                    out.println("END_OF_MESSAGE");
-                                    break;
-                                }
-                                String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
-                                String[] motsAvances = requete.split(" "); //découpage avec les espaces
-
-                                Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0]);
-                                out.println(maRecherche.RechercheAvance());
-
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "-m":
-                                String chemin;
-                                if (arg.length >3) chemin = arg[2];
-                                else chemin = arg[1];
-                                UpdateFile updateFile = new UpdateFile(chemin);
-                                switch (arg[1]) {
-                                    case "-rn":
-                                        if (arg.length >= 4) {
-                                            String nouveauChemin = arg[3];
-
-                                            String resultat = updateFile.renomerFichier(nouveauChemin);
-                                            if (resultat.equals("Fichier renommé")) {
-                                                stockagesDocuments.supprimerDocument(chemin);
-                                                journal.ecrireSuppression(chemin, System.currentTimeMillis());
-
-                                                idToPath.addPath(nouveauChemin);
-                                                indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true);
-                                            }
-
-                                            out.println(resultat);
-                                        } else {
-                                            out.println("Erreur: arg manquants. Utilisation: -m -rn <ancien> <nouveau>");
-                                        }
-                                        break;
-
-                                    case "-rm":
-                                        String resultat = updateFile.supprimerFichier();
-
-                                        if (resultat.equals("Fichier supprimé")) {
-                                            stockagesDocuments.supprimerDocument(chemin);
-                                            journal.ecrireSuppression(chemin, System.currentTimeMillis());
-                                        } else {
-                                            out.println("erreur");
-                                        }
-                                        break;
-
-                                    default:
-                                        out.println(stockagesDocuments.getMetaData(arg[1]));
-                                        break;
-                                }
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "-r":
-                                path = str.split(" ")[1];
-                                ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
-                                String texte = extracteurTexte.extraireTexte();
-                                out.println("\n" + texte);
-                                out.println("END_OF_MESSAGE");
-                                break;
-
-                            case "q":
+                            if (str == null || str.equals("-q") || str.equals("q")) {
                                 clientConnected = false;
-                                System.out.println("Client disconnected");
+                                System.out.println("\nClient disconnected");
                                 break;
+                            }
 
-                            case "-kw":
-                                if (arg.length < 2) {
-                                    out.println("Erreur: Utilisation: -kw add <mot> / -kw remove <mot> / -kw list / -kw search");
-                                    out.println("END_OF_MESSAGE");
-                                    break;
-                                }
-                                switch (arg[1]) {
-                                    case "add":
-                                        if (arg.length < 3) {
-                                            out.println("Erreur: Spécifiez un mot.");
-                                            break;
+                            String path;
+                            String command = str.split(" ")[0];
+                            String[] arg = str.split(" ");
+
+                            if (str.length() > 2 || str.equals("-h") || str.equals("-l")) {
+                                switch (command) {
+                                    case "-l":
+                                        out.println(ANSI_BLEU);
+                                        for (String file : stockagesDocuments.getStockagesDocuments().keySet()) {
+                                            out.println(file);
                                         }
-                                        if (!motsClesUtilisateur.contains(arg[2])) {
-                                            motsClesUtilisateur.add(arg[2]);
-                                            out.println("Mot-clé ajouté : " + arg[2]);
-                                        } else {
-                                            out.println("Ce mot-clé existe déjà.");
-                                        }
+                                        out.println(ANSI_RESET);
+                                        out.println("END_OF_MESSAGE");
                                         break;
 
-                                    case "remove":
-                                        if (arg.length < 3) {
-                                            out.println("Erreur: Spécifiez un mot.");
-                                            break;
-                                        }
-                                        if (motsClesUtilisateur.remove(arg[2])) {
-                                            out.println("Mot-clé supprimé : " + arg[2]);
-                                        } else {
-                                            out.println("Ce mot-clé n'existe pas.");
-                                        }
+                                    case "-h":
+                                        out.println(" Commandes disponibles :\n" +
+                                                "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
+                                                "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
+                                                "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
+                                                "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
+                                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
+                                                "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
+                                                "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
+                                                "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
+                                                "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
+                                                "-as" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
+                                                "-kw " + ANSI_VERT + "add/remove/list/search : " + ANSI_BLEU + "Gérer les mots-clés utilisateur\n" + ANSI_RESET +
+                                                "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
+                                                "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET);
+                                        out.println("END_OF_MESSAGE");
                                         break;
 
-                                    case "list":
-                                        if (motsClesUtilisateur.isEmpty()) {
-                                            out.println("Aucun mot-clé utilisateur défini.");
-                                        } else {
-                                            out.println("Mots-clés utilisateur :");
-                                            for (String motCle : motsClesUtilisateur) {
-                                                out.println("  → " + ANSI_VERT + motCle + ANSI_RESET);
-                                            }
-                                        }
+                                    case "-t":
+                                        out.println("Message reçu : " + ANSI_BLEU + str.substring(3) + ANSI_RESET);
+                                        out.println("END_OF_MESSAGE");
                                         break;
 
-                                    case "search":
-                                        if (motsClesUtilisateur.isEmpty()) {
-                                            out.println("Aucun mot-clé utilisateur défini.");
+                                    case "-s":
+                                        if (arg.length < 2) {
+                                            out.println("Erreur: Veuillez spécifier un mot à chercher.");
+                                            out.println("END_OF_MESSAGE");
                                             break;
                                         }
-                                        String[] motsAChercher = motsClesUtilisateur.toArray(new String[0]);
-                                        Recherche rechercheKw = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAChercher);
-                                        out.println(rechercheKw.effectuerRecherche());
+
+                                        String[] mots = arg[1].split(",");
+
+                                        Recherche recherche;
+                                        if (arg.length >= 4 && arg[2].equals("--")) {
+                                            String[] motsNonRecherches = arg[3].split(",");
+                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
+
+                                        } else {
+                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
+                                        }
+
+                                        out.println(recherche.effectuerRecherche());
+                                        out.println("END_OF_MESSAGE");
+                                        break;
+
+                                    case "-as":
+                                        if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
+                                            out.println("Erreur: Specifiez un/des mot(s) à chercher");
+                                            out.println("END_OF_MESSAGE");
+                                            break;
+                                        }
+                                        String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
+                                        String[] motsAvances = requete.split(" "); //découpage avec les espaces
+
+                                        Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0]);
+                                        out.println(maRecherche.RechercheAvance());
+
+                                        out.println("END_OF_MESSAGE");
+                                        break;
+
+                                    case "-m":
+                                        String chemin;
+                                        if (arg.length > 3) chemin = arg[2];
+                                        else chemin = arg[1];
+                                        UpdateFile updateFile = new UpdateFile(chemin);
+                                        switch (arg[1]) {
+                                            case "-rn":
+                                                if (arg.length >= 4) {
+                                                    String nouveauChemin = arg[3];
+
+                                                    String resultat = updateFile.renomerFichier(nouveauChemin);
+                                                    if (resultat.equals("Fichier renommé")) {
+                                                        stockagesDocuments.supprimerDocument(chemin);
+                                                        journal.ecrireSuppression(chemin, System.currentTimeMillis());
+
+                                                        idToPath.addPath(nouveauChemin);
+                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true);
+                                                    }
+
+                                                    out.println(resultat);
+                                                } else {
+                                                    out.println("Erreur: arg manquants. Utilisation: -m -rn <ancien> <nouveau>");
+                                                }
+                                                break;
+
+                                            case "-rm":
+                                                String resultat = updateFile.supprimerFichier();
+
+                                                if (resultat.equals("Fichier supprimé")) {
+                                                    stockagesDocuments.supprimerDocument(chemin);
+                                                    journal.ecrireSuppression(chemin, System.currentTimeMillis());
+                                                } else {
+                                                    out.println("erreur");
+                                                }
+                                                break;
+
+                                            default:
+                                                out.println(stockagesDocuments.getMetaData(arg[1]));
+                                                break;
+                                        }
+                                        out.println("END_OF_MESSAGE");
+                                        break;
+
+                                    case "-r":
+                                        path = str.split(" ")[1];
+                                        ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
+                                        String texte = extracteurTexte.extraireTexte();
+                                        out.println("\n" + texte);
+                                        out.println("END_OF_MESSAGE");
+                                        break;
+
+                                    case "q":
+                                        clientConnected = false;
+                                        System.out.println("Client disconnected");
+                                        break;
+
+                                    case "-kw":
+                                        if (arg.length < 2) {
+                                            out.println("Erreur: Utilisation: -kw add <mot> / -kw remove <mot> / -kw list / -kw search");
+                                            out.println("END_OF_MESSAGE");
+                                            break;
+                                        }
+                                        switch (arg[1]) {
+                                            case "add":
+                                                if (arg.length < 3) {
+                                                    out.println("Erreur: Spécifiez un mot.");
+                                                    break;
+                                                }
+                                                if (!motsClesUtilisateur.contains(arg[2])) {
+                                                    motsClesUtilisateur.add(arg[2]);
+                                                    out.println("Mot-clé ajouté : " + arg[2]);
+                                                } else {
+                                                    out.println("Ce mot-clé existe déjà.");
+                                                }
+                                                break;
+
+                                            case "remove":
+                                                if (arg.length < 3) {
+                                                    out.println("Erreur: Spécifiez un mot.");
+                                                    break;
+                                                }
+                                                if (motsClesUtilisateur.remove(arg[2])) {
+                                                    out.println("Mot-clé supprimé : " + arg[2]);
+                                                } else {
+                                                    out.println("Ce mot-clé n'existe pas.");
+                                                }
+                                                break;
+
+                                            case "list":
+                                                if (motsClesUtilisateur.isEmpty()) {
+                                                    out.println("Aucun mot-clé utilisateur défini.");
+                                                } else {
+                                                    out.println("Mots-clés utilisateur :");
+                                                    for (String motCle : motsClesUtilisateur) {
+                                                        out.println("  → " + ANSI_VERT + motCle + ANSI_RESET);
+                                                    }
+                                                }
+                                                break;
+
+                                            case "search":
+                                                if (motsClesUtilisateur.isEmpty()) {
+                                                    out.println("Aucun mot-clé utilisateur défini.");
+                                                    break;
+                                                }
+                                                String[] motsAChercher = motsClesUtilisateur.toArray(new String[0]);
+                                                Recherche rechercheKw = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAChercher);
+                                                out.println(rechercheKw.effectuerRecherche());
+                                                break;
+
+                                            default:
+                                                out.println("Action inconnue. Utilisez add, remove, list ou search.");
+                                                break;
+                                        }
+                                        out.println("END_OF_MESSAGE");
                                         break;
 
                                     default:
-                                        out.println("Action inconnue. Utilisez add, remove, list ou search.");
+                                        out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
+                                        out.println("END_OF_MESSAGE");
                                         break;
                                 }
+                            } else {
+                                out.println("donnez le(s) parametre(s)");
                                 out.println("END_OF_MESSAGE");
-                                break;
-
-                            default:
-                                out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
-                                out.println("END_OF_MESSAGE");
-                                break;
+                            }
                         }
-                    } else {
-                        out.println("donnez le(s) parametre(s)");
-                        out.println("END_OF_MESSAGE");
-                    }
-                }
                         socket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
