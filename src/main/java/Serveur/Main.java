@@ -309,33 +309,6 @@ public class Main {
                                 out.println("END_OF_MESSAGE");
                                 break;
 
-                            case "-sw":
-                                if (arg.length < 3) {
-                                    out.println("Erreur: Utilisation: -sw add <mot> ou -sw remove <mot>");
-                                    out.println("END_OF_MESSAGE");
-                                    break;
-                                }
-                                String action = arg[1];
-                                String mot = arg[2];
-                                if (action.equals("add")) {
-                                    if (!bypassMot.contains(mot)) {
-                                        bypassMot.add(mot);
-                                        out.println("Stop-word ajouté : " + mot);
-                                    } else {
-                                        out.println("Ce mot est déjà un stop-word.");
-                                    }
-                                } else if (action.equals("remove")) {
-                                    if (bypassMot.remove(mot)) {
-                                        out.println("Stop-word supprimé : " + mot);
-                                    } else {
-                                        out.println("Ce mot n'est pas dans la liste des stop-words.");
-                                    }
-                                } else {
-                                    out.println("Action inconnue. Utilisez add ou remove.");
-                                }
-                                out.println("END_OF_MESSAGE");
-                                break;
-
                             default:
                                 out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
                                 out.println("END_OF_MESSAGE");
