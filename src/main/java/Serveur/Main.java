@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -309,6 +310,13 @@ public class Main {
                                         out.println("END_OF_MESSAGE");
                                         break;
 
+                                    case "-d" :
+                                        Doublon doublon = new Doublon(arg[1], arg[2]);
+                                        boolean estDublon = doublon.EstDoublon();
+                                        if (estDublon) out.println("C'est fichier sont similaire");
+                                        else out.println("fichier différents");
+                                        out.println("END_OF_MESSAGE");
+
                                     default:
                                         out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
                                         out.println("END_OF_MESSAGE");
@@ -322,6 +330,8 @@ public class Main {
                         socket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e);
                     }
                 }).start();
             }
