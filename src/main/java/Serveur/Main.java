@@ -145,7 +145,7 @@ public class Main {
                                                 "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
                                                 "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
                                                 "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
-                                                "-as" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
+                                                "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
                                                 "-kw " + ANSI_VERT + "add/remove/list/search : " + ANSI_BLEU + "Gérer les mots-clés utilisateur\n" + ANSI_RESET +
                                                 "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
                                                 "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET);
@@ -179,7 +179,7 @@ public class Main {
                                         out.println("END_OF_MESSAGE");
                                         break;
 
-                                    case "-as":
+                                    case "-ar":
                                         if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
                                             out.println("Erreur: Specifiez un/des mot(s) à chercher");
                                             out.println("END_OF_MESSAGE");
