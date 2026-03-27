@@ -110,6 +110,7 @@ public class Main {
 
                         String help = "Commandes disponibles :\n" +
                                 "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
+                                "-l : " + ANSI_BLEU + "liste tous les fichiers indexés\n" + ANSI_RESET +
                                 "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
                                 "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
                                 "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
@@ -117,7 +118,8 @@ public class Main {
                                 "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
                                 "-m -rn" + ANSI_VERT + " <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
                                 "-m -rm" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Supprimer fichier \n" + ANSI_RESET +
-                                "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
+                                "-d" + ANSI_VERT + " <chemin du document> <chemin du document>" + ANSI_BLEU + " Permet de détecté sont deux fichiers sont les même \n" + ANSI_RESET +
+                                "-r" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Affiche le contenu du fichier \n" + ANSI_RESET +
                                 "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
                                 "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET;
 
