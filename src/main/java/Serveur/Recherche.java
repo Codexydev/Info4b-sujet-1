@@ -125,7 +125,7 @@ public class Recherche {
         for(Integer id: resultatFinal){
             reponse += idVersChemin.getChemin(id) + "\n";
         }
-        return reponse;
+        return ANSI_BLEU+reponse+ANSI_RESET;
 
     }
 }
