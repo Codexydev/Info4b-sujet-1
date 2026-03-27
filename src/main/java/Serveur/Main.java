@@ -260,6 +260,31 @@ public class Main {
                                         out.println("END_OF_MESSAGE");
                                         break;
 
+                                    case "-dl":
+                                        String fichier = str.substring(4).trim();
+                                        String unité = "octets";
+                                        File monFichier = new File(fichier);
+                                        if (!monFichier.exists()) {
+                                            out.println("fichier inexistant");
+                                            out.println("END_OF_MESSAGE");
+                                            break;
+                                        } else {
+                                            String taille_fichier_affiche_fin = "";
+                                            long taille_fichier = monFichier.length();
+                                            out.println("File_incomming..." + " " + taille_fichier + " " + monFichier.getName());
+                                            out.flush();
+                                            byte[] buffer = new byte[4096];
+                                            int quantité_actuelle_lu = 0;
+                                            FileInputStream lecteur= new FileInputStream((monFichier));
+                                            OutputStream tuyau_envoi = socket.getOutputStream();
+                                            while((quantité_actuelle_lu = lecteur.read(buffer)) != -1){
+                                                tuyau_envoi.write(buffer, 0, quantité_actuelle_lu);
+                                            }
+                                            lecteur.close();
+                                            tuyau_envoi.flush();
+                                        }
+                                        break;
+
                                     case "q":
                                         clientConnected = false;
                                         System.out.println("Client disconnected");
