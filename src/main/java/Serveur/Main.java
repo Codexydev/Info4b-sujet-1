@@ -236,6 +236,21 @@ public class Main {
                                         }
                                         out.println("END_OF_MESSAGE");
                                         break;
+                                    case "-exif":
+                                        if (arg.length < 2) {
+                                            out.println("Erreur: Spécifiez un chemin d'image.");
+                                            out.println("END_OF_MESSAGE");
+                                            break;
+                                        }
+                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(arg[1]);
+                                        String metaExiv = extracteurExiv.extraireTexte();
+                                        if (metaExiv == null || metaExiv.isEmpty()) {
+                                            out.println("Impossible d'extraire les métadonnées.");
+                                        } else {
+                                                    out.println(metaExiv);
+                                        }
+                                        out.println("END_OF_MESSAGE");
+                                        break;
 
                                     case "-r":
                                         path = str.split(" ")[1];
