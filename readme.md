@@ -5,7 +5,7 @@ Un moteur de recherche de fichiers locaux léger et performant développé en Ja
 ![Java](https://img.shields.io/badge/Java-17-orange.svg)
 ![Maven](https://img.shields.io/badge/Build-Maven-blue.svg)
 
-## ✨ Fonctionnalités Principales
+## Fonctionnalités Principales
 
 - **Indexation automatique** : Parcours et indexe le contenu des fichiers `.txt` et `.pdf` (nécessite `pdftotext`).
 - **Recherche avancée (TF-IDF)** : Recherche de mots-clés avec tri par pertinence.
@@ -15,7 +15,7 @@ Un moteur de recherche de fichiers locaux léger et performant développé en Ja
 
 ---
 
-## 🛠️ Prérequis
+## Prérequis
 
 Avant de lancer le projet, assurez-vous d'avoir installé :
 - **Java JDK 17** (ou version supérieure)
@@ -45,7 +45,7 @@ Avant de lancer le projet, assurez-vous d'avoir installé :
 
 ---
 
-## 🚀 Compilation et Exécution
+## Compilation et Exécution
 
 ### 1. Compiler le projet
 `mvn clean compile`
@@ -67,7 +67,7 @@ Par défaut le client démarrera et se connectera sur `localhost` port `12345`
 
 *`./run.sh`*
 
-## 📖 Guide des Commandes (Client)
+## Guide des Commandes (Client)
 
 Une fois le client connecté, utilisez l'interface en ligne de commande (`>`) :
 

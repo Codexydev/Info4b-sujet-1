@@ -66,4 +66,11 @@ public class IndexInverse {
         ConcurrentHashMap<Integer, Integer> sousDico = indexInverse.computeIfAbsent(mot, k -> new ConcurrentHashMap<>());
         sousDico.put(id, frequence);
     }
+
+    /**
+     * Supprime totalement un mot de l'index global (rétroactivité des mots vides).
+     */
+    public void supprimerMot(String mot) {
+        indexInverse.remove(mot);
+    }
 }

@@ -7,9 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -19,12 +16,8 @@ public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
-    public static final List<String> bypassMot = new ArrayList<>(Arrays.asList(
-            "le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"
-    ));
-    public static final List<String> motsClesUtilisateur = new ArrayList<>();
 
-    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal) {
+    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal, StopWord stopWord) {
         Path start = Paths.get(cheminRepertoire);
 
         try {
@@ -42,7 +35,7 @@ public class Main {
                                 int nouvelId = idVersChemin.getIdCourant();
 
                                 if (DEBUG) System.out.println("\nIndexation du NOUVEAU fichier : " + cheminFichier);
-                                indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true);
+                                indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true, stopWord);
                             }).start();
                         }
                     });
@@ -51,7 +44,7 @@ public class Main {
         }
     }
 
-    public static void indexerFichier(int id, String cheminFichier, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, boolean estUnAjout) {
+    public static void indexerFichier(int id, String cheminFichier, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, boolean estUnAjout, StopWord stopWord) {
         File file = new File(cheminFichier);
         ExtracteurTexte extracteurTexte = new ExtracteurTexte(cheminFichier);
         String texte = extracteurTexte.extraireTexte();
@@ -76,7 +69,7 @@ public class Main {
         for (String mot : motsExtraits) {
             if (mot.isEmpty()) continue;
 
-            if (!bypassMot.contains(mot)) {
+            if (!stopWord.getWords().contains(mot)) {
                 indexInverse.indexerMot(mot, id);
                 nbMots += 1;
             }
@@ -94,7 +87,7 @@ public class Main {
         }
     }
 
-    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -107,6 +100,24 @@ public class Main {
                     try {
                         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+                        String help = "Commandes disponibles :\n" +
+                                "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
+                                "-l : " + ANSI_BLEU + "liste tous les fichiers indexés\n" + ANSI_RESET +
+                                "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
+                                "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
+                                "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
+                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
+                                "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
+                                "-m -rn" + ANSI_VERT + " <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
+                                "-m -rm" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Supprimer fichier \n" + ANSI_RESET +
+                                "-d" + ANSI_VERT + " <chemin du document> <chemin du document>" + ANSI_BLEU + " Permet de détecté sont deux fichiers sont les même \n" + ANSI_RESET +
+                                "-r" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Affiche le contenu du fichier \n" + ANSI_RESET +
+                                "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
+                                "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET;
+
+                        out.println(help);
+                        out.println("END_OF_MESSAGE");
 
                         boolean clientConnected = true;
 
@@ -135,20 +146,7 @@ public class Main {
                                         break;
 
                                     case "-h":
-                                        out.println(" Commandes disponibles :\n" +
-                                                "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
-                                                "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
-                                                "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
-                                                "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
-                                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
-                                                "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
-                                                "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
-                                                "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
-                                                "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
-                                                "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
-                                                "-kw " + ANSI_VERT + "add/remove/list/search : " + ANSI_BLEU + "Gérer les mots-clés utilisateur\n" + ANSI_RESET +
-                                                "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
-                                                "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET);
+                                        out.println("\n" + help);
                                         out.println("END_OF_MESSAGE");
                                         break;
 
@@ -210,7 +208,7 @@ public class Main {
                                                         journal.ecrireSuppression(chemin, System.currentTimeMillis());
 
                                                         idToPath.addPath(nouveauChemin);
-                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true);
+                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true, stopWord);
                                                     }
 
                                                     out.println(resultat);
@@ -236,6 +234,7 @@ public class Main {
                                         }
                                         out.println("END_OF_MESSAGE");
                                         break;
+
                                     case "-exif":
                                         if (arg.length < 2) {
                                             out.println("Erreur: Spécifiez un chemin d'image.");
@@ -247,13 +246,13 @@ public class Main {
                                         if (metaExiv == null || metaExiv.isEmpty()) {
                                             out.println("Impossible d'extraire les métadonnées.");
                                         } else {
-                                                    out.println(metaExiv);
+                                            out.println(metaExiv);
                                         }
                                         out.println("END_OF_MESSAGE");
                                         break;
 
                                     case "-r":
-                                        path = str.split(" ")[1];
+                                        path = str.substring(3).trim();
                                         ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
                                         String texte = extracteurTexte.extraireTexte();
                                         out.println("\n" + texte);
@@ -290,72 +289,53 @@ public class Main {
                                         System.out.println("Client disconnected");
                                         break;
 
-                                    case "-kw":
-                                        if (arg.length < 2) {
-                                            out.println("Erreur: Utilisation: -kw add <mot> / -kw remove <mot> / -kw list / -kw search");
-                                            out.println("END_OF_MESSAGE");
-                                            break;
-                                        }
-                                        switch (arg[1]) {
-                                            case "add":
-                                                if (arg.length < 3) {
-                                                    out.println("Erreur: Spécifiez un mot.");
-                                                    break;
-                                                }
-                                                if (!motsClesUtilisateur.contains(arg[2])) {
-                                                    motsClesUtilisateur.add(arg[2]);
-                                                    out.println("Mot-clé ajouté : " + arg[2]);
-                                                } else {
-                                                    out.println("Ce mot-clé existe déjà.");
-                                                }
-                                                break;
-
-                                            case "remove":
-                                                if (arg.length < 3) {
-                                                    out.println("Erreur: Spécifiez un mot.");
-                                                    break;
-                                                }
-                                                if (motsClesUtilisateur.remove(arg[2])) {
-                                                    out.println("Mot-clé supprimé : " + arg[2]);
-                                                } else {
-                                                    out.println("Ce mot-clé n'existe pas.");
-                                                }
-                                                break;
-
-                                            case "list":
-                                                if (motsClesUtilisateur.isEmpty()) {
-                                                    out.println("Aucun mot-clé utilisateur défini.");
-                                                } else {
-                                                    out.println("Mots-clés utilisateur :");
-                                                    for (String motCle : motsClesUtilisateur) {
-                                                        out.println("  → " + ANSI_VERT + motCle + ANSI_RESET);
-                                                    }
-                                                }
-                                                break;
-
-                                            case "search":
-                                                if (motsClesUtilisateur.isEmpty()) {
-                                                    out.println("Aucun mot-clé utilisateur défini.");
-                                                    break;
-                                                }
-                                                String[] motsAChercher = motsClesUtilisateur.toArray(new String[0]);
-                                                Recherche rechercheKw = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAChercher);
-                                                out.println(rechercheKw.effectuerRecherche());
-                                                break;
-
-                                            default:
-                                                out.println("Action inconnue. Utilisez add, remove, list ou search.");
-                                                break;
-                                        }
-                                        out.println("END_OF_MESSAGE");
-                                        break;
-
-                                    case "-d" :
+                                    case "-d":
                                         Doublon doublon = new Doublon(arg[1], arg[2]);
                                         boolean estDublon = doublon.EstDoublon();
                                         if (estDublon) out.println("C'est fichier sont similaire");
                                         else out.println("fichier différents");
                                         out.println("END_OF_MESSAGE");
+                                        break;
+
+                                    case "-sw":
+                                        if (arg.length < 3 && !arg[1].equals("-l")) {
+                                            out.println("Erreur : Arguments manquants. Exemple : -sw -add le,la");
+                                            out.println("END_OF_MESSAGE");
+                                            break;
+                                        }
+                                        switch (arg[1]) {
+                                            case "-add" :
+                                                try {
+                                                    String[] motsAAjouter = arg[2].split(",");
+                                                    stopWord.addMot(motsAAjouter);
+
+                                                    for (String m : motsAAjouter) {
+                                                        indexInverse.supprimerMot(m);
+                                                    }
+                                                    out.println("Mot ajouté et supprimer de l'index !");
+                                                } catch (IOException e) {
+                                                    out.println("Erreur d'écriture dans le fichier stopword");
+                                                }
+                                                break;
+
+                                            case "-rm" :
+                                                try {
+                                                    String[] motsASupprimer = arg[2].split(",");
+                                                    stopWord.removeMot(motsASupprimer);
+                                                    out.println("Mot retiré des Stop Words !");
+                                                    out.println("Note : Ce changement s'appliquera aux futures indexations. Les anciens fichiers ne contiennent pas encore ce mot dans l'index.");
+                                                } catch (IOException e) {
+                                                    out.println("Erreur de réécriture dans le fichier stopword.");
+                                                }
+                                                break;
+
+                                            case "-l":
+                                                out.println(ANSI_BLEU + "Liste des mots vides actuels :" + ANSI_RESET);
+                                                out.println(stopWord);
+                                                break;
+                                        }
+                                        out.println("END_OF_MESSAGE");
+                                        break;
 
                                     default:
                                         out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
@@ -388,12 +368,12 @@ public class Main {
         String path = scanner.nextLine();*/
 
         String path = "src/testIndexed/";
-
         StockagesDocuments stockagesDocuments = new StockagesDocuments();
         IndexInverse indexInverse = new IndexInverse();
         IdVersChemin idVersChemin = new IdVersChemin();
         Journal journal = null;
         String cheminJournal = "journal.csv";
+        StopWord stopWord = new StopWord();
         try {
             journal = new Journal(cheminJournal);
         } catch (IOException e) {
@@ -403,9 +383,9 @@ public class Main {
 
         // restauration + réconciliation + parcoursFichiers
         Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin);
-        Journal.reconcilier(stockagesDocuments, indexInverse, journal);
+        Journal.reconcilier(stockagesDocuments, indexInverse, journal, stopWord);
 
-        parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal);
+        parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);
         System.out.println("Restauration depuis journal.csv : " + stockagesDocuments.getNombreDocuments() + " documents rechargés, pas de réindexation");
 
         if (DEBUG) System.out.println("\nServeur.DocumentStore : " + stockagesDocuments.getStockagesDocuments());
@@ -413,7 +393,7 @@ public class Main {
 
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + stockagesDocuments.getNombreDocuments());
 
-        server(indexInverse, stockagesDocuments, idVersChemin, journal);
+        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord);
         journal.fermer();
     }
 }

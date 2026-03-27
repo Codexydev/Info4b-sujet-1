@@ -217,7 +217,7 @@ public class Journal {
      * @param indexInverse       indexinverse
      * @param journal            journal
      */
-    public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal) {
+    public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, StopWord stopWord) {
         for (String chemin : new ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
             // Ajout de threads pour un démarrage plus rapide (vérification de plusieurs fichiers en parallèle)
             new Thread(() -> {
@@ -235,7 +235,7 @@ public class Journal {
                         if (dateOS > dateStockee) {
                             int vraiId = meta.getId();
 
-                            Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false);
+                            Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false, stopWord);
                         }
                     }
                 }
