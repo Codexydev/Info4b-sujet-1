@@ -153,7 +153,7 @@ public class Main {
                                         break;
 
                                     case "-h":
-                                        out.println("\n"+help);
+                                        out.println("\n" + help);
                                         out.println("END_OF_MESSAGE");
                                         break;
 
@@ -253,7 +253,7 @@ public class Main {
                                         if (metaExiv == null || metaExiv.isEmpty()) {
                                             out.println("Impossible d'extraire les métadonnées.");
                                         } else {
-                                                    out.println(metaExiv);
+                                            out.println(metaExiv);
                                         }
                                         out.println("END_OF_MESSAGE");
                                         break;
@@ -271,7 +271,7 @@ public class Main {
                                         System.out.println("Client disconnected");
                                         break;
 
-                                    case "-d" :
+                                    case "-d":
                                         Doublon doublon = new Doublon(arg[1], arg[2]);
                                         boolean estDublon = doublon.EstDoublon();
                                         if (estDublon) out.println("C'est fichier sont similaire");
