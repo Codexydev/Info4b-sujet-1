@@ -7,9 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -19,12 +16,8 @@ public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
-    public static final List<String> bypassMot = new ArrayList<>(Arrays.asList(
-            "le", "la", "les", "un", "une", "des", "de", "du", "et", "en", "à", "pour", "dans", "sur", "avec", "sans"
-    ));
-    public static final List<String> motsClesUtilisateur = new ArrayList<>();
 
-    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal) {
+    public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal, StopWord stopWord) {
         Path start = Paths.get(cheminRepertoire);
 
         try {
@@ -42,7 +35,7 @@ public class Main {
                                 int nouvelId = idVersChemin.getIdCourant();
 
                                 if (DEBUG) System.out.println("\nIndexation du NOUVEAU fichier : " + cheminFichier);
-                                indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true);
+                                indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true, stopWord);
                             }).start();
                         }
                     });
@@ -51,7 +44,7 @@ public class Main {
         }
     }
 
-    public static void indexerFichier(int id, String cheminFichier, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, boolean estUnAjout) {
+    public static void indexerFichier(int id, String cheminFichier, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, boolean estUnAjout, StopWord stopWord) {
         File file = new File(cheminFichier);
         ExtracteurTexte extracteurTexte = new ExtracteurTexte(cheminFichier);
         String texte = extracteurTexte.extraireTexte();
@@ -76,7 +69,7 @@ public class Main {
         for (String mot : motsExtraits) {
             if (mot.isEmpty()) continue;
 
-            if (!bypassMot.contains(mot)) {
+            if (!stopWord.getWords().contains(mot)) {
                 indexInverse.indexerMot(mot, id);
                 nbMots += 1;
             }
@@ -94,7 +87,7 @@ public class Main {
         }
     }
 
-    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -215,7 +208,7 @@ public class Main {
                                                         journal.ecrireSuppression(chemin, System.currentTimeMillis());
 
                                                         idToPath.addPath(nouveauChemin);
-                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true);
+                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true, stopWord);
                                                     }
 
                                                     out.println(resultat);
@@ -278,6 +271,29 @@ public class Main {
                                         else out.println("fichier différents");
                                         out.println("END_OF_MESSAGE");
 
+                                    case "-sw":
+                                        if (arg.length < 3 && !arg[1].equals("-l")) {
+                                            System.out.println("Erreur : Arguments manquants. Exemple : -sw -add le,la");
+                                            break;
+                                        }
+                                        switch (arg[1]) {
+                                            case "-add" :
+                                                stopWord.addMot(arg[2].split(","));
+                                                out.println("mot ajouté");
+                                                out.println("END_OF_MESSAGE");
+                                                break;
+
+                                            case "-rm" :
+                                                // TODO : plus tard
+                                                break;
+
+                                            case "-l":
+                                                out.println(stopWord);
+                                                out.println("END_OF_MESSAGE");
+                                                break;
+                                        }
+                                        break;
+
                                     default:
                                         out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
                                         out.println("END_OF_MESSAGE");
@@ -309,12 +325,12 @@ public class Main {
         String path = scanner.nextLine();*/
 
         String path = "src/testIndexed/";
-
         StockagesDocuments stockagesDocuments = new StockagesDocuments();
         IndexInverse indexInverse = new IndexInverse();
         IdVersChemin idVersChemin = new IdVersChemin();
         Journal journal = null;
         String cheminJournal = "journal.csv";
+        StopWord stopWord = new StopWord();
         try {
             journal = new Journal(cheminJournal);
         } catch (IOException e) {
@@ -324,9 +340,9 @@ public class Main {
 
         // restauration + réconciliation + parcoursFichiers
         Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin);
-        Journal.reconcilier(stockagesDocuments, indexInverse, journal);
+        Journal.reconcilier(stockagesDocuments, indexInverse, journal, stopWord);
 
-        parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal);
+        parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);
         System.out.println("Restauration depuis journal.csv : " + stockagesDocuments.getNombreDocuments() + " documents rechargés, pas de réindexation");
 
         if (DEBUG) System.out.println("\nServeur.DocumentStore : " + stockagesDocuments.getStockagesDocuments());
@@ -334,7 +350,7 @@ public class Main {
 
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + stockagesDocuments.getNombreDocuments());
 
-        server(indexInverse, stockagesDocuments, idVersChemin, journal);
+        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord);
         journal.fermer();
     }
 }
