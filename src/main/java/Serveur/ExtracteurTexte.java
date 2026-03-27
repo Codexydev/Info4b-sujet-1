@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class ExtractText {
-    private String cheminFichier;
-    private String extension;
+public class ExtracteurTexte {
+    private final String cheminFichier;
+    private final String extension;
 
-    public ExtractText(String cheminFichier) {
+    public ExtracteurTexte(String cheminFichier) {
         this.cheminFichier = cheminFichier;
         this.extension = cheminFichier.substring(cheminFichier.lastIndexOf(".") + 1).toLowerCase();
     }
@@ -29,8 +29,26 @@ public class ExtractText {
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
                     process.waitFor();
-
                     return texteExtrait;
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            case "jpg", "jpeg", "png" -> {
+                try {
+                    ProcessBuilder processBuilder = new ProcessBuilder("exiv2", this.cheminFichier);
+                    Process process = processBuilder.start();
+                    String texteExtrait = new String(process.getInputStream().readAllBytes());
+
+                    String out = "";
+                    String[] texteExtraitTab = texteExtrait.split("\n");
+                    for (String ligne : texteExtraitTab) {
+                        if (!ligne.split(":")[1].equals(" "))
+                            out+=ligne+"\n";
+                    }
+
+                    process.waitFor();
+                    return out;
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }

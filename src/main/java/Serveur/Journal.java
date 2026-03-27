@@ -1,51 +1,147 @@
 package Serveur;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Journal {
+
     private final String chemin;
     private final BufferedWriter writer;
 
+    // buffer borné
+    private final ArrayList<String> fileOperations = new ArrayList<>();
+    private static final int CAPACITE_MAX = 100;
+    private volatile boolean actif = true;
+
+    private final Thread threadEcrivain;
+
+
     public Journal(String chemin) throws IOException {
         this.chemin = chemin;
-        writer =  new BufferedWriter(new FileWriter(chemin, true));
+        this.writer = new BufferedWriter(new FileWriter(chemin, true));
+
+        threadEcrivain = new Thread(new EcrivainJournal(), "Thread-Journal-Ecrivain");
+        threadEcrivain.setDaemon(true);
+        threadEcrivain.start();
     }
 
-    // Liste de mots + fréquence
-    public String formaterMots(ConcurrentHashMap<String, Integer> mots){
+    /**
+     * Tâche exécutée par le thread Consommateur.
+     * Lit les opérations dans le buffer mémoire et les écrit physiquement sur le disque.
+     */
+    private class EcrivainJournal implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                String operation = null;
+
+                synchronized (fileOperations) {
+                    while (fileOperations.isEmpty() && actif) {
+                        try {
+                            fileOperations.wait();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return;
+                        }
+                    }
+
+                    if (!actif && fileOperations.isEmpty()) {
+                        break;
+                    }
+
+                    // On consomme le premier élément
+                    operation = fileOperations.remove(0);
+
+                    fileOperations.notifyAll();
+                }
+
+                // Écriture sur disque
+                if (operation != null) {
+                    try {
+                        writer.write(operation);
+                        writer.newLine();
+                        writer.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Ajoute une opération dans le buffer borné. Bloque le thread appelant si le buffer est plein.
+     *
+     * @param operation La chaîne de caractères formatée représentant l'opération à loguer.
+     */
+    private void ajouterOperation(String operation) {
+        // Synchronized(o) pr assurer exclusion mutuelle sur le buffer partagé
+        synchronized (fileOperations) {
+            // Si buffer plein -> producteurs bloqués
+            // o.wait() pr attente passive tant que buffer plein
+            while (fileOperations.size() >= CAPACITE_MAX && actif) {
+                try {
+                    fileOperations.wait();
+                } catch (InterruptedException e) {
+                    // InterruptedException à capturer lors d'une attente
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            // si le journal a été fermé pendant l'ajout on annule l'ajout
+            if (!actif) return;
+
+            fileOperations.add(operation);
+
+            // réveille le consommateur
+            fileOperations.notifyAll();
+        }
+    }
+
+    /**
+     * Formatage map
+     *
+     * @param mots La map contenant les mots et leurs occurrences.
+     * @return (ex: "mot1:2,mot2:5") ou une chaîne vide si la map est nulle/vide.
+     */
+    public String formaterMots(ConcurrentHashMap<String, Integer> mots) {
+        if (mots == null || mots.isEmpty()) return "";
+
         StringBuilder builder = new StringBuilder();
         for (ConcurrentHashMap.Entry<String, Integer> entry : mots.entrySet()) {
-            builder.append(entry.getKey() + ":" + entry.getValue() + ",");
+            builder.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
         }
         builder.deleteCharAt(builder.length() - 1);
         return builder.toString();
     }
 
-    // sauvegarde immédiate sur disque dur
-    public void ecrireAjout(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) throws IOException {
-        String motsformat = formaterMots(mots) ; // transforme en string pr pouboir etre ecrit proprement ensuite
-        writer.write("AJOUT" + ";" + chemin +";" + datemodif + ";" + taille + ";" + motsformat); // écrit dans journal.csv
-        writer.newLine();
-        writer.flush(); //force écriture sur le disque
+    public void ecrireAjout(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) {
+        ajouterOperation("AJOUT;" + chemin + ";" + datemodif + ";" + taille + ";" + formaterMots(mots));
     }
 
-    // sauvegarde suppression
-    public void ecrireSuppression(String chemin, long datemodif) throws IOException {
-        writer.write("SUPPRESSION" + ";" + chemin +";" + datemodif + ";0;");
-        writer.newLine();
-        writer.flush();
+    public void ecrireSuppression(String chemin, long datemodif) {
+        ajouterOperation("SUPPRESSION;" + chemin + ";" + datemodif + ";0;");
     }
 
-    // sauvegarde MAJ
-    public void ecrireMiseAJour(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) throws IOException {
-        String motsformat = formaterMots(mots) ;
-        writer.write("MISE_A_JOUR" + ";" + chemin +";" + datemodif + ";" + taille + ";" + motsformat);
-        writer.newLine();
-        writer.flush();
+    public void ecrireMiseAJour(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) {
+        ajouterOperation("MISE_A_JOUR;" + chemin + ";" + datemodif + ";" + taille + ";" + formaterMots(mots));
     }
 
-    public void fermer(){
+    public void fermer() {
+        // notifyAll() pr débloquer thread s'il est en wait()
+        synchronized (fileOperations) {
+            actif = false;
+            fileOperations.notifyAll();
+        }
+
+        try {
+            threadEcrivain.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         try {
             writer.close();
         } catch (IOException e) {
@@ -53,71 +149,97 @@ public class Journal {
         }
     }
 
-    public static void restaurerDepuisJournal(String cheminJournal, DocumentStore documentStore, InvertedIndex invertedIndex) {
+
+    /**
+     * Lit le journal.csv au démarrage pour restaurer l'état en mémoire.
+     * Reconstruit le StockageDocument et l'IndexInverse
+     *
+     * @param cheminJournal      chemin journal
+     * @param stockagesDocuments stockageDocuments
+     * @param indexInverse       indexinversé
+     * @param idVersChemin       idVersChemin
+     */
+    public static void restaurerDepuisJournal(String cheminJournal, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin) {
         File fichier = new File(cheminJournal);
-        if (!fichier.exists()) {
-            return;
-        }
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(cheminJournal));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        try {
+        if (!fichier.exists()) return;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(cheminJournal))) {
             String ligne;
-            int id = 0;
             while ((ligne = br.readLine()) != null) {
                 String[] champs = ligne.split(";");
-                if (champs[0].equals("AJOUT") || champs[0].equals("MISE_A_JOUR")) {
-                    String[] motsFréquences = champs[4].split(",");
+
+                if (champs.length < 2) continue;
+
+                String typeAction = champs[0];
+                String chemin = champs[1];
+
+                if (typeAction.equals("AJOUT") || typeAction.equals("MISE_A_JOUR")) {
+                    long dateModif = Long.parseLong(champs[2]);
+                    long taille = Long.parseLong(champs[3]);
+
+                    int docId;
+                    MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
+
+                    if (meta != null) {
+                        docId = meta.getId();
+                    } else {
+                        idVersChemin.addPath(chemin);
+                        docId = idVersChemin.getIdCourant();
+                    }
+
                     ConcurrentHashMap<String, Integer> frequence = new ConcurrentHashMap<>();
-                    for (String motFreq : motsFréquences) {
-                        String[] paire = motFreq.split(":");
-                        frequence.put(paire[0], Integer.parseInt(paire[1]));
+                    if (champs.length > 4 && !champs[4].isEmpty()) {
+                        for (String motFreq : champs[4].split(",")) {
+                            String[] paire = motFreq.split(":");
+                            if (paire.length == 2) {
+                                int freq = Integer.parseInt(paire[1]);
+                                frequence.put(paire[0], freq);
+                                indexInverse.restaurerFrequenceMot(paire[0], docId, freq);
+                            }
+                        }
                     }
-                    documentStore.ajouterDocument(id, champs[1], Long.parseLong(champs[3]), Long.parseLong(champs[2]), frequence.size());
-                    for (ConcurrentHashMap.Entry<String, Integer> entry : frequence.entrySet()) {
-                        invertedIndex.indexerMot(entry.getKey(), Integer.parseInt(champs[2]));
-                    }
-                    id++;
-                } else if (champs[0].equals("SUPPRESSION")) {
-                    documentStore.supprimerDocument(champs[1]);
+
+                    stockagesDocuments.ajouterDocument(docId, chemin, taille, dateModif, frequence.size());
+
+                } else if (typeAction.equals("SUPPRESSION")) {
+                    stockagesDocuments.supprimerDocument(chemin);
                 }
             }
-            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void reconcilier(DocumentStore documentStore, InvertedIndex invertedIndex, Journal journal){
-    for(String chemin : documentStore.getDocumentStore().keySet()){
-        File fichier = new File(chemin);
-        if (!fichier.exists()) {
-            documentStore.supprimerDocument(chemin);
-            try {
-                journal.ecrireSuppression(chemin, 0);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else {
-            long dateOS = fichier.lastModified();
-            long dateStockee = documentStore.getDocumentMetaData(chemin).getDateModification();
-            if (dateOS > dateStockee) {
-                Main.indexFile(0, chemin, documentStore, invertedIndex);
-                try {
-                    journal.ecrireMiseAJour(chemin, dateOS, fichier.length(), new ConcurrentHashMap<>());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+    /**
+     * Détecte les fichiers supprimés ou modifiés hors ligne et met à jour le système
+     *
+     * @param stockagesDocuments stockageDocument
+     * @param indexInverse       indexinverse
+     * @param journal            journal
+     */
+    public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal) {
+        for (String chemin : new ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
+            // Ajout de threads pour un démarrage plus rapide (vérification de plusieurs fichiers en parallèle)
+            new Thread(() -> {
+                File fichier = new File(chemin);
+                if (!fichier.exists()) {
+                    stockagesDocuments.supprimerDocument(chemin);
+                    journal.ecrireSuppression(chemin, 0); // appel producteur
+                } else {
+                    long dateOS = fichier.lastModified();
+                    MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
+
+                    if (meta != null) {
+                        long dateStockee = meta.getDateModification();
+
+                        if (dateOS > dateStockee) {
+                            int vraiId = meta.getId();
+
+                            Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false);
+                        }
+                    }
                 }
-            }
+            }).start();
         }
-    }
     }
 }
-
-
-
-
