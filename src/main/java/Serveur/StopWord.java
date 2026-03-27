@@ -27,10 +27,22 @@ public class StopWord {
     }
 
     public void addMot(String[] words) throws IOException {
-        FileWriter writer = new FileWriter("/Users/antoine/Documents/etude/l2/s4/info4b/projet/src/main/java/Serveur/stopword.txt", true);
+        FileWriter writer = new FileWriter("src/main/java/Serveur/stopword.txt", true);
         for (String word : words) {
-            writer.write("\n"+word);
+            writer.write(word + "\n");
             this.words.add(word);
+        }
+        writer.close();
+    }
+
+    public void removeMot(String[] words) throws IOException {
+        for (String word : words) {
+            this.words.remove(word);
+        }
+
+        FileWriter writer = new FileWriter("src/main/java/Serveur/stopword.txt", false);
+        for (String motRestant : this.words) {
+            writer.write(motRestant + "\n");
         }
         writer.close();
     }

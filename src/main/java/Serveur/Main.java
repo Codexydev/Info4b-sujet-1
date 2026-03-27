@@ -270,28 +270,46 @@ public class Main {
                                         if (estDublon) out.println("C'est fichier sont similaire");
                                         else out.println("fichier différents");
                                         out.println("END_OF_MESSAGE");
+                                        break;
 
                                     case "-sw":
                                         if (arg.length < 3 && !arg[1].equals("-l")) {
-                                            System.out.println("Erreur : Arguments manquants. Exemple : -sw -add le,la");
+                                            out.println("Erreur : Arguments manquants. Exemple : -sw -add le,la");
+                                            out.println("END_OF_MESSAGE");
                                             break;
                                         }
                                         switch (arg[1]) {
                                             case "-add" :
-                                                stopWord.addMot(arg[2].split(","));
-                                                out.println("mot ajouté");
-                                                out.println("END_OF_MESSAGE");
+                                                try {
+                                                    String[] motsAAjouter = arg[2].split(",");
+                                                    stopWord.addMot(motsAAjouter);
+
+                                                    for (String m : motsAAjouter) {
+                                                        indexInverse.supprimerMot(m);
+                                                    }
+                                                    out.println("Mot ajouté et supprimer de l'index !");
+                                                } catch (IOException e) {
+                                                    out.println("Erreur d'écriture dans le fichier stopword");
+                                                }
                                                 break;
 
                                             case "-rm" :
-                                                // TODO : plus tard
+                                                try {
+                                                    String[] motsASupprimer = arg[2].split(",");
+                                                    stopWord.removeMot(motsASupprimer);
+                                                    out.println("Mot retiré des Stop Words !");
+                                                    out.println("Note : Ce changement s'appliquera aux futures indexations. Les anciens fichiers ne contiennent pas encore ce mot dans l'index.");
+                                                } catch (IOException e) {
+                                                    out.println("Erreur de réécriture dans le fichier stopword.");
+                                                }
                                                 break;
 
                                             case "-l":
+                                                out.println(ANSI_BLEU + "Liste des mots vides actuels :" + ANSI_RESET);
                                                 out.println(stopWord);
-                                                out.println("END_OF_MESSAGE");
                                                 break;
                                         }
+                                        out.println("END_OF_MESSAGE");
                                         break;
 
                                     default:
