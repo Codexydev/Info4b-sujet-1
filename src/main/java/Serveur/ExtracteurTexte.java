@@ -39,8 +39,16 @@ public class ExtracteurTexte {
                     ProcessBuilder processBuilder = new ProcessBuilder("exiv2", this.cheminFichier);
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
+
+                    String out = "";
+                    String[] texteExtraitTab = texteExtrait.split("\n");
+                    for (String ligne : texteExtraitTab) {
+                        if (!ligne.split(":")[1].equals(" "))
+                            out+=ligne+"\n";
+                    }
+
                     process.waitFor();
-                    return texteExtrait;
+                    return out;
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
