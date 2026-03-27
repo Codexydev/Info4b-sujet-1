@@ -20,7 +20,7 @@ public class Main {
         try {
             System.out.println("Client started...\n");
 
-            Socket socket = new Socket("localhost", 12345);
+            Socket socket = new Socket("10.217.171.40", 12345);
             /*Socket socket = new Socket(ip, Integer.parseInt(port));*/
 
             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
