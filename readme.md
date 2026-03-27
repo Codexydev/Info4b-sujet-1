@@ -37,6 +37,12 @@ Avant de lancer le projet, assurez-vous d'avoir installé :
 - **Poppler-utils / pdftotext** (Nécessaire pour l'indexation des fichiers PDF) :
     - Mac OS (via Homebrew) : `brew install poppler`
     - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install poppler-utils`
+
+
+- **exiv2** (Nécessaire pour obtenir les données exif des images) :
+  - Mac OS (via Homebrew) : `brew install exiv2`
+  - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install exiv2`
+
 ---
 
 ## 🚀 Compilation et Exécution
