@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
@@ -11,6 +12,12 @@ public class Main {
     public static final String ANSI_RESET = "\u001B[0m";
 
     public static void main(String[] args) {
+
+/*        System.out.print("IP > ");
+        Scanner scanner = new Scanner(System.in);
+        String ip = scanner.nextLine();
+        System.out.print("Port > ");
+        String port = scanner.nextLine();*/
 
         try {
             System.out.println("Client started...\n");
@@ -29,6 +36,7 @@ public class Main {
                     "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
                     "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET);
             Socket socket = new Socket("localhost", 12345);
+            /*Socket socket = new Socket(ip, Integer.parseInt(port));*/
 
             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
