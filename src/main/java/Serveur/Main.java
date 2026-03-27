@@ -239,6 +239,7 @@ public class Main {
                                         }
                                         out.println("END_OF_MESSAGE");
                                         break;
+
                                     case "-exif":
                                         if (arg.length < 2) {
                                             out.println("Erreur: Spécifiez un chemin d'image.");
@@ -256,7 +257,7 @@ public class Main {
                                         break;
 
                                     case "-r":
-                                        path = str.split(" ")[1];
+                                        path = str.substring(3).trim();
                                         ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
                                         String texte = extracteurTexte.extraireTexte();
                                         out.println("\n" + texte);
