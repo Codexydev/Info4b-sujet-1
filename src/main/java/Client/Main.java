@@ -4,13 +4,21 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
 
+/*        System.out.print("IP > ");
+        Scanner scanner = new Scanner(System.in);
+        String ip = scanner.nextLine();
+        System.out.print("Port > ");
+        String port = scanner.nextLine();*/
+
         try {
             System.out.println("Client started...");
             Socket socket = new Socket("localhost", 12345);
+            /*Socket socket = new Socket(ip, Integer.parseInt(port));*/
 
             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
