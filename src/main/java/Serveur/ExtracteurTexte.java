@@ -29,7 +29,17 @@ public class ExtracteurTexte {
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
                     process.waitFor();
-
+                    return texteExtrait;
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            case "jpg", "jpeg", "png" -> {
+                try {
+                    ProcessBuilder processBuilder = new ProcessBuilder("exiv2", this.cheminFichier);
+                    Process process = processBuilder.start();
+                    String texteExtrait = new String(process.getInputStream().readAllBytes());
+                    process.waitFor();
                     return texteExtrait;
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();

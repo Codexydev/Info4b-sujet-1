@@ -21,7 +21,7 @@ public class CacheLRU<K, V> extends LinkedHashMap<K, V> {
 }
 
 /*
-classe qui sert a gerer la qquantité de fichier en ram, donc au lieu de faire une liste infini sans limite avec le
+classe qui sert a gerer la quantité de fichier en ram, donc au lieu de faire une liste infini sans limite avec le
 concurrent hash map dans le DocumentStore, la on a creer une limite (je l'ai mise a 100 dans le document store
 mais on avisera si besoin), et bah dès que c'est plein le fichier le plus ancien est effacé (comme en tp avec les pages)
 */
