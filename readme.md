@@ -22,6 +22,21 @@ Avant de lancer le projet, assurez-vous d'avoir installé :
 - **Maven** (pour la gestion des dépendances et la compilation)
 - **Poppler-utils / pdftotext** (nécessaire pour l'extraction du texte des fichiers PDF)
 
+### Installation des prérequis
+
+- **Java JDK 17** (Environnement de développement et d'exécution) :
+    - Mac OS (via Homebrew) : `brew install openjdk@17`
+    - Linux (Ubuntu/Debian) : `sudo apt install openjdk-17-jdk`
+
+
+- **Maven** (Outil de gestion des dépendances et de compilation) :
+    - Mac OS (via Homebrew) : `brew install maven`
+    - Linux (Ubuntu/Debian) : `sudo apt install maven`
+
+
+- **Poppler-utils / pdftotext** (Nécessaire pour l'indexation des fichiers PDF) :
+    - Mac OS (via Homebrew) : `brew install poppler`
+    - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install poppler-utils`
 ---
 
 ## 🚀 Compilation et Exécution
@@ -41,6 +56,10 @@ Ouvrez un nouveau terminal et lancez le client :
 Par défaut le client démarrera et se connectera sur `localhost` port `12345`
 
 ---
+### 4. Script automatisé
+*`chmod +x run.sh`*
+
+*`./run.sh`*
 
 ## 📖 Guide des Commandes (Client)
 
