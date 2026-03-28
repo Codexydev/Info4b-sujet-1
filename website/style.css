@@ -74,7 +74,7 @@ body {
     .main-perso {
         position: fixed;
         z-index: -1;
-        background-image: url("img2.png");
+        background-image: url("website/img2.png");
         background-position: 5px -40px !important;
         background-size: cover;
         margin: 0;
