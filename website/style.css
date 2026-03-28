@@ -2,6 +2,11 @@
     --bg-main: #494343;
     --bg-card: #2b2a2a;
     --color-accent: #84b5ff;
+
+    --macos-red: #ff5f56;
+    --macos-yellow: #ffbd2e;
+    --macos-green: #27c93f;
+    --color-accent: #84b5ff;
 }
 
 html {
@@ -34,13 +39,15 @@ body {
     border-radius: 12px;
 }
 
-.main {
+.main-perso {
     position: fixed;
     z-index: -1;
     background-image: url("img2.png");
     background-position: center center;
     background-size: cover;
     margin : 0;
+    top:0;
+    left:0;
     padding: 0;
     height: 100vh;
 }
@@ -57,14 +64,6 @@ body {
     height: 100vh;
 }
 
-.card-perso{
-    width: 80%;
-}
-
-.space {
-    height: 100vh;
-}
-
 .bg-bottom{
     background-color: #7a76765e;
     backdrop-filter: blur(30px);
@@ -75,13 +74,84 @@ body {
     border: #494343 2px solid !important;
 }
 
-.card-perso{
+/* --- card perso mac os --- */
+.card-perso {
+    background-color: var(--bg-card) !important;
+    border: 444 2px solid !important;
+    border-radius: 30px;
+
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+
+    transform: translateY(-8vh);
+    width: 80%;
     padding: 15px;
-    min-height: 600px;
 }
 
-.container-bottom {
-    margin-top: 50px;
+.card-perso .macos-header {
+    background-color: #3d3a3a;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    border-radius: 18px;
+}
+
+.card-perso .macos-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.card-perso .macos-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.card-perso .btn-red { background-color: var(--macos-red); }
+.card-perso .btn-yellow { background-color: var(--macos-yellow); }
+.card-perso .btn-green { background-color: var(--macos-green); }
+
+.card-perso .macos-title {
+    flex-grow: 1;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-right: 44px;
+}
+
+.card-perso .card-body {
+    padding: 2.5rem !important;
+}
+
+.card-perso .lead {
+    font-size: 1.15rem;
+    opacity: 0.95;
+    line-height: 1.7;
+}
+
+.card-perso-btn{
+    text-decoration: none;
+    background-color: var(--color-accent);
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 16px;
+    color : var(--bg-card);
+    font-family: monospace;
+    font-weight: 500;
+    transition: .2s ease-in-out;
+    display: inline-block;
+}
+
+.card-perso-btn:hover{
+    transform: scale(1.05);
+}
+
+/* Contenu */
+
+.bg-bottom {
+    margin-top: 100vh;
 }
 
 .main img{
