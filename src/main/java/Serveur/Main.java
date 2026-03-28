@@ -114,7 +114,8 @@ public class Main {
                                 "-d" + ANSI_VERT + " <chemin du document> <chemin du document>" + ANSI_BLEU + " Permet de détecté sont deux fichiers sont les même \n" + ANSI_RESET +
                                 "-r" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Affiche le contenu du fichier \n" + ANSI_RESET +
                                 "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
-                                "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET;
+                                "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
+                                "-dl" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "Permet au client de télécharger le fichier duquel on écrit le chemin\n" + ANSI_RESET;
 
                         out.println(help);
                         out.println("END_OF_MESSAGE");
