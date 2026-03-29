@@ -261,11 +261,9 @@ public class Journal {
         tmpWriter.write("PATH;" + cheminRepertoire);
         tmpWriter.newLine();
 
-        for (java.util.Map.Entry<String, MetaDataDocument> entry :
-                stockagesDocuments.getStockagesDocuments().entrySet()) {
-
-            String cheminDoc = entry.getKey();
-            MetaDataDocument meta = entry.getValue();
+        ConcurrentHashMap<String, MetaDataDocument> docs = stockagesDocuments.getStockagesDocuments();
+        for (String cheminDoc : docs.keySet()) {
+            MetaDataDocument meta = docs.get(cheminDoc);
             ConcurrentHashMap<String, Integer> mots = indexInverse.getMotsDocument(meta.getId());
 
             String ligne = "AJOUT;" + cheminDoc + ";"
@@ -276,12 +274,13 @@ public class Journal {
             tmpWriter.write(ligne);
             tmpWriter.newLine();
         }
-
-        tmpWriter.flush();
         tmpWriter.close();
         this.writer.close();
         new File(chemin).delete();
         tmp.renameTo(new File(chemin));
+        if (!tmp.renameTo(new File(chemin))) {
+            throw new IOException("Échec du renommage journal.tmp → journal.csv");
+        }
         this.writer = new BufferedWriter(new FileWriter(chemin, true));
     }
 }
