@@ -27,8 +27,6 @@ public class Main {
                         String cheminFichier = path.toString();
 
                         if (stockagesDocuments.getMetaData(cheminFichier) == null) {
-                            // Ajout de threads pour indexer plusieurs fichiers en même temps
-                            new Thread(() -> {
                                 synchronized (idVersChemin) {
                                     idVersChemin.addPath(cheminFichier);
                                 }
@@ -36,7 +34,6 @@ public class Main {
 
                                 if (DEBUG) System.out.println("\nIndexation du NOUVEAU fichier : " + cheminFichier);
                                 indexerFichier(nouvelId, cheminFichier, stockagesDocuments, indexInverse, journal, true, stopWord);
-                            }).start();
                         }
                     });
         } catch (IOException e) {
@@ -115,7 +112,8 @@ public class Main {
                                 "-r" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Affiche le contenu du fichier \n" + ANSI_RESET +
                                 "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
                                 "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
-                                "-dl" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "Permet au client de télécharger le fichier duquel on écrit le chemin\n" + ANSI_RESET;
+                                "-dl" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "Permet au client de télécharger le fichier duquel on écrit le chemin\n" + ANSI_RESET+
+                                "-clean : " + ANSI_BLEU + "Compacter le journal (garde uniquement l'état actuel)\n" + ANSI_RESET ;
 
                         out.println(help);
                         out.println("END_OF_MESSAGE");
@@ -342,6 +340,15 @@ public class Main {
                                         out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
                                         out.println("END_OF_MESSAGE");
                                         break;
+                                    case "-clean":
+                                        try {
+                                            journal.compacter(stockagesDocuments, indexInverse);
+                                            out.println("Journal compacté avec succès.");
+                                        } catch (IOException e) {
+                                            out.println("Erreur lors de la compaction : " + e.getMessage());
+                                        }
+                                        out.println("END_OF_MESSAGE");
+                                        break;
                                 }
                             } else {
                                 out.println("donnez le(s) parametre(s)");
@@ -368,22 +375,22 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();*/
 
-        String path = "src/testIndexed/";
+        String path = "src/testIndexed";
         StockagesDocuments stockagesDocuments = new StockagesDocuments();
         IndexInverse indexInverse = new IndexInverse();
         IdVersChemin idVersChemin = new IdVersChemin();
         Journal journal = null;
         String cheminJournal = "journal.csv";
         StopWord stopWord = new StopWord();
+        Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin, path);
         try {
-            journal = new Journal(cheminJournal);
+            journal = new Journal(cheminJournal, path);
         } catch (IOException e) {
             System.out.println("Impossible d'ouvrir journal : " + e.getMessage());
             return;
         }
 
-        // restauration + réconciliation + parcoursFichiers
-        Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin);
+        // réconciliation + parcoursFichiers
         Journal.reconcilier(stockagesDocuments, indexInverse, journal, stopWord);
 
         parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);

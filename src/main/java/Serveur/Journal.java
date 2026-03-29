@@ -7,7 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Journal {
 
     private final String chemin;
-    private final BufferedWriter writer;
+    private final String cheminRepertoire;
+    private BufferedWriter writer; //pas final pour pouvoir le réouvrir après compaction
 
     // buffer borné
     private final ArrayList<String> fileOperations = new ArrayList<>();
@@ -17,9 +18,10 @@ public class Journal {
     private final Thread threadEcrivain;
 
 
-    public Journal(String chemin) throws IOException {
+    public Journal(String chemin, String cheminRepertoire) throws IOException {
         this.chemin = chemin;
         this.writer = new BufferedWriter(new FileWriter(chemin, true));
+        this.cheminRepertoire = cheminRepertoire;
 
         threadEcrivain = new Thread(new EcrivainJournal(), "Thread-Journal-Ecrivain");
         threadEcrivain.setDaemon(true);
@@ -128,6 +130,11 @@ public class Journal {
     public void ecrireMiseAJour(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) {
         ajouterOperation("MISE_A_JOUR;" + chemin + ";" + datemodif + ";" + taille + ";" + formaterMots(mots));
     }
+    public static void resetJournal(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin){
+        stockagesDocuments.clear();
+        indexInverse.reinitialiserIndex();
+        idVersChemin.clear();
+    }
 
     public void fermer() {
         // notifyAll() pr débloquer thread s'il est en wait()
@@ -159,54 +166,61 @@ public class Journal {
      * @param indexInverse       indexinversé
      * @param idVersChemin       idVersChemin
      */
-    public static void restaurerDepuisJournal(String cheminJournal, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin) {
+    public static void restaurerDepuisJournal(String cheminJournal, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, String nouveauChemin) {
         File fichier = new File(cheminJournal);
         if (!fichier.exists()) return;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(cheminJournal))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(fichier))) {
             String ligne;
-            while ((ligne = br.readLine()) != null) {
-                String[] champs = ligne.split(";");
+            String ligneEntete = br.readLine();
+            if(ligneEntete == null) return;
 
-                if (champs.length < 2) continue;
+            String cheminStocke = ligneEntete.split(";")[1].trim();
+            String nouveauCheminNettoye = nouveauChemin.trim();
+            if (cheminStocke.endsWith("/") || cheminStocke.endsWith("\\")) cheminStocke = cheminStocke.substring(0, cheminStocke.length() - 1);
+            if (nouveauCheminNettoye.endsWith("/") || nouveauCheminNettoye.endsWith("\\")) nouveauCheminNettoye = nouveauCheminNettoye.substring(0, nouveauCheminNettoye.length() - 1);
 
-                String typeAction = champs[0];
-                String chemin = champs[1];
+            if (cheminStocke.equals(nouveauCheminNettoye)) {
+                while ((ligne = br.readLine()) != null) {
+                    String[] champs = ligne.split(";");
+                    if (champs.length < 2) continue;
 
-                if (typeAction.equals("AJOUT") || typeAction.equals("MISE_A_JOUR")) {
-                    long dateModif = Long.parseLong(champs[2]);
-                    long taille = Long.parseLong(champs[3]);
+                    String typeAction = champs[0];
+                    String chemin = champs[1];
 
-                    int docId;
-                    MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
+                    if (typeAction.equals("AJOUT") || typeAction.equals("MISE_A_JOUR")) {
+                        long dateModif = Long.parseLong(champs[2]);
+                        long taille = Long.parseLong(champs[3]);
 
-                    if (meta != null) {
-                        docId = meta.getId();
-                    } else {
                         idVersChemin.addPath(chemin);
-                        docId = idVersChemin.getIdCourant();
-                    }
+                        int docId = idVersChemin.getIdCourant();
 
-                    ConcurrentHashMap<String, Integer> frequence = new ConcurrentHashMap<>();
-                    if (champs.length > 4 && !champs[4].isEmpty()) {
-                        for (String motFreq : champs[4].split(",")) {
-                            String[] paire = motFreq.split(":");
-                            if (paire.length == 2) {
-                                int freq = Integer.parseInt(paire[1]);
-                                frequence.put(paire[0], freq);
-                                indexInverse.restaurerFrequenceMot(paire[0], docId, freq);
+                        ConcurrentHashMap<String, Integer> frequence = new ConcurrentHashMap<>();
+                        if (champs.length > 4 && !champs[4].isEmpty()) {
+                            for (String motFreq : champs[4].split(",")) {
+                                String[] paire = motFreq.split(":");
+                                if (paire.length == 2) {
+                                    int freq = Integer.parseInt(paire[1]);
+                                    frequence.put(paire[0], freq);
+                                    indexInverse.restaurerFrequenceMot(paire[0], docId, freq);
+                                }
                             }
                         }
+
+                        stockagesDocuments.ajouterDocument(docId, chemin, taille, dateModif, frequence.size());
+
+                    } else if (typeAction.equals("SUPPRESSION")) {
+                        stockagesDocuments.supprimerDocument(chemin);
                     }
-
-                    stockagesDocuments.ajouterDocument(docId, chemin, taille, dateModif, frequence.size());
-
-                } else if (typeAction.equals("SUPPRESSION")) {
-                    stockagesDocuments.supprimerDocument(chemin);
+                }
+            } else {
+                br.close();
+                resetJournal(stockagesDocuments, indexInverse, idVersChemin);
+                try (FileWriter fw = new FileWriter(cheminJournal, false)) {
+                    fw.write("PATH;" + nouveauChemin + "\n");
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Erreur lors de la gestion du journal : " + e.getMessage());
         }
     }
 
@@ -219,8 +233,6 @@ public class Journal {
      */
     public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, StopWord stopWord) {
         for (String chemin : new ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
-            // Ajout de threads pour un démarrage plus rapide (vérification de plusieurs fichiers en parallèle)
-            new Thread(() -> {
                 File fichier = new File(chemin);
                 if (!fichier.exists()) {
                     stockagesDocuments.supprimerDocument(chemin);
@@ -239,7 +251,37 @@ public class Journal {
                         }
                     }
                 }
-            }).start();
         }
+    }
+
+    public synchronized void compacter(StockagesDocuments stockagesDocuments, IndexInverse indexInverse) throws IOException {
+        File tmp = new File("journal.tmp");
+        BufferedWriter tmpWriter = new BufferedWriter(new FileWriter(tmp, false));
+
+        tmpWriter.write("PATH;" + cheminRepertoire);
+        tmpWriter.newLine();
+
+        for (java.util.Map.Entry<String, MetaDataDocument> entry :
+                stockagesDocuments.getStockagesDocuments().entrySet()) {
+
+            String cheminDoc = entry.getKey();
+            MetaDataDocument meta = entry.getValue();
+            ConcurrentHashMap<String, Integer> mots = indexInverse.getMotsDocument(meta.getId());
+
+            String ligne = "AJOUT;" + cheminDoc + ";"
+                    + meta.getDateModification() + ";"
+                    + meta.getPoids() + ";"
+                    + formaterMots(mots);
+
+            tmpWriter.write(ligne);
+            tmpWriter.newLine();
+        }
+
+        tmpWriter.flush();
+        tmpWriter.close();
+        this.writer.close();
+        new File(chemin).delete();
+        tmp.renameTo(new File(chemin));
+        this.writer = new BufferedWriter(new FileWriter(chemin, true));
     }
 }
