@@ -35,16 +35,35 @@ body {
 
 /* --- Menu Mobile (Smartphone & Tablette) --- */
 @media (max-width: 991.98px) {
+    /* Nav bar */
     .header {
-        width: 100% !important;
+        width: 93% !important;
+        position: relative;
+        border-radius: 18px !important;
+        padding: 15px 10px !important;
+
     }
 
+    .header-container {
+        height: auto !important;
+        min-height: 90px;
+    }
+
+    .navbar-toggler{
+        border-radius: 13px !important;
+    }
+
+
+    /* .navbar-toggler:focus, .navbar-toggler:active {
+        outline: none !important;
+        box-shadow:0px 0px 8px 4px black ;
+    } */
+
     .navbar-collapse {
-        background-color: rgba(236, 225, 225, 0.95);
+        /* backdrop-filter: blur(42px);
+        -webkit-backdrop-filter: blur(42px); */
 
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-
+        width : 100vw !important;
 
         padding: 15px;
         border-radius: 12px;
@@ -52,6 +71,43 @@ body {
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
+    .navbar-container-perso {
+        background-color: var(--bg-card); 
+        
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px); 
+
+        width: 50% !important;
+
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-top: 15px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-container-perso .nav-link {
+        color: #f8f9fa !important;
+        margin-bottom: 5px;
+        border-radius: 6px;
+        transition: 0.3s ease;
+    }
+
+    .navbar-container-perso .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding-left: 10px;
+    }
+
+    .navbar-container-perso .navbar-text {
+        color: #aaaaaa !important;
+        display: block;
+        margin-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 10px;
+    }
+
+
+    /* Card home page */
     .card-perso {
         text-align: justify;
         background-color: var(--bg-card) !important;
@@ -95,8 +151,6 @@ body {
     width: 80%;
     border-radius: 12px;
 }
-
-
 
 
 .main-perso {
