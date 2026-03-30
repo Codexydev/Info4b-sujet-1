@@ -73,4 +73,8 @@ public class IndexInverse {
     public void supprimerMot(String mot) {
         indexInverse.remove(mot);
     }
+
+    public void reinitialiserIndex() {
+        indexInverse.clear();
+    }
 }

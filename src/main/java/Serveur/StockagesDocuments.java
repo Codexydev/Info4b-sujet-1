@@ -35,4 +35,8 @@ public class StockagesDocuments {
         return stockagesDocuments.size();
     }
 
+    public void clear() {
+        stockagesDocuments.clear();
+
+    }
 }
