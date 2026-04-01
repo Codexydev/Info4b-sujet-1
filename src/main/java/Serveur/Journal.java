@@ -136,6 +136,14 @@ public class Journal {
         idVersChemin.clear();
     }
 
+    public synchronized void supprimerJournal() throws IOException{
+        this.writer.close();
+        FileWriter fw = new FileWriter(this.chemin, false);
+        fw.write("PATH;" + this.cheminRepertoire + "\n");
+        fw.close();
+        this.writer = new BufferedWriter(new FileWriter(this.chemin, true));
+    }
+
     public void fermer() {
         // notifyAll() pr débloquer thread s'il est en wait()
         synchronized (fileOperations) {

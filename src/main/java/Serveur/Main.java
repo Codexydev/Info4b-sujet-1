@@ -84,7 +84,7 @@ public class Main {
         }
     }
 
-    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -288,6 +288,18 @@ public class Main {
                                         System.out.println("Client disconnected");
                                         break;
 
+                                    case "-reindex":
+                                        Journal.resetJournal(stockagesDocuments, indexInverse, idToPath); //on suppr que la RAM ici
+                                        try {journal.supprimerJournal();
+                                        }catch (IOException e){
+                                            System.out.println("Erreur lors de la reindexation du journal.");
+                                        }
+                                        parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
+                                        out.println("Réindexation terminée !");
+                                        out.println("END_OF_MESSAGE");
+
+                                        break;
+
                                     case "-d":
                                         Doublon doublon = new Doublon(arg[1], arg[2]);
                                         boolean estDublon = doublon.EstDoublon();
@@ -401,7 +413,7 @@ public class Main {
 
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + stockagesDocuments.getNombreDocuments());
 
-        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord);
+        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path);
         journal.fermer();
     }
 }
