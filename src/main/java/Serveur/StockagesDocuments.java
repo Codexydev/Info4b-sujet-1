@@ -1,9 +1,11 @@
 package Serveur;
 
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 public class StockagesDocuments {
-    private final ConcurrentHashMap<String, MetaDataDocument> stockagesDocuments = new ConcurrentHashMap<>();
+    private final Map<String, MetaDataDocument> stockagesDocuments = Collections.synchronizedMap(new CacheLRU<>(100));
 
     public void ajouterDocument(int idDocument, String cheminRepertoire, long poids, long dateModification, long nombreTotalMots) {
         MetaDataDocument metaData = new MetaDataDocument(idDocument, cheminRepertoire, poids, dateModification, nombreTotalMots);
@@ -24,7 +26,7 @@ public class StockagesDocuments {
     }
 
     public ConcurrentHashMap<String, MetaDataDocument> getStockagesDocuments() {
-        return stockagesDocuments;
+        return new ConcurrentHashMap<>(stockagesDocuments);
     }
 
     public void supprimerDocument(String chemin) {
