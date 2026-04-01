@@ -113,7 +113,11 @@ public class Main {
                                 "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
                                 "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
                                 "-dl" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "Permet au client de télécharger le fichier duquel on écrit le chemin\n" + ANSI_RESET+
-                                "-clean : " + ANSI_BLEU + "Compacter le journal (garde uniquement l'état actuel)\n" + ANSI_RESET ;
+                                "-clean : " + ANSI_BLEU + "Compacter le journal (garde uniquement l'état actuel)\n" + ANSI_RESET +
+                                "-reindex " + ANSI_BLEU + "permet de supprimer le journal et refaire une indexation\n" + ANSI_RESET +
+                                "-sw -l" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'afficher la liste des stop words\n" + ANSI_RESET +
+                                "-sw -rm" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'enlever un mot de la liste des stop words\n" + ANSI_RESET +
+                                "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET;
 
                         out.println(help);
                         out.println("END_OF_MESSAGE");
@@ -297,7 +301,6 @@ public class Main {
                                         parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
                                         out.println("Réindexation terminée !");
                                         out.println("END_OF_MESSAGE");
-
                                         break;
 
                                     case "-d":
