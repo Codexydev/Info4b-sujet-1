@@ -416,6 +416,10 @@ public class Main {
 
         System.out.println("\nIndexation terminée. Nombre de documents indexés : " + stockagesDocuments.getNombreDocuments());
 
+        SurveillanceTempsReel surveillance = new SurveillanceTempsReel(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);
+        Thread threadSurveillance = new Thread(surveillance);
+        threadSurveillance.start();
+
         server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path);
         journal.fermer();
     }

@@ -35,7 +35,10 @@ public class SurveillanceTempsReel implements Runnable {
                 for(WatchEvent<?> action : info.pollEvents()){
                     WatchEvent.Kind<?> typeAction = action.kind(); //type d'evenement (si on creeer?modifie?supprime?)
                     Path nomDuFichier = (Path) action.context(); //où est ce que l'action a été faite?
-                    System.out.println("L'action " + typeAction + "a été réalisée sur " + nomDuFichier);
+                    if (nomDuFichier.toString().startsWith(".")) {
+                        continue; //condition qui permet d'ignorer les fichiers cachés
+                    }
+                    System.out.println("L'action " + typeAction + " a été réalisée sur " + nomDuFichier);
                 }
                 boolean valide = info.reset();
                 if (!valide) {
