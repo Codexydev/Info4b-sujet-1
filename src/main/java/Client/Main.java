@@ -2,6 +2,10 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
@@ -22,7 +26,8 @@ public class Main {
             Socket socket = new Socket("localhost", 12345);
             /*Socket socket = new Socket(ip, Integer.parseInt(port));*/
 
-            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+            Terminal terminal = TerminalBuilder.builder().system(true).build();
+            LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -38,7 +43,7 @@ public class Main {
 
             do {
                 System.out.print("\n > ");
-                str = userInput.readLine(); // lecture entrée utilisateur
+                str = lineReader.readLine("\n > ");
 
                 out.println(str); // envoie str au server
 
