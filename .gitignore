@@ -5,8 +5,6 @@ target/
 out/
 *.class
 
-src/main/java/Serveur/stopword.txt
-
 # ==========================================
 # 2. Configuration IntelliJ IDEA
 # ==========================================
@@ -28,3 +26,5 @@ downloads/
 # 2. Configuration vscode
 # ==========================================
 .vscode/
+
+src/main/java/Serveur/stopword.txt
