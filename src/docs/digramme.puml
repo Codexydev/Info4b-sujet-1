@@ -1,0 +1,183 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class CacheLRU<K, V> {
+  + CacheLRU(int):
+  - capaciteMax: int
+  # removeEldestEntry(Entry<K, V>): boolean
+}
+class Doublon {
+  + Doublon(String, String):
+  - f1: String
+  - f2: String
+  + EstDoublon(): boolean
+}
+class ExtracteurTexte {
+  + ExtracteurTexte(String):
+  - cheminFichier: String
+  - extension: String
+  + extraireTexte(): String
+}
+class IdVersChemin {
+  + IdVersChemin():
+  - idVersChemin: ArrayList<String>
+  - idCourant: int
+  + clear(): void
+  + getIdCourant(): int
+  + addPath(String): void
+  + getChemin(int): String
+  + getIdFromPath(String): int
+  + getIdVersChemin(): ArrayList
+}
+class IndexInverse {
+  + IndexInverse():
+  - indexInverse: ConcurrentHashMap<String, ConcurrentHashMap<Integer, Integer>>
+  + reinitialiserIndex(): void
+  + supprimerMot(String): void
+  + indexerMot(String, int): void
+  + getMotsDocument(int): ConcurrentHashMap<String, Integer>
+  + getDocumentsByMot(String): ConcurrentHashMap<Integer, Integer>
+  + restaurerFrequenceMot(String, int, int): void
+  + getIndexInverse(): ConcurrentHashMap<String, ConcurrentHashMap<Integer, Integer>>
+}
+class Journal {
+  + Journal(String, String):
+  - cheminRepertoire: String
+  - CAPACITE_MAX: int
+  - actif: boolean
+  - chemin: String
+  - writer: BufferedWriter
+  - threadEcrivain: Thread
+  - fileOperations: ArrayList<String>
+  + restaurerDepuisJournal(String, StockagesDocuments, IndexInverse, IdVersChemin, String): void
+  + formaterMots(ConcurrentHashMap<String, Integer>): String
+  + supprimerJournal(): void
+  + ecrireSuppression(String, long): void
+  + compacter(StockagesDocuments, IndexInverse): void
+  + reconcilier(StockagesDocuments, IndexInverse, Journal, StopWord): void
+  + ecrireAjout(String, long, long, ConcurrentHashMap<String, Integer>): void
+  + resetJournal(StockagesDocuments, IndexInverse, IdVersChemin): void
+  + ecrireMiseAJour(String, long, long, ConcurrentHashMap<String, Integer>): void
+  + fermer(): void
+  - ajouterOperation(String): void
+}
+class Main {
+  + Main():
+  + ANSI_BLEU: String
+  + ANSI_VERT: String
+  + ANSI_RESET: String
+  + main(String[]): void
+}
+class Main {
+  + Main():
+  + ANSI_BLEU: String
+  + DEBUG: boolean
+  + ANSI_RESET: String
+  + ANSI_VERT: String
+  + indexerFichier(int, String, StockagesDocuments, IndexInverse, Journal, boolean, StopWord): void
+  + server(IndexInverse, StockagesDocuments, IdVersChemin, Journal, StopWord, String): void
+  + parcoursFichiers(String, StockagesDocuments, IndexInverse, IdVersChemin, Journal, StopWord): void
+  + main(String[]): void
+}
+class MetaDataDocument {
+  + MetaDataDocument(int, String, long, long, long):
+  + ANSI_RESET: String
+  + ANSI_VERT: String
+  + ANSI_BLEU: String
+  - dateModification: long
+  - chemin: String
+  - poids: long
+  - id: int
+  - totalMots: long
+  + getPoids(): long
+  + getDateModification(): long
+  + getTotalMots(): long
+  + getChemin(): String
+  + toString(): String
+  + getId(): int
+}
+class Recherche {
+  + Recherche(IndexInverse, StockagesDocuments, IdVersChemin, String[], String[]):
+  + Recherche(IndexInverse, StockagesDocuments, IdVersChemin, String[]):
+  + ANSI_BLEU: String
+  + ANSI_RESET: String
+  + ANSI_VERT: String
+  - motsRecherches: String[]
+  - indexInverse: IndexInverse
+  - stockagesDocuments: StockagesDocuments
+  - idVersChemin: IdVersChemin
+  - motsNonRecherches: ArrayList<String>
+  + RechercheAvance(): String
+  + effectuerRecherche(): String
+}
+class StockagesDocuments {
+  + StockagesDocuments():
+  - stockagesDocuments: Map<String, MetaDataDocument>
+  + getMetaDataById(int): MetaDataDocument
+  + getMetaData(String): MetaDataDocument
+  + ajouterDocument(int, String, long, long, long): void
+  + clear(): void
+  + getStockagesDocuments(): ConcurrentHashMap<String, MetaDataDocument>
+  + supprimerDocument(String): void
+  + getNombreDocuments(): int
+}
+class StopWord {
+  + StopWord():
+  - words: HashSet<String>
+  + removeMot(String[]): void
+  + toString(): String
+  + addMot(String[]): void
+  + getWords(): HashSet<String>
+}
+class SurveillanceTempsReel {
+  + SurveillanceTempsReel(String, StockagesDocuments, IndexInverse, IdVersChemin, Journal, StopWord):
+  - indexInverse: IndexInverse
+  - idVersChemin: IdVersChemin
+  - stockagesDocuments: StockagesDocuments
+  - stopWord: StopWord
+  - cheminRepertoire: String
+  - journal: Journal
+  + run(): void
+}
+class UpdateFile {
+  + UpdateFile(String):
+  ~ file: File
+  ~ in: String
+  ~ stockagesDocuments: StockagesDocuments
+  ~ out: String
+  ~ file2: File
+  + renomerFichier(String): String
+  + supprimerFichier(): String
+  + getIn(): String
+}
+class test {
+  + test():
+  + main(String[]): void
+}
+
+Main                   -[#595959,dashed]->  Doublon               : "«create»"
+Main                   -[#595959,dashed]->  ExtracteurTexte       : "«create»"
+Main                   -[#595959,dashed]->  IdVersChemin          : "«create»"
+Main                   -[#595959,dashed]->  IndexInverse          : "«create»"
+Main                   -[#595959,dashed]->  Journal               : "«create»"
+Main                   -[#595959,dashed]->  Recherche             : "«create»"
+Main                   -[#595959,dashed]->  StockagesDocuments    : "«create»"
+Main                   -[#595959,dashed]->  StopWord              : "«create»"
+Main                   -[#595959,dashed]->  SurveillanceTempsReel : "«create»"
+Main                   -[#595959,dashed]->  UpdateFile            : "«create»"
+Recherche             "1" *-[#595959,plain]-> "idVersChemin\n1" IdVersChemin
+Recherche             "1" *-[#595959,plain]-> "indexInverse\n1" IndexInverse
+Recherche             "1" *-[#595959,plain]-> "stockagesDocuments\n1" StockagesDocuments
+StockagesDocuments     -[#595959,dashed]->  CacheLRU              : "«create»"
+StockagesDocuments     -[#595959,dashed]->  MetaDataDocument      : "«create»"
+StockagesDocuments    "1" *-[#595959,plain]-> "stockagesDocuments\n*" MetaDataDocument
+SurveillanceTempsReel "1" *-[#595959,plain]-> "idVersChemin\n1" IdVersChemin
+SurveillanceTempsReel "1" *-[#595959,plain]-> "indexInverse\n1" IndexInverse
+SurveillanceTempsReel "1" *-[#595959,plain]-> "journal\n1" Journal
+SurveillanceTempsReel "1" *-[#595959,plain]-> "stockagesDocuments\n1" StockagesDocuments
+SurveillanceTempsReel "1" *-[#595959,plain]-> "stopWord\n1" StopWord
+UpdateFile            "1" *-[#595959,plain]-> "stockagesDocuments\n1" StockagesDocuments
+@enduml
