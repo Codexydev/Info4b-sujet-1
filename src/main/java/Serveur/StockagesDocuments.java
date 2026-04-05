@@ -5,14 +5,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 public class StockagesDocuments {
-    private final Map<String, MetaDataDocument> stockagesDocuments = Collections.synchronizedMap(new CacheLRU<>(100));
+    private final CacheLRU<String, MetaDataDocument> stockagesDocuments = new CacheLRU<>(100);
 
-    public void ajouterDocument(int idDocument, String cheminRepertoire, long poids, long dateModification, long nombreTotalMots) {
+    public synchronized void ajouterDocument(int idDocument, String cheminRepertoire, long poids, long dateModification, long nombreTotalMots) {
         MetaDataDocument metaData = new MetaDataDocument(idDocument, cheminRepertoire, poids, dateModification, nombreTotalMots);
         stockagesDocuments.put(cheminRepertoire, metaData); // ajouter les metaData d'un document au stockages de tous les documents
     }
 
-    public MetaDataDocument getMetaData(String cheminRepertoire) {
+    public synchronized MetaDataDocument getMetaData(String cheminRepertoire) {
         return stockagesDocuments.get(cheminRepertoire);
     }
 
@@ -29,11 +29,11 @@ public class StockagesDocuments {
         return new ConcurrentHashMap<>(stockagesDocuments);
     }
 
-    public void supprimerDocument(String chemin) {
+    public synchronized void supprimerDocument(String chemin) {
         stockagesDocuments.remove(chemin);
     }
 
-    public int getNombreDocuments() {
+    public synchronized int getNombreDocuments() {
         return stockagesDocuments.size();
     }
 

@@ -2,7 +2,6 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";

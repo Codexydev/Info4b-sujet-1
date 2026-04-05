@@ -92,8 +92,9 @@ public class Main {
             while (true) {
                 Socket socket = server.accept();
                 System.out.println("Client connected");
-                // Ajout de threads pour gérer plusieurs clients au lieu d'un seul
-                new Thread(() -> {
+                // Ajout de ThreadGroup (TP1) pour regroupper les threads
+                ThreadGroup clientsGroup = new ThreadGroup("Clients-connectes");
+                new Thread(clientsGroup, () -> {
                     try {
                         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -376,7 +377,7 @@ public class Main {
                     } catch (NoSuchAlgorithmException e) {
                         throw new RuntimeException(e);
                     }
-                }).start();
+                }, "Client-" + clientsGroup.activeCount()).start();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -418,6 +419,8 @@ public class Main {
 
         SurveillanceTempsReel surveillance = new SurveillanceTempsReel(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);
         Thread threadSurveillance = new Thread(surveillance);
+        threadSurveillance.setPriority(Thread.MIN_PRIORITY);
+        threadSurveillance.setDaemon(true);
         threadSurveillance.start();
 
         server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path);

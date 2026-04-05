@@ -24,6 +24,7 @@ public class Journal {
         this.cheminRepertoire = cheminRepertoire;
 
         threadEcrivain = new Thread(new EcrivainJournal(), "Thread-Journal-Ecrivain");
+        threadEcrivain.setPriority(Thread.MIN_PRIORITY);
         threadEcrivain.setDaemon(true);
         threadEcrivain.start();
     }
@@ -61,9 +62,11 @@ public class Journal {
                 // Écriture sur disque
                 if (operation != null) {
                     try {
-                        writer.write(operation);
-                        writer.newLine();
-                        writer.flush();
+                        synchronized (Journal.this) {
+                            writer.write(operation);
+                            writer.newLine();
+                            writer.flush();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

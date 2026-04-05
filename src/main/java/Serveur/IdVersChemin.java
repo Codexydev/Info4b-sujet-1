@@ -9,7 +9,7 @@ public class IdVersChemin {
     public IdVersChemin() {
     }
 
-    public void addPath(String path) {
+    public synchronized void addPath(String path) {
         if (!idVersChemin.contains(path)) {
             idVersChemin.add(path);
             idCourant = idVersChemin.size() - 1;
@@ -20,7 +20,7 @@ public class IdVersChemin {
         return idCourant;
     }
 
-    public String getChemin(int id) {
+    public synchronized String getChemin(int id) {
         if (id >= 0 && id < idVersChemin.size()) {
             return (String) idVersChemin.get(id);
         }
@@ -31,7 +31,7 @@ public class IdVersChemin {
         return this.idVersChemin;
     }
 
-    public int getIdFromPath(String path) {
+    public synchronized int getIdFromPath(String path) {
         return idVersChemin.indexOf(path);
     }
 
