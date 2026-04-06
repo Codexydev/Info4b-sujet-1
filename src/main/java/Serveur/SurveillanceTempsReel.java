@@ -3,6 +3,7 @@ package Serveur;
 import java.nio.file.*;
 import java.io.IOException;
 import java.nio.file.StandardWatchEventKinds;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SurveillanceTempsReel implements Runnable {
 
@@ -56,6 +57,13 @@ public class SurveillanceTempsReel implements Runnable {
                         MetaDataDocument meta = stockagesDocuments.getMetaData(cheminComplet);
                         if (meta != null) {
                             int vraiId = meta.getId();
+                            ConcurrentHashMap<String, Integer> anciensMots = indexInverse.getMotsDocument(vraiId);
+                            for (String mot : anciensMots.keySet()) {
+                                ConcurrentHashMap<Integer, Integer> listeDocsDuMot = indexInverse.getDocumentsByMot(mot);
+                                if (listeDocsDuMot != null) {
+                                    listeDocsDuMot.remove(vraiId);
+                                }
+                            }
                             Main.indexerFichier(vraiId, cheminComplet, stockagesDocuments, indexInverse, journal, false, stopWord); //on met false car c'est pas un ajout mais une modif
                             System.out.println("fichier mis à jour");
                         }

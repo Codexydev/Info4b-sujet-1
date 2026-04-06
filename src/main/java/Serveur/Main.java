@@ -24,6 +24,9 @@ public class Main {
             Files.walk(start)
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
+                        if (path.getFileName().toString().startsWith(".")) {
+                            return; //permet d'eviter les fihciers .DS_store qui ne serve pas à l'indexation
+                        }
                         String cheminFichier = path.toString();
 
                         if (stockagesDocuments.getMetaData(cheminFichier) == null) {
