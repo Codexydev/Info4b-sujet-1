@@ -22,6 +22,7 @@ public class Main {
 
         try {
             Files.walk(start)
+                    .parallel()
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         if (path.getFileName().toString().startsWith(".")) {
