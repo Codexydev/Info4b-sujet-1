@@ -329,7 +329,7 @@ public class Main {
                                                     for (String m : motsAAjouter) {
                                                         indexInverse.supprimerMot(m);
                                                     }
-                                                    out.println("Mot ajouté et supprimer de l'index !");
+                                                    out.println("Mot ajouté aux stopwords et supprimé de l'index !");
                                                 } catch (IOException e) {
                                                     out.println("Erreur d'écriture dans le fichier stopword");
                                                 }
@@ -340,7 +340,14 @@ public class Main {
                                                     String[] motsASupprimer = arg[2].split(",");
                                                     stopWord.removeMot(motsASupprimer);
                                                     out.println("Mot retiré des Stop Words !");
-                                                    out.println("Note : Ce changement s'appliquera aux futures indexations. Les anciens fichiers ne contiennent pas encore ce mot dans l'index.");
+                                                    out.println("Lancement de la reindexation!");
+                                                    Journal.resetJournal(stockagesDocuments, indexInverse, idToPath);
+                                                    try {journal.supprimerJournal();
+                                                    }catch (IOException e){
+                                                        System.out.println("Erreur lors de la reindexation du journal.");
+                                                    }
+                                                    parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
+                                                    out.println("Réindexation terminée !");
                                                 } catch (IOException e) {
                                                     out.println("Erreur de réécriture dans le fichier stopword.");
                                                 }
