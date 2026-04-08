@@ -23,12 +23,24 @@ public class SurveillanceTempsReel implements Runnable {
         this.stopWord = stopWord;
     }
 
+    private void enregistrerDossiers(Path racine, WatchService watchService) throws IOException {
+        Files.walk(racine)
+                .filter(Files::isDirectory)
+                .forEach(dossier -> {
+                    try {
+                        dossier.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
+                    } catch (IOException e) {
+                        System.err.println("Erreur sur : " + dossier);
+                    }
+                });
+    }
+
     @Override
     public void run() {
         try{
             WatchService watchservice = FileSystems.getDefault().newWatchService();
             Path chemin = Paths.get(cheminRepertoire); //faut un chemin et pas juste un string sinon il sera pas utilisable pour faire des actions dessus avec NIO
-            chemin.register(watchservice, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE); // permet de notifier le watchservice en cas de creation, modif ou suppression
+            enregistrerDossiers(chemin, watchservice); // permet de notifier le watchservice en cas de creation, modif ou suppression
             System.out.println("Lancement du watchservice sur le dossier: " + cheminRepertoire);
 
             while(true){
@@ -36,21 +48,31 @@ public class SurveillanceTempsReel implements Runnable {
                 for(WatchEvent<?> action : info.pollEvents()){
                     WatchEvent.Kind<?> typeAction = action.kind(); //type d'evenement (si on creeer?modifie?supprime?)
                     Path nomDuFichier = (Path) action.context(); //où est ce que l'action a été faite?
-                    String cheminComplet = chemin.resolve(nomDuFichier).toString();
+                    Path dossierConcerne = (Path) info.watchable();
+                    String cheminComplet = dossierConcerne.resolve(nomDuFichier).toString();
                     if (nomDuFichier.toString().startsWith(".")) {
                         continue; //condition qui permet d'ignorer les fichiers cachés
                     }
+                    try {
+                        Thread.sleep(150); // On laisse le temps à l'éditeur de texte de sauvegarder
+                    } catch (InterruptedException ignored) {}
                     System.out.println("L'action " + typeAction + " a été réalisée sur " + nomDuFichier);
                     if(typeAction == StandardWatchEventKinds.ENTRY_CREATE){
-                        if(stockagesDocuments.getMetaData(cheminComplet) == null){
-                            int nouvelId;
-                            synchronized(idVersChemin){
-                                idVersChemin.addPath(cheminComplet);
-                                nouvelId = idVersChemin.getIdCourant();
+                        if (Files.isDirectory(Paths.get(cheminComplet))) { //permet de verif si c'est un dossier au lieu d'un fichier
+                            enregistrerDossiers(Paths.get(cheminComplet), watchservice);
+                            System.out.println("Nouveau dossier  : " + cheminComplet);
+                            Main.parcoursFichiers(cheminComplet, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord); //scan si on ajoute un dossier deja plein
+                        }
+                        else {
+                            if(stockagesDocuments.getMetaData(cheminComplet) == null){
+                                int nouvelId;
+                                synchronized(idVersChemin){
+                                    idVersChemin.addPath(cheminComplet);
+                                    nouvelId = idVersChemin.getIdFromPath(cheminComplet);
+                                }
+                                Main.indexerFichier(nouvelId, cheminComplet, stockagesDocuments, indexInverse, journal, true, stopWord);
+                                System.out.println("nouveau fichier ajouté à l'indexeur de fichier");
                             }
-                            Main.indexerFichier(nouvelId, cheminComplet, stockagesDocuments, indexInverse, journal, true, stopWord); //la lecture de fichier est longue donc vaut mieux sortir du for pour eviter
-                            //de monopoliser la clé du synchronized poour rien
-                            System.out.println("nouveau fichier ajouté à l'indexeur de fichier");
                         }
 
                     } else if (typeAction == StandardWatchEventKinds.ENTRY_MODIFY) {
@@ -69,16 +91,24 @@ public class SurveillanceTempsReel implements Runnable {
                         }
 
                     } else if (typeAction == StandardWatchEventKinds.ENTRY_DELETE) {
-                        stockagesDocuments.supprimerDocument(cheminComplet);
-                        journal.ecrireSuppression(cheminComplet, System.currentTimeMillis());
-                        System.out.println("fichier supprimé de l'indexeur de fichier");
+                        MetaDataDocument meta = stockagesDocuments.getMetaData(cheminComplet);
+                        if (meta != null) {
+                            int vraiId = meta.getId();
+                            ConcurrentHashMap<String, Integer> anciensMots = indexInverse.getMotsDocument(vraiId);
+                            for (String mot : anciensMots.keySet()) {
+                                ConcurrentHashMap<Integer, Integer> listeDocsDuMot = indexInverse.getDocumentsByMot(mot);
+                                if (listeDocsDuMot != null) {
+                                    listeDocsDuMot.remove(vraiId);
+                                }
+                            }
 
+                            stockagesDocuments.supprimerDocument(cheminComplet);
+                            journal.ecrireSuppression(cheminComplet, System.currentTimeMillis());
+                            System.out.println("Le fichier : " + " ' " +  cheminComplet + " ' " + " a été supprimé de l'indexeur de fichier.");
+                        }
                     }
                 }
-                boolean valide = info.reset();
-                if (!valide) {
-                    break; // On casse la boucle infinie, et on arrete le watchsrrvice si le dossier a été supprimer le info.reset() enverraa un false
-                }
+                info.reset();
             }
         }catch (Exception e){
             System.out.println("le watchservice a cesser de fonctionner: " + e.getMessage());
