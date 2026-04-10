@@ -1,85 +1,87 @@
-# 🔍 Moteur de Recherche Local - Projet Info4B
+# Moteur de Recherche Local - Projet Info4B
 
-Un moteur de recherche de fichiers locaux léger et performant développé en Java. Ce projet implémente une architecture **Client-Serveur** communiquant via des Sockets TCP et repose sur un **Index Inversé** pour effectuer des recherches textuelles optimisées (avec calcul de pertinence TF-IDF).
+Un moteur de recherche de fichiers locaux performant et robuste développé en Java. Ce projet implémente une architecture **Client-Serveur** communiquant via des flux binaires sécurisés (Sockets TCP) et repose sur un **Index Inversé** en RAM pour effectuer des recherches textuelles ultra-rapides basées sur l'algorithme **TF-IDF**.
 
 ![Java](https://img.shields.io/badge/Java-17-orange.svg)
 ![Maven](https://img.shields.io/badge/Build-Maven-blue.svg)
+![Release](https://img.shields.io/badge/Release-v1.0-success.svg)
 
 ## Fonctionnalités Principales
 
-- **Indexation automatique** : Parcours et indexe le contenu des fichiers `.txt` et `.pdf` (nécessite `pdftotext`).
-- **Recherche avancée (TF-IDF)** : Recherche de mots-clés avec tri par pertinence.
-- **Filtres d'exclusion** : Possibilité de rechercher des mots tout en excluant certains résultats.
-- **Persistance des données** : Système de journalisation (`journal.csv`) fonctionnant en arrière-plan (Producteur/Consommateur) pour sauvegarder et restaurer l'état de l'index sans ralentir le serveur.
-- **Client interactif CLI** : Interface en ligne de commande pour interroger le serveur en temps réel.
+- **Indexation Automatique & WatchService** : Parcours initial et surveillance en temps réel (anti-crash) des modifications de fichiers (`.txt`, `.pdf`).
+- **Recherche Avancée (TF-IDF & Booléen)** : Tri par pertinence mathématique, filtres d'exclusion, et support des opérateurs logiques (`ET`, `OU`, `SAUF`).
+- **Transfert Binaire Sécurisé** : Téléchargement de fichiers du serveur vers le client sans aucune corruption de données.
+- **Interface CLI Interactive (JLine)** : Client en ligne de commande offrant une expérience native (historique des commandes avec la flèche du haut, autocomplétion, design clair).
+- **Persistance** : Système de journalisation (`journal.csv`) via le pattern Producteur/Consommateur pour ne jamais perdre l'état de l'index.
+
+---
+
+## Documentation Complète
+
+Pour découvrir en détail l'architecture réseau, l'explication complète des commandes et des exemples d'utilisation avancés, consultez notre **[Documentation Web Interactive](searchengine.antoineragot.com/docs/)** *(Ouvrez le fichier `docs/index.html` dans votre navigateur)*.
 
 ---
 
 ## Prérequis
 
-Avant de lancer le projet, assurez-vous d'avoir installé :
+Avant de lancer le projet, assurez-vous d'avoir installé les composants suivants sur votre machine :
+
 - **Java JDK 17** (ou version supérieure)
-- **Maven** (pour la gestion des dépendances et la compilation)
-- **Poppler-utils / pdftotext** (nécessaire pour l'extraction du texte des fichiers PDF)
+- **Maven** (pour la compilation et les dépendances)
+- **Poppler-utils / pdftotext** (nécessaire pour lire le contenu des PDF)
+- **exiv2** (nécessaire pour l'extraction des métadonnées d'images)
 
-### Installation des prérequis
-
-- **Java JDK 17** (Environnement de développement et d'exécution) :
-    - Mac OS (via Homebrew) : `brew install openjdk@17`
-    - Linux (Ubuntu/Debian) : `sudo apt install openjdk-17-jdk`
-
-
-- **Maven** (Outil de gestion des dépendances et de compilation) :
-    - Mac OS (via Homebrew) : `brew install maven`
-    - Linux (Ubuntu/Debian) : `sudo apt install maven`
-
-
-- **Poppler-utils / pdftotext** (Nécessaire pour l'indexation des fichiers PDF) :
-    - Mac OS (via Homebrew) : `brew install poppler`
-    - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install poppler-utils`
-
-
-- **exiv2** (Nécessaire pour obtenir les données exif des images) :
-  - Mac OS (via Homebrew) : `brew install exiv2`
-  - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install exiv2`
+### Commandes d'installation rapide :
+- **Mac OS (via Homebrew)** : `brew install openjdk@17 maven poppler exiv2`
+- **Linux (Ubuntu/Debian)** : `sudo apt update && sudo apt install openjdk-17-jdk maven poppler-utils exiv2`
 
 ---
 
-## Compilation et Exécution
+## Lancement Rapide (Recommandé)
 
-### 1. Compiler le projet
-`mvn clean compile`
+Plutôt que de taper les commandes Maven manuellement, utilisez notre script d'orchestration intégré. Il gère la compilation, le lancement asynchrone et le nettoyage des ports réseau en cas de problème.
 
-### 2. Démarrer le Serveur
-*`mvn exec:java -Dexec.mainClass="Serveur.Main"`*
+    # 1. Donner les droits d'exécution au script
+    chmod +x run.sh
+    
+    # 2. Lancer le menu interactif
+    ./run.sh
 
-Le serveur démarrera sur le port `12345` et lancera la restauration/l'indexation du répertoire cible.
+*Depuis le menu, appuyez sur `1` pour compiler, `2` pour lancer le serveur en arrière-plan, puis `3` pour ouvrir le client interactif.*
 
-### 3. Démarrer le Client
-Ouvrez un nouveau terminal et lancez le client :
-*`mvn exec:java -Dexec.mainClass="Client.Main"`*
-
-Par défaut le client démarrera et se connectera sur `localhost` port `12345`
+### Lancement Manuel (Alternative)
+Si vous préférez utiliser des terminaux séparés :
+1. `mvn clean compile`
+2. **Terminal 1 (Serveur)** : `mvn exec:java -Dexec.mainClass="Serveur.Main"` *(Port 12345)*
+3. **Terminal 2 (Client)** : `mvn exec:java -Dexec.mainClass="Client.Main"`
 
 ---
-### 4. Script automatisé
-*`chmod +x run.sh`*
 
-*`./run.sh`*
+##  Guide Rapide des Commandes (CLI)
 
-## Guide des Commandes (Client)
+Une fois le client connecté au serveur, utilisez le prompt interactif `> ` :
 
-Une fois le client connecté, utilisez l'interface en ligne de commande (`>`) :
-
+### Indexation & Recherche
 | Commande | Action | Exemple |
 | :--- | :--- | :--- |
-| `-h` | Affiche le menu d'aide complet. | `> -h` |
-| `-s <mots>` | Recherche un ou plusieurs mots (séparés par des virgules). | `> -s linux,systeme` |
-| `-s <mots> -- <exclus>` | Recherche des mots en excluant les documents contenant les mots après le `--`. | `> -s reseau -- windows` |
-| `-m <chemin>` | Affiche les métadonnées d'un document indexé (poids, date, mots totaux). | `> -m src/test.txt` |
-| `-p <chemin>` | Affiche le texte brut extrait du document. | `> -p src/test.pdf` |
-| `-t <msg>` | Test (Ping) de la communication avec le serveur. | `> -t Bonjour Serveur` |
-| `q` | Quitte proprement le client et ferme la connexion. | `> q` |
+| `-s <dossier>` | Indexe un dossier entier et active la surveillance temporelle. | `> -s src/documents` |
+| `-r <mots> -- <exclus>` | Recherche TF-IDF standard avec exclusion optionnelle (`--`). | `> -r reseau -- windows` |
+| `-ar <requête>` | Recherche logique stricte avec opérateurs. | `> -ar java ET reseau SAUF cpp` |
+
+### Gestion des Fichiers & Réseau
+| Commande | Action | Exemple |
+| :--- | :--- | :--- |
+| `-dl <chemin>` | **Télécharge** le fichier distant vers le dossier `downloads/` local. | `> -dl src/cours.pdf` |
+| `-m <chemin>` | Affiche les métadonnées internes du document. | `> -m src/notes.txt` |
+| `-m -rn <old> <new>` | **Renomme** un fichier sur le serveur et met à jour l'index. | `> -m -rn vieux.txt neuf.txt` |
+| `-m -rm <chemin>` | **Supprime** le fichier du serveur et purge l'index. | `> -m -rm src/secret.txt` |
+
+### Outils Avancés
+| Commande | Action | Exemple |
+| :--- | :--- | :--- |
+| `-exif <image>` | Extrait les métadonnées cachées (GPS, Date) d'une image. | `> -exif image.jpg` |
+| `-d <fich1> <fich2>` | Détecte si deux fichiers sont des doublons stricts. | `> -d f1.txt f2.txt` |
+| `-sw -add <mots>` | Ajoute des Stop-Words (mots exclus du calcul de pertinence). | `> -sw -add donc,mais` |
 
 ---
-*Projet réalisé dans le cadre de l'UE Info4B (L2).*
+*Projet académique réalisé dans le cadre de l'UE Info4B (L2) - Université de Bourgogne.*
