@@ -24,81 +24,67 @@ public class Main {
             System.out.println("Client started...\n");
 
             Socket socket = new Socket("localhost", 12345);
-            /*Socket socket = new Socket(ip, Integer.parseInt(port));*/
 
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             String str;
             String reponse;
 
-            while ((reponse = in.readLine()) != null) {
-                if (reponse.equals("END_OF_MESSAGE")) { // vérifie la fin de la réponse du server
-                    break;
-                }
+            while (true) {
+                reponse = in.readUTF();
+                if (reponse.equals("END_OF_MESSAGE")) break;
                 System.out.println(reponse);
             }
 
             do {
                 System.out.print("\n > ");
-                str = lineReader.readLine("\n > ");
+                str = userInput.readLine();
 
-                out.println(str); // envoie str au server
+                out.writeUTF(str);
+                out.flush();
 
-                // reponse server
-                while ((reponse = in.readLine()) != null) {
-                    if (reponse.equals("END_OF_MESSAGE")) { // vérifie la fin de la réponse du server
+                while (true) {
+                    reponse = in.readUTF();
+
+                    if (reponse.equals("END_OF_MESSAGE")) {
                         break;
                     } else if (reponse.startsWith("File_incomming...")) {
-                        String[] donnees = reponse.split(" ");
-                        String unité = "octets";
-                        String taille_fichier_affiche_fin = "";
-                        double taille_fichier = Long.parseLong(donnees[1]);
-                        double taille_fichier_affiche = taille_fichier;
-                        if (taille_fichier < 1000) {
-                            taille_fichier_affiche_fin = String.format("%.0f", taille_fichier);
-                        }
-                        if (1000 <= taille_fichier && taille_fichier < 1000000) {
-                            taille_fichier_affiche = taille_fichier / (double) 1000;
-                            taille_fichier_affiche_fin = String.format("%.1f", taille_fichier_affiche);
-                            unité = "ko";
-                        } else if (1000000 <= taille_fichier && taille_fichier < 1000000000) {
-                            taille_fichier_affiche = taille_fichier / (double) 1000000;
-                            taille_fichier_affiche_fin = String.format("%.1f", taille_fichier_affiche);
-                            unité = "Mo";
-                        } else if (1000000000 <= taille_fichier) {
-                            taille_fichier_affiche = taille_fichier / (double) 1000000000;
-                            taille_fichier_affiche_fin = String.format("%.1f", taille_fichier_affiche);
-                            unité = "Go";
-                        }
-                        System.out.println(ANSI_VERT + "taille du fichier téléchargé : " + ANSI_BLEU + taille_fichier_affiche_fin + unité + "\n" + ANSI_VERT + "nom du fichier : " + ANSI_BLEU + donnees[2] + ANSI_RESET);
+                        String[] donnees = reponse.split(" ", 3);
+                        long taille_fichier = Long.parseLong(donnees[1]);
+                        String nomFichier = donnees[2];
+
+                        System.out.println(ANSI_VERT + "Début du téléchargement : " + ANSI_BLEU + nomFichier + ANSI_RESET);
+
                         File dossier = new File("downloads");
                         dossier.mkdirs();
-                        String chemin_sauvegarde = "downloads/" + donnees[2];
+                        String chemin_sauvegarde = "downloads/" + nomFichier;
+
                         FileOutputStream ecriture = new FileOutputStream(chemin_sauvegarde);
-                        InputStream tuyau_reception = socket.getInputStream();
                         byte[] buffer = new byte[4096];
                         long total_lu = 0;
-                        int quantite_lu = 0;
-                        while(total_lu < taille_fichier && (quantite_lu = tuyau_reception.read(buffer)) != -1){
+                        int quantite_lu;
+
+                        while (total_lu < taille_fichier && (quantite_lu = in.read(buffer, 0, (int)Math.min(buffer.length, taille_fichier - total_lu))) != -1) {
                             ecriture.write(buffer, 0, quantite_lu);
                             total_lu += quantite_lu;
                         }
+
                         ecriture.close();
-                        System.out.println("Télechargement terminé!");
-
-
+                        System.out.println(ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets)" + ANSI_RESET);
                         break;
+
                     } else {
                         System.out.println(reponse);
                     }
-
                 }
 
-            }
-            while (!(str.equals("q") || str.equals("-q")));
+            } while (!(str.equals("q") || str.equals("-q")));
+
             System.out.println("\nFermeture du client...");
             socket.close();
         } catch (Exception e) {
