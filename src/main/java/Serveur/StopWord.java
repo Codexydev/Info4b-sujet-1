@@ -12,7 +12,7 @@ public class StopWord {
             String line = reader.readLine();
 
             while (line != null) {
-                this.words.add(line);
+                this.words.add(line.trim().toLowerCase()); //permet de mettre les stopword en minuscule(sinon il seront ignoré)
                 line = reader.readLine();
             }
 
@@ -29,15 +29,16 @@ public class StopWord {
     public void addMot(String[] words) throws IOException {
         FileWriter writer = new FileWriter("src/main/java/Serveur/stopword.txt", true);
         for (String word : words) {
-            writer.write(word + "\n");
-            this.words.add(word);
+            String motPropre = word.trim().toLowerCase(); //passe tout en minuscule et enleve les espaces inutiles
+            writer.write(motPropre + "\n");
+            this.words.add(motPropre);
         }
         writer.close();
     }
 
     public void removeMot(String[] words) throws IOException {
         for (String word : words) {
-            this.words.remove(word);
+            this.words.remove(word.trim().toLowerCase());
         }
 
         FileWriter writer = new FileWriter("src/main/java/Serveur/stopword.txt", false);

@@ -360,10 +360,17 @@ public class Main {
                                                     String[] motsAAjouter = arg[2].split(",");
                                                     stopWord.addMot(motsAAjouter);
 
-                                                    for (String m : motsAAjouter) {
-                                                        indexInverse.supprimerMot(m);
+                                                    out.writeUTF("Mot ajouté aux Stop Words !");
+                                                    out.writeUTF("Lancement de la réindexation...");
+                                                    Journal.resetJournal(stockagesDocuments, indexInverse, idToPath);
+                                                    try {
+                                                        journal.supprimerJournal();
+                                                    } catch (IOException e){
+                                                        System.out.println("Erreur lors de la suppression du journal.");
                                                     }
-                                                    out.writeUTF("Mot ajouté aux stopwords et supprimé de l'index !");
+                                                    parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
+
+                                                    out.writeUTF("Réindexation terminée !");
                                                 } catch (IOException e) {
                                                     out.writeUTF("Erreur d'écriture dans le fichier stopword");
                                                 }

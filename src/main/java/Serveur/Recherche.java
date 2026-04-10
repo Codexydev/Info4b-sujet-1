@@ -18,15 +18,23 @@ public class Recherche {
         this.indexInverse = indexInverse;
         this.stockagesDocuments = stockagesDocuments;
         this.idVersChemin = idVersChemin;
-        this.motsRecherches = motsRecherches;
-        this.motsNonRecherches.addAll(Arrays.asList(motsNonRecherches));
+        this.motsRecherches = new String[motsRecherches.length];
+        for (int i = 0; i < motsRecherches.length; i++) { //passage en minuscule de tous les mots recherchés
+            this.motsRecherches[i] = motsRecherches[i].toLowerCase();
+        }
+        for (String motExclu : motsNonRecherches) { //idem avec les mots exclu
+            this.motsNonRecherches.add(motExclu.toLowerCase());
+        }
     }
 
     public Recherche(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idVersChemin, String[] motsRecherches) {
         this.indexInverse = indexInverse;
         this.stockagesDocuments = stockagesDocuments;
         this.idVersChemin = idVersChemin;
-        this.motsRecherches = motsRecherches;
+        this.motsRecherches = new String[motsRecherches.length];
+        for (int i = 0; i < motsRecherches.length; i++) { //pareil passage en minuscule
+            this.motsRecherches[i] = motsRecherches[i].toLowerCase();
+        }
     }
 
     /**
@@ -45,6 +53,7 @@ public class Recherche {
             if (motsNonRecherches.contains(mot)) continue;
 
             ConcurrentHashMap<Integer, Integer> indexDuMot = indexInverse.getDocumentsByMot(mot);
+            if (indexDuMot == null || indexDuMot.isEmpty()) continue;
 
             // calcul IDF
             int nbDocsAvecMot = indexDuMot.size();
@@ -92,10 +101,10 @@ public class Recherche {
     public String RechercheAvance(){
         java.util.HashSet<Integer> resultat = new java.util.HashSet<>(); //le HashSet évite les doublons
         java.util.HashSet<Integer> resultatFinal = new java.util.HashSet<>();
-        String operateur = "OU"; //je passe le OU comme opérateur par défauts
+        String operateur = "ou"; //je passe le OU comme opérateur par défauts
         boolean premierMot = true;
         for(String mot : motsRecherches){
-            if(mot.equals("ET") || mot.equals("OU") || mot.equals("SAUF")){
+            if(mot.equals("et") || mot.equals("ou") || mot.equals("sauf")){
                 operateur = mot;
                 continue;
             }
@@ -104,20 +113,20 @@ public class Recherche {
                 premierMot = false;
             } else{
                 resultat.addAll(indexInverse.getDocumentsByMot(mot).keySet());
-                if(operateur.equals("ET")){
+                if(operateur.equals("et")){
                     resultatFinal.retainAll(resultat);
                 }
-                if(operateur.equals("OU")){
+                if(operateur.equals("ou")){
                     resultatFinal.addAll(resultat);
                 }
-                if(operateur.equals("SAUF")){
+                if(operateur.equals("sauf")){
                     resultatFinal.removeAll(resultat);
                 }
-                operateur = "OU";
+                operateur = "ou";
                 resultat.clear();
             }
 
-            operateur = "OU"; //remet le ou par defaut
+            operateur = "ou"; //remet le ou par defaut
         }
         if(resultatFinal.isEmpty()){
             return "Aucun resultat trouvé!";
