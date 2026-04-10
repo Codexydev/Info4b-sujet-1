@@ -22,8 +22,12 @@ public class Main {
 
         try {
             Files.walk(start)
+                    .parallel()
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
+                        if (path.getFileName().toString().startsWith(".")) {
+                            return; //permet d'eviter les fihciers .DS_store qui ne serve pas à l'indexation
+                        }
                         String cheminFichier = path.toString();
 
                         if (stockagesDocuments.getMetaData(cheminFichier) == null) {
@@ -74,7 +78,6 @@ public class Main {
 
         if (DEBUG) System.out.println("nombre de mots : " + nbMots);
         stockagesDocuments.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(), nbMots);
-        // enregistre dans journal chaque fichier indexer (= sauvegarde)
 
         ConcurrentHashMap<String, Integer> mots = indexInverse.getMotsDocument(id);
         if (estUnAjout) {
@@ -96,8 +99,8 @@ public class Main {
                 ThreadGroup clientsGroup = new ThreadGroup("Clients-connectes");
                 new Thread(clientsGroup, () -> {
                     try {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                        DataInputStream in = new DataInputStream(socket.getInputStream());
+                        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
                         String help = "Commandes disponibles :\n" +
                                 "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
@@ -120,13 +123,13 @@ public class Main {
                                 "-sw -rm" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'enlever un mot de la liste des stop words\n" + ANSI_RESET +
                                 "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET;
 
-                        out.println(help);
-                        out.println("END_OF_MESSAGE");
+                        out.writeUTF(help);
+                        out.writeUTF("END_OF_MESSAGE");
 
                         boolean clientConnected = true;
 
                         while (clientConnected) {
-                            String str = in.readLine();
+                            String str = in.readUTF();
 
                             if (str == null || str.equals("-q") || str.equals("q")) {
                                 clientConnected = false;
@@ -141,28 +144,28 @@ public class Main {
                             if (str.length() > 2 || str.equals("-h") || str.equals("-l")) {
                                 switch (command) {
                                     case "-l":
-                                        out.println(ANSI_BLEU);
+                                        out.writeUTF(ANSI_BLEU);
                                         for (String file : stockagesDocuments.getStockagesDocuments().keySet()) {
-                                            out.println(file);
+                                            out.writeUTF(file);
                                         }
-                                        out.println(ANSI_RESET);
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF(ANSI_RESET);
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-h":
-                                        out.println("\n" + help);
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("\n" + help);
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-t":
-                                        out.println("Message reçu : " + ANSI_BLEU + str.substring(3) + ANSI_RESET);
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("Message reçu : " + ANSI_BLEU + str.substring(3) + ANSI_RESET);
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-s":
                                         if (arg.length < 2) {
-                                            out.println("Erreur: Veuillez spécifier un mot à chercher.");
-                                            out.println("END_OF_MESSAGE");
+                                            out.writeUTF("Erreur: Veuillez spécifier un mot à chercher.");
+                                            out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
 
@@ -177,114 +180,115 @@ public class Main {
                                             recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
                                         }
 
-                                        out.println(recherche.effectuerRecherche());
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF(recherche.effectuerRecherche());
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-ar":
                                         if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
-                                            out.println("Erreur: Specifiez un/des mot(s) à chercher");
-                                            out.println("END_OF_MESSAGE");
+                                            out.writeUTF("Erreur: Specifiez un/des mot(s) à chercher");
+                                            out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
                                         String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
                                         String[] motsAvances = requete.split(" "); //découpage avec les espaces
 
                                         Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0]);
-                                        out.println(maRecherche.RechercheAvance());
+                                        out.writeUTF(maRecherche.RechercheAvance());
 
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-m":
-                                        String chemin;
-                                        if (arg.length > 3) chemin = arg[2];
-                                        else chemin = arg[1];
-                                        UpdateFile updateFile = new UpdateFile(chemin);
-                                        switch (arg[1]) {
-                                            case "-rn":
-                                                if (arg.length >= 4) {
-                                                    String nouveauChemin = arg[3];
+                                        if (str.startsWith("-m -rn")) {
+                                            String[] argumentsRn = str.split(" ", 4);
+                                            if (argumentsRn.length >= 4) {
+                                                String ancienChemin = argumentsRn[2];
+                                                String nouveauChemin = argumentsRn[3];
+                                                UpdateFile updateFileRn = new UpdateFile(ancienChemin);
+                                                String resultat = updateFileRn.renomerFichier(nouveauChemin);
 
-                                                    String resultat = updateFile.renomerFichier(nouveauChemin);
-                                                    if (resultat.equals("Fichier renommé")) {
-                                                        stockagesDocuments.supprimerDocument(chemin);
-                                                        journal.ecrireSuppression(chemin, System.currentTimeMillis());
-
-                                                        idToPath.addPath(nouveauChemin);
-                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true, stopWord);
-                                                    }
-
-                                                    out.println(resultat);
-                                                } else {
-                                                    out.println("Erreur: arg manquants. Utilisation: -m -rn <ancien> <nouveau>");
+                                                if (resultat.equals("Fichier renommé")) {
+                                                    stockagesDocuments.supprimerDocument(ancienChemin);
+                                                    journal.ecrireSuppression(ancienChemin, System.currentTimeMillis());
+                                                    idToPath.addPath(nouveauChemin);
+                                                    indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true, stopWord);
                                                 }
-                                                break;
+                                                out.writeUTF(resultat);
+                                            } else {
+                                                out.writeUTF("Erreur: arguments manquants. Utilisation: -m -rn <ancien> <nouveau>");
+                                            }
+                                        } else if (str.startsWith("-m -rm")) {
+                                            String cheminRm = str.substring(7).trim();
+                                            UpdateFile updateFileRm = new UpdateFile(cheminRm);
+                                            String resultat = updateFileRm.supprimerFichier();
 
-                                            case "-rm":
-                                                String resultat = updateFile.supprimerFichier();
+                                            if (resultat.equals("Fichier supprimé")) {
+                                                stockagesDocuments.supprimerDocument(cheminRm);
+                                                journal.ecrireSuppression(cheminRm, System.currentTimeMillis());
+                                                out.writeUTF("Fichier supprimé avec succès.");
+                                            } else {
+                                                out.writeUTF("Erreur lors de la suppression.");
+                                            }
+                                        } else {
+                                            String cheminMeta = str.substring(3).trim();
+                                            MetaDataDocument meta = stockagesDocuments.getMetaData(cheminMeta);
 
-                                                if (resultat.equals("Fichier supprimé")) {
-                                                    stockagesDocuments.supprimerDocument(chemin);
-                                                    journal.ecrireSuppression(chemin, System.currentTimeMillis());
-                                                } else {
-                                                    out.println("erreur");
-                                                }
-                                                break;
-
-                                            default:
-                                                out.println(stockagesDocuments.getMetaData(arg[1]));
-                                                break;
+                                            if (meta != null) {
+                                                out.writeUTF(meta.toString());
+                                            } else {
+                                                out.writeUTF("Fichier introuvable dans l'index.");
+                                            }
                                         }
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-exif":
-                                        if (arg.length < 2) {
-                                            out.println("Erreur: Spécifiez un chemin d'image.");
-                                            out.println("END_OF_MESSAGE");
+                                        if (str.length() <= 6) {
+                                            out.writeUTF("Erreur: Spécifiez un chemin d'image.");
+                                            out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(arg[1]);
+                                        String cheminImage = str.substring(6).trim();
+                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
                                         String metaExiv = extracteurExiv.extraireTexte();
+
                                         if (metaExiv == null || metaExiv.isEmpty()) {
-                                            out.println("Impossible d'extraire les métadonnées.");
+                                            out.writeUTF("Impossible d'extraire les métadonnées.");
                                         } else {
-                                            out.println(metaExiv);
+                                            out.writeUTF(metaExiv);
                                         }
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-r":
                                         path = str.substring(3).trim();
                                         ExtracteurTexte extracteurTexte = new ExtracteurTexte(path);
                                         String texte = extracteurTexte.extraireTexte();
-                                        out.println("\n" + texte);
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("\n" + texte);
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-dl":
                                         String fichier = str.substring(4).trim();
-                                        String unité = "octets";
                                         File monFichier = new File(fichier);
                                         if (!monFichier.exists()) {
-                                            out.println("fichier inexistant");
-                                            out.println("END_OF_MESSAGE");
+                                            out.writeUTF("fichier inexistant");
+                                            out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         } else {
-                                            String taille_fichier_affiche_fin = "";
                                             long taille_fichier = monFichier.length();
-                                            out.println("File_incomming..." + " " + taille_fichier + " " + monFichier.getName());
-                                            out.flush();
+
+                                            out.writeUTF("File_incomming... " + taille_fichier + " " + monFichier.getName());
+
+                                            FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
-                                            int quantité_actuelle_lu = 0;
-                                            FileInputStream lecteur= new FileInputStream((monFichier));
-                                            OutputStream tuyau_envoi = socket.getOutputStream();
-                                            while((quantité_actuelle_lu = lecteur.read(buffer)) != -1){
-                                                tuyau_envoi.write(buffer, 0, quantité_actuelle_lu);
+                                            int quantite_lu;
+                                            while ((quantite_lu = lecteur.read(buffer)) != -1) {
+                                                out.write(buffer, 0, quantite_lu);
                                             }
                                             lecteur.close();
-                                            tuyau_envoi.flush();
+                                            out.flush();
                                         }
                                         break;
 
@@ -300,22 +304,22 @@ public class Main {
                                             System.out.println("Erreur lors de la reindexation du journal.");
                                         }
                                         parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
-                                        out.println("Réindexation terminée !");
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("Réindexation terminée !");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-d":
                                         Doublon doublon = new Doublon(arg[1], arg[2]);
                                         boolean estDublon = doublon.EstDoublon();
-                                        if (estDublon) out.println("C'est fichier sont similaire");
-                                        else out.println("fichier différents");
-                                        out.println("END_OF_MESSAGE");
+                                        if (estDublon) out.writeUTF("C'est fichier sont similaire");
+                                        else out.writeUTF("fichier différents");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-sw":
                                         if (arg.length < 3 && !arg[1].equals("-l")) {
-                                            out.println("Erreur : Arguments manquants. Exemple : -sw -add le,la");
-                                            out.println("END_OF_MESSAGE");
+                                            out.writeUTF("Erreur : Arguments manquants. Exemple : -sw -add le,la");
+                                            out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
                                         switch (arg[1]) {
@@ -327,9 +331,9 @@ public class Main {
                                                     for (String m : motsAAjouter) {
                                                         indexInverse.supprimerMot(m);
                                                     }
-                                                    out.println("Mot ajouté et supprimer de l'index !");
+                                                    out.writeUTF("Mot ajouté aux stopwords et supprimé de l'index !");
                                                 } catch (IOException e) {
-                                                    out.println("Erreur d'écriture dans le fichier stopword");
+                                                    out.writeUTF("Erreur d'écriture dans le fichier stopword");
                                                 }
                                                 break;
 
@@ -337,38 +341,45 @@ public class Main {
                                                 try {
                                                     String[] motsASupprimer = arg[2].split(",");
                                                     stopWord.removeMot(motsASupprimer);
-                                                    out.println("Mot retiré des Stop Words !");
-                                                    out.println("Note : Ce changement s'appliquera aux futures indexations. Les anciens fichiers ne contiennent pas encore ce mot dans l'index.");
+                                                    out.writeUTF("Mot retiré des Stop Words !");
+                                                    out.writeUTF("Lancement de la reindexation!");
+                                                    Journal.resetJournal(stockagesDocuments, indexInverse, idToPath);
+                                                    try {journal.supprimerJournal();
+                                                    }catch (IOException e){
+                                                        System.out.println("Erreur lors de la reindexation du journal.");
+                                                    }
+                                                    parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
+                                                    out.writeUTF("Réindexation terminée !");
                                                 } catch (IOException e) {
-                                                    out.println("Erreur de réécriture dans le fichier stopword.");
+                                                    out.writeUTF("Erreur de réécriture dans le fichier stopword.");
                                                 }
                                                 break;
 
                                             case "-l":
-                                                out.println(ANSI_BLEU + "Liste des mots vides actuels :" + ANSI_RESET);
-                                                out.println(stopWord);
+                                                out.writeUTF(ANSI_BLEU + "Liste des mots vides actuels :" + ANSI_RESET);
+                                                out.writeUTF(String.valueOf(stopWord));
                                                 break;
                                         }
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     default:
-                                        out.println("Commande inconnuee. Tapez -h pour afficher l'aide.");
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("Commande inconnuee. Tapez -h pour afficher l'aide.");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
                                     case "-clean":
                                         try {
                                             journal.compacter(stockagesDocuments, indexInverse);
-                                            out.println("Journal compacté avec succès.");
+                                            out.writeUTF("Journal compacté avec succès.");
                                         } catch (IOException e) {
-                                            out.println("Erreur lors de la compaction : " + e.getMessage());
+                                            out.writeUTF("Erreur lors de la compaction : " + e.getMessage());
                                         }
-                                        out.println("END_OF_MESSAGE");
+                                        out.writeUTF("END_OF_MESSAGE");
                                         break;
                                 }
                             } else {
-                                out.println("donnez le(s) parametre(s)");
-                                out.println("END_OF_MESSAGE");
+                                out.writeUTF("donnez le(s) parametre(s)");
+                                out.writeUTF("END_OF_MESSAGE");
                             }
                         }
                         socket.close();

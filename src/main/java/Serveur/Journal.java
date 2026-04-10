@@ -203,7 +203,7 @@ public class Journal {
                         long taille = Long.parseLong(champs[3]);
 
                         idVersChemin.addPath(chemin);
-                        int docId = idVersChemin.getIdCourant();
+                        int docId = idVersChemin.getIdFromPath(chemin);
 
                         ConcurrentHashMap<String, Integer> frequence = new ConcurrentHashMap<>();
                         if (champs.length > 4 && !champs[4].isEmpty()) {
