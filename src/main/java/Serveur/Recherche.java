@@ -9,42 +9,39 @@ public class Recherche {
     private final IdVersChemin idVersChemin;
     private final String[] motsRecherches;
     private final ArrayList<String> motsNonRecherches = new ArrayList<>();
+    private final StopWord stopWord;
 
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public Recherche(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idVersChemin, String[] motsRecherches, String[] motsNonRecherches) {
+    public Recherche(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idVersChemin, String[] motsRecherches, String[] motsNonRecherches, StopWord stopWord) {
         this.indexInverse = indexInverse;
         this.stockagesDocuments = stockagesDocuments;
         this.idVersChemin = idVersChemin;
+        this.stopWord = stopWord;
         this.motsRecherches = new String[motsRecherches.length];
-        for (int i = 0; i < motsRecherches.length; i++) { //passage en minuscule de tous les mots recherchés
+
+        for (int i = 0; i < motsRecherches.length; i++) { // passage en minuscule
             this.motsRecherches[i] = motsRecherches[i].toLowerCase();
         }
-        for (String motExclu : motsNonRecherches) { //idem avec les mots exclu
+        for (String motExclu : motsNonRecherches) { // idem avec les mots exclu
             this.motsNonRecherches.add(motExclu.toLowerCase());
         }
     }
 
-    public Recherche(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idVersChemin, String[] motsRecherches) {
+    public Recherche(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idVersChemin, String[] motsRecherches, StopWord stopWord) {
         this.indexInverse = indexInverse;
         this.stockagesDocuments = stockagesDocuments;
         this.idVersChemin = idVersChemin;
+        this.stopWord = stopWord;
         this.motsRecherches = new String[motsRecherches.length];
-        for (int i = 0; i < motsRecherches.length; i++) { //pareil passage en minuscule
+
+        for (int i = 0; i < motsRecherches.length; i++) { // passage en minuscule
             this.motsRecherches[i] = motsRecherches[i].toLowerCase();
         }
     }
 
-    /**
-     * Effectue une recherche ordonne les resultats selon TF-IDF.<br>
-     * IDF -> log( totalDocsConcerné / nbDocsAvecMotDedans )<br>
-     * TF -> occurrences du mot dans ce doc / total mots du doc<br>
-     * TF-IDF = Score -> IDF * TF
-     *
-     * @return String
-     */
     public String effectuerRecherche() {
         ConcurrentHashMap<String, Double> scoresParChemin = new ConcurrentHashMap<>();
         int totalDocs = stockagesDocuments.getNombreDocuments();
@@ -75,16 +72,28 @@ public class Recherche {
 
                     double tf = (double) indexDuMot.get(id) / metaData.getTotalMots();
                     double score = tf * idf;
-                    double scoreArrondi = Math.round(score * 10000.0) / 10000.0;
-                    // Changement pr pas écraser le score à chaque fois
+
                     String chemin = idVersChemin.getChemin(id);
                     scoresParChemin.merge(chemin, score, Double::sum);
                 }
             }
         }
-        List<Map.Entry<String, Double>> listeTriee = new ArrayList<>(scoresParChemin.entrySet());
 
+        List<Map.Entry<String, Double>> listeTriee = new ArrayList<>(scoresParChemin.entrySet());
         listeTriee.sort(Map.Entry.<String, Double>comparingByValue().reversed());
+
+        if (listeTriee.isEmpty()) {
+            List<String> motsVidesTrouves = new ArrayList<>();
+            for (String mot : motsRecherches) { //permet de verif si les mots sont dans la liste des stopwords
+                if (stopWord.getWords().contains(mot)) {
+                    motsVidesTrouves.add(mot);
+                }
+            }
+            if (!motsVidesTrouves.isEmpty()) {
+                return "Aucun résultat : ce mot appartient à la liste des Stop Words";
+            }
+            return "Aucun résultat trouvé pour le(s) mot(s) recherché(s).";
+        }
 
         StringBuilder reponseText = new StringBuilder();
         for (Map.Entry<String, Double> entry : listeTriee) {
@@ -94,15 +103,15 @@ public class Recherche {
                     .append("\n");
         }
 
-        if (reponseText.length() == 0) return "Aucun résultat trouvé pour le(s) mot(s) recherché(s).";
         return reponseText.toString();
     }
 
     public String RechercheAvance(){
-        java.util.HashSet<Integer> resultat = new java.util.HashSet<>(); //le HashSet évite les doublons
+        java.util.HashSet<Integer> resultat = new java.util.HashSet<>();
         java.util.HashSet<Integer> resultatFinal = new java.util.HashSet<>();
-        String operateur = "ou"; //je passe le OU comme opérateur par défauts
+        String operateur = "ou";
         boolean premierMot = true;
+
         for(String mot : motsRecherches){
             if(mot.equals("et") || mot.equals("ou") || mot.equals("sauf")){
                 operateur = mot;
@@ -125,17 +134,26 @@ public class Recherche {
                 operateur = "ou";
                 resultat.clear();
             }
+            operateur = "ou";
+        }
 
-            operateur = "ou"; //remet le ou par defaut
-        }
         if(resultatFinal.isEmpty()){
-            return "Aucun resultat trouvé!";
+            List<String> motsVidesTrouves = new ArrayList<>();
+            for (String mot : motsRecherches) {
+                if (stopWord.getWords().contains(mot)) {
+                    motsVidesTrouves.add(mot);
+                }
+            }
+            if (!motsVidesTrouves.isEmpty()) {
+                return "Aucun résultat : ce mot appartient à la liste des Stop Words.";
+            }
+            return "Aucun résultat trouvé!";
         }
+
         String reponse= "";
         for(Integer id: resultatFinal){
             reponse += idVersChemin.getChemin(id) + "\n";
         }
-        return ANSI_BLEU+reponse+ANSI_RESET;
-
+        return ANSI_BLEU + reponse + ANSI_RESET;
     }
 }

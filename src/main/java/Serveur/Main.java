@@ -174,10 +174,10 @@ public class Main {
                                         Recherche recherche;
                                         if (arg.length >= 4 && arg[2].equals("--")) {
                                             String[] motsNonRecherches = arg[3].split(",");
-                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
+                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches, stopWord);
 
                                         } else {
-                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
+                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, stopWord);
                                         }
 
                                         out.writeUTF(recherche.effectuerRecherche());
@@ -193,7 +193,7 @@ public class Main {
                                         String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
                                         String[] motsAvances = requete.split(" "); //découpage avec les espaces
 
-                                        Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0]);
+                                        Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0], stopWord);
                                         out.writeUTF(maRecherche.RechercheAvance());
 
                                         out.writeUTF("END_OF_MESSAGE");
