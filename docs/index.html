@@ -4,16 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation CLI - Projet Info4B</title>
+    <title>Docs - Projet Info4B</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../website/docs.css"> </head>
+    <link rel="stylesheet" href="../website/docs.css">
+</head>
 
 <body>
+    <div class="img-bg"></div>
 
     <div class="header-container">
         <nav class="header navbar navbar-expand-lg navbar-light shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="../index.html">Moteur de Recherche</a>
+                <a class="navbar-brand fw-bold" href="#">Moteur de Recherche</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
                     aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -21,67 +23,116 @@
                 <div class="collapse navbar-collapse navbar-container-perso" id="navbarText">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="../index.html">← Retour à l'accueil</a>
+                            <a class="nav-link" href="../index.html">← Accueil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#indexation">Recherche & Indexation</a>
+                            <a class="nav-link" href="#orchestration">Le script run.sh</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#fichiers">Gestion Fichiers</a>
+                            <a class="nav-link" href="#recherche">Recherche</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#avance">Outils Avancés</a>
+                            <a class="nav-link" href="#fichiers">Fichiers & Réseau</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold text-accent" href="#avance">Outils Avancés</a>
                         </li>
                     </ul>
-                    <span class="navbar-text text-accent fw-bold opacity-100">
-                        Documentation CLI
+                    <span class="navbar-text text-dark opacity-75">
+                        Projet académique Info4B
                     </span>
                 </div>
             </div>
         </nav>
     </div>
 
-    <div class="img-bg"></div>
     <div class="bg-docs-page">
-        
-        <div class="container text-light pt-4">
-            
-            <div class="text-center mb-5">
-                <h1 class="fw-bold text-accent display-5">Guide d'utilisation du Client CLI</h1>
-                <p class="text-secondary fs-5">Découvrez toutes les commandes disponibles pour interagir avec le serveur.</p>
+        <div class="container text-light">
+
+            <div class="mb-5 mt-4">
+                <h1 class="fw-bold text-accent">Documentation Technique Complète</h1>
+                <p class="text-secondary">Manuel d'utilisation détaillé de l'interface en ligne de commande (CLI) et de l'orchestration du serveur.</p>
             </div>
 
-            <section id="indexation" class="mb-5">
+            <section id="orchestration" class="mb-5">
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
-                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Indexation & Recherche</h2>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-5">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;dossier&gt;</code></h5>
-                                <p class="text-secondary mt-2">Démarre le processus d'indexation sur un dossier donné. Le serveur va scanner tous les fichiers textes et PDF, extraire leur contenu et peupler l'index inversé.</p>
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Lancement (run.sh)</h2>
+                        <p>Le script <code>run.sh</code> automatise entièrement la compilation Maven, le lancement des processus en arrière-plan et la gestion des ports réseau (pour éviter l'erreur <em>Address already in use</em>).</p>
+
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Utilisation du menu interactif</h5>
+                                <p class="text-secondary mt-3">Exécutez le script à la racine du projet. Un menu vous guidera pour lancer le serveur et le client sans avoir à mémoriser les commandes Maven.</p>
+                                <div class="terminal-block shadow-sm mt-3">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># 1. Rendre le script exécutable (Linux/Mac)</span>
+chmod +x run.sh
+
+<span class="text-comment"># 2. Lancement</span>
+./run.sh</code></pre>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-7 d-flex align-items-center">
-                                <div class="terminal-block shadow-sm w-100">
-                                    <div class="terminal-body p-3">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -s src/documents
-<span class="text-success-cmd">Dossier indexé avec succès (142 fichiers).</span></code></pre>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Options du menu</h5>
+                                <div class="terminal-block shadow-sm mt-3">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-light">========================================
+ MENU DE LANCEMENT - PROJET INFO4B 
+========================================
+1) Recompiler tout le projet (Maven)
+2) Démarrer le Serveur
+3) Démarrer le Client interactif
+4) Quitter
+========================================
+-> Entrez votre choix (1-4) : </span><span class="text-prompt">3</span></code></pre>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
 
-                        <div class="row">
-                            <div class="col-md-5">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-r &lt;mots&gt;</code></h5>
-                                <p class="text-secondary mt-2">Effectue une recherche intelligente. Le système utilise l'algorithme TF-IDF pour vous retourner les documents les plus pertinents classés par score. Vous pouvez utiliser les opérateurs logiques.</p>
+            <section id="recherche" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Indexation & Moteur TF-IDF</h2>
+                        
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-12">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;dossier&gt;</code> (Scan & Indexation)</h5>
+                                <p class="text-secondary">Parcourt récursivement un dossier, extrait le texte des fichiers (PDF, TXT) et peuple l'index inversé en mémoire (RAM).</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -s src/documents
+<span class="text-success-cmd">Dossier indexé avec succès. Surveillance temps réel activée.</span></code></pre>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-7 d-flex align-items-center">
-                                <div class="terminal-block shadow-sm w-100">
-                                    <div class="terminal-body p-3">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -r architecture AND réseau
-<span class="text-light">Document: src/cours.pdf | Score TF-IDF: 0.8452
-Document: src/notes.txt | Score TF-IDF: 0.1205</span></code></pre>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold mt-4"><code class="text-accent fs-5">-r &lt;mots&gt;</code></h5>
+                                <p class="text-secondary">Recherche standard calculée via TF-IDF. Vous pouvez exclure des mots stricts avec le double tiret <code>--</code>.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># Recherche "réseau" sans "cloud"</span>
+<span class="text-prompt">></span> -r reseau -- cloud
+<span class="text-light">Document: src/tcp.txt | Score: 0.8452
+Document: src/osi.pdf | Score: 0.1205</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold mt-4"><code class="text-accent fs-5">-ar &lt;requête&gt;</code></h5>
+                                <p class="text-secondary">Recherche avancée supportant les opérateurs logiques complexes : <code>ET</code>, <code>OU</code>, <code>SAUF</code>.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># Doit contenir java ET réseau, sans C++</span>
+<span class="text-prompt">></span> -ar java ET reseau SAUF cpp
+<span class="text-light">Document: src/sockets.txt | Score: 1.1042</span></code></pre>
                                     </div>
                                 </div>
                             </div>
@@ -94,58 +145,55 @@ Document: src/notes.txt | Score TF-IDF: 0.1205</span></code></pre>
             <section id="fichiers" class="mb-5">
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
-                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Gestion des Fichiers</h2>
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Gestion de Fichiers Distants</h2>
+                        <p>Commandes réseau utilisant les flux sécurisés pour prévenir la corruption des données lors du transfert.</p>
 
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
-                                <div class="p-3 border border-secondary rounded h-100 border-opacity-50">
-                                    <h5 class="fw-bold"><code class="text-accent fs-5">-dl &lt;fichier&gt;</code></h5>
-                                    <p class="text-secondary">Télécharge un fichier depuis le serveur vers votre machine locale (dans le dossier <code>downloads/</code>). Le transfert binaire garantit qu'il n'y a aucune corruption.</p>
-                                    <div class="terminal-block shadow-sm mt-3">
-                                        <div class="terminal-body p-2">
-                                            <pre class="m-0"><code><span class="text-prompt">></span> -dl src/cours.pdf</code></pre>
-                                        </div>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-dl &lt;chemin&gt;</code></h5>
+                                <p class="text-secondary mb-2">Télécharge un fichier binaire (PDF, Image, etc.) depuis le serveur vers le dossier local <code>downloads/</code>.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -dl src/cours_maths.pdf
+<span class="text-success-cmd">Début du téléchargement : cours_maths.pdf
+Téléchargement terminé ! (3072 octets)</span></code></pre>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <div class="p-3 border border-secondary rounded h-100 border-opacity-50">
-                                    <h5 class="fw-bold"><code class="text-accent fs-5">-m &lt;fichier&gt;</code></h5>
-                                    <p class="text-secondary">Affiche les métadonnées internes générées par le moteur pour un document spécifique (Poids, date d'indexation, taille, etc).</p>
-                                    <div class="terminal-block shadow-sm mt-3">
-                                        <div class="terminal-body p-2">
-                                            <pre class="m-0"><code><span class="text-prompt">></span> -m src/notes.txt</code></pre>
-                                        </div>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m &lt;chemin&gt;</code></h5>
+                                <p class="text-secondary mb-2">Affiche les métadonnées internes du moteur (Date d'indexation, taille exacte, nombre de mots).</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -m src/notes.txt
+<span class="text-light">Chemin: src/notes.txt | Poids: 14Kb</span></code></pre>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <div class="p-3 border border-secondary rounded h-100 border-opacity-50">
-                                    <h5 class="fw-bold"><code class="text-accent fs-5">-m -rn &lt;old&gt; &lt;new&gt;</code></h5>
-                                    <p class="text-secondary">Renomme un fichier sur le serveur. Le moteur mettra automatiquement à jour l'index inversé et l'historique de journalisation.</p>
-                                    <div class="terminal-block shadow-sm mt-3">
-                                        <div class="terminal-body p-2">
-                                            <pre class="m-0"><code><span class="text-prompt">></span> -m -rn vieux.txt nouveau.txt</code></pre>
-                                        </div>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m -rn &lt;ancien&gt; &lt;nouveau&gt;</code></h5>
+                                <p class="text-secondary mb-2">Renomme le fichier sur le serveur. Met à jour l'index et consigne l'action dans <code>journal.csv</code>.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -m -rn src/old.txt src/new.txt
+<span class="text-success-cmd">Fichier renommé avec succès.</span></code></pre>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <div class="p-3 border border-secondary rounded h-100 border-opacity-50">
-                                    <h5 class="fw-bold"><code class="text-accent fs-5">-m -rm &lt;fichier&gt;</code></h5>
-                                    <p class="text-secondary">Supprime définitivement un fichier du serveur et purge ses données de l'index de recherche.</p>
-                                    <div class="terminal-block shadow-sm mt-3">
-                                        <div class="terminal-body p-2">
-                                            <pre class="m-0"><code><span class="text-prompt">></span> -m -rm src/brouillon.txt</code></pre>
-                                        </div>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m -rm &lt;chemin&gt;</code></h5>
+                                <p class="text-secondary mb-2">Supprime définitivement le fichier du serveur physique et purge l'index inversé.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -m -rm src/secret.pdf
+<span class="text-success-cmd">Fichier supprimé avec succès.</span></code></pre>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </section>
@@ -153,43 +201,42 @@ Document: src/notes.txt | Score TF-IDF: 0.1205</span></code></pre>
             <section id="avance" class="mb-5">
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
-                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Outils Avancés</h2>
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Outils d'Analyse Avancés</h2>
                         
-                        <p class="mb-4">Le moteur de recherche embarque des modules complémentaires pour l'analyse et la maintenance de votre base documentaire.</p>
-
-                        <div class="list-group list-group-flush rounded bg-transparent">
-                            
+                        <div class="list-group list-group-flush rounded bg-transparent mt-2">
                             <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-exif &lt;image&gt;</code> : Extraction de Métadonnées Images</h5>
-                                <p class="text-secondary mb-2">Utilise l'outil système <code>exiv2</code> pour lire et afficher toutes les données cachées dans une image (Appareil photo, GPS, Date de création).</p>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-exif &lt;image.jpg&gt;</code> : Extraction EXIF</h5>
+                                <p class="text-secondary mb-2">S'interface avec <code>exiv2</code> pour extraire les données cachées (GPS, Appareil photo, Date) d'une image distante.</p>
                                 <div class="terminal-block shadow-sm w-75">
-                                    <div class="terminal-body p-2">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -exif images/vacances.jpg</code></pre>
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -exif images/photo.jpg</code></pre>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="list-group-item bg-transparent text-light border-secondary list-group-item-perso">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-d &lt;fich1&gt; &lt;fich2&gt;</code> : Détection de Doublons</h5>
-                                <p class="text-secondary mb-2">Compare mathématiquement deux fichiers pour déterminer s'ils sont strictement identiques en termes de contenu, peu importe leur nom.</p>
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-d &lt;fich1&gt; &lt;fich2&gt;</code> : Doublons stricts</h5>
+                                <p class="text-secondary mb-2">Vérifie algorithmiquement si deux fichiers sont des copies conformes au niveau du contenu.</p>
                                 <div class="terminal-block shadow-sm w-75">
-                                    <div class="terminal-body p-2">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -d src/A.txt src/copie_de_A.txt</code></pre>
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -d doc1.txt doc2.txt
+<span class="text-success-cmd">Ces fichiers sont similaires.</span></code></pre>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="list-group-item bg-transparent text-light border-secondary list-group-item-perso border-bottom-0">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-sw -add / -rm</code> : Gestion des Stop Words</h5>
-                                <p class="text-secondary mb-2">Ajoute ou retire des "mots vides" (le, la, et, ou...) à la liste d'exclusion pour améliorer la pertinence du score TF-IDF.</p>
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary border-bottom-0">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-sw -add / -rm &lt;mots&gt;</code> : Stop Words</h5>
+                                <p class="text-secondary mb-2">Modifie la liste des Stop-Words (mots exclus du calcul TF-IDF). L'ajout ou la suppression déclenche une réindexation automatique.</p>
                                 <div class="terminal-block shadow-sm w-75">
-                                    <div class="terminal-body p-2">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -sw -add donc,cependant</code></pre>
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -sw -add cependant,néanmoins
+<span class="text-success-cmd">Mots ajoutés à la liste d'exclusion avec succès.</span></code></pre>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
+
                     </div>
                 </div>
             </section>
