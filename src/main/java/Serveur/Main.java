@@ -309,10 +309,37 @@ public class Main {
                                         break;
 
                                     case "-d":
-                                        Doublon doublon = new Doublon(arg[1], arg[2]);
+                                        if (arg.length < 3) {
+                                            out.writeUTF("Erreur : arguments manquants. Utilisation : -d <chemin_fichier_1> <chemin_fichier_2>");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        String chemin1 = arg[1];
+                                        String chemin2 = arg[2];
+                                        File fichier1 = new File(chemin1);
+                                        File fichier2 = new File(chemin2);
+
+                                        if (!fichier1.exists() || !fichier1.isFile()) {
+                                            out.writeUTF("Erreur : Le premier fichier est introuvable ou est un dossier (" + chemin1 + ").");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+                                        if (!fichier2.exists() || !fichier2.isFile()) {
+                                            out.writeUTF("Erreur : Le deuxième fichier est introuvable ou est un dossier (" + chemin2 + ").");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        Doublon doublon = new Doublon(chemin1, chemin2);
                                         boolean estDublon = doublon.EstDoublon();
-                                        if (estDublon) out.writeUTF("C'est fichier sont similaire");
-                                        else out.writeUTF("fichier différents");
+
+                                        if (estDublon) {
+                                            out.writeUTF("Ces fichiers sont similaires.");
+                                        } else {
+                                            out.writeUTF("Ces fichiers sont différents.");
+                                        }
+
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
