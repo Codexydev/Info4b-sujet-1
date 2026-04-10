@@ -415,7 +415,10 @@ public class Main {
                             }
                         }
                         socket.close();
+                    } catch (java.io.EOFException | java.net.SocketException e) {
+                        System.out.println("Un client s'est déconnecté brutalement.");
                     } catch (IOException e) {
+                        System.err.println("Erreur d'entrée/sortie avec le client :");
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
                         throw new RuntimeException(e);
