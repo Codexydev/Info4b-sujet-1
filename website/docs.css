@@ -130,6 +130,18 @@ body {
     .card-body {
         padding: 20px !important;
     }
+
+    .list-group-item-perso{
+        padding : 1.5rem 0.5rem 1.5rem !important;
+    }
+
+    .w-75{
+        width: 100% !important;
+    }
+}
+
+.list-group-item-perso{
+    padding : 1.5rem;
 }
 
 .header {
