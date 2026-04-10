@@ -47,7 +47,13 @@ public class SurveillanceTempsReel implements Runnable {
                 WatchKey info = watchservice.take(); //boucle infinie mais avec un emethode bloquante, et on est notifier que si besoin
                 for(WatchEvent<?> action : info.pollEvents()){
                     WatchEvent.Kind<?> typeAction = action.kind(); //type d'evenement (si on creeer?modifie?supprime?)
-                    Path nomDuFichier = (Path) action.context(); //où est ce que l'action a été faite?
+
+                    if (typeAction == StandardWatchEventKinds.OVERFLOW) {
+                        continue;
+                    }
+
+                    Path nomDuFichier = (Path) action.context();
+                    if (nomDuFichier == null) continue; // Double sécurité
                     Path dossierConcerne = (Path) info.watchable();
                     String cheminComplet = dossierConcerne.resolve(nomDuFichier).toString();
                     if (nomDuFichier.toString().startsWith(".")) {

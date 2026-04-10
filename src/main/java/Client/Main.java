@@ -28,7 +28,6 @@ public class Main {
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
 
-            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
@@ -42,8 +41,7 @@ public class Main {
             }
 
             do {
-                System.out.print("\n > ");
-                str = userInput.readLine();
+                str = lineReader.readLine("\n > ");
 
                 out.writeUTF(str);
                 out.flush();
