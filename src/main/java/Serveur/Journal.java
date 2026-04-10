@@ -288,7 +288,6 @@ public class Journal {
         tmpWriter.close();
         this.writer.close();
         new File(chemin).delete();
-        tmp.renameTo(new File(chemin));
         if (!tmp.renameTo(new File(chemin))) {
             throw new IOException("Échec du renommage journal.tmp → journal.csv");
         }
