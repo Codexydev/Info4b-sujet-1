@@ -270,6 +270,11 @@ public class Main {
                                         break;
 
                                     case "-dl":
+                                        if (str.length() <= 4) {
+                                            out.writeUTF("Erreur : Spécifiez un nom de fichier. (ex: -dl monfichier.txt)");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
                                         String fichier = str.substring(4).trim();
                                         File monFichier = new File(fichier);
                                         if (!monFichier.exists()) {
