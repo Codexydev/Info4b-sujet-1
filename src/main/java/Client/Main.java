@@ -23,14 +23,12 @@ public class Main {
             Socket socket = new Socket("localhost", 12345);
 
             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-            // NOUVEAU : Utilisation des DataStreams
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             String str;
             String reponse;
 
-            // Lecture du message d'accueil (Le Menu Help)
             while (true) {
                 reponse = in.readUTF();
                 if (reponse.equals("END_OF_MESSAGE")) break;
@@ -39,20 +37,17 @@ public class Main {
 
             do {
                 System.out.print("\n > ");
-                str = userInput.readLine(); // lecture entrée clavier utilisateur
+                str = userInput.readLine();
 
-                out.writeUTF(str); // envoie la commande au serveur en UTF
+                out.writeUTF(str);
                 out.flush();
 
-                // Boucle de réponse du serveur
                 while (true) {
                     reponse = in.readUTF();
 
                     if (reponse.equals("END_OF_MESSAGE")) {
                         break;
                     } else if (reponse.startsWith("File_incomming...")) {
-
-                        // Séparation en 3 parties max pour supporter les noms avec espaces (Bug #3)
                         String[] donnees = reponse.split(" ", 3);
                         long taille_fichier = Long.parseLong(donnees[1]);
                         String nomFichier = donnees[2];
@@ -68,7 +63,6 @@ public class Main {
                         long total_lu = 0;
                         int quantite_lu;
 
-                        // LECTURE CHIRURGICALE : On ne lit que les octets qui appartiennent au fichier
                         while (total_lu < taille_fichier && (quantite_lu = in.read(buffer, 0, (int)Math.min(buffer.length, taille_fichier - total_lu))) != -1) {
                             ecriture.write(buffer, 0, quantite_lu);
                             total_lu += quantite_lu;
@@ -76,7 +70,7 @@ public class Main {
 
                         ecriture.close();
                         System.out.println(ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets)" + ANSI_RESET);
-                        break; // Le fichier est reçu, on sort de la boucle de réponse
+                        break;
 
                     } else {
                         System.out.println(reponse);

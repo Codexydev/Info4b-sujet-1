@@ -78,7 +78,6 @@ public class Main {
 
         if (DEBUG) System.out.println("nombre de mots : " + nbMots);
         stockagesDocuments.ajouterDocument(id, cheminFichier, file.length(), file.lastModified(), nbMots);
-        // enregistre dans journal chaque fichier indexer (= sauvegarde)
 
         ConcurrentHashMap<String, Integer> mots = indexInverse.getMotsDocument(id);
         if (estUnAjout) {
@@ -200,56 +199,59 @@ public class Main {
                                         break;
 
                                     case "-m":
-                                        String chemin;
-                                        if (arg.length > 3) chemin = arg[2];
-                                        else chemin = arg[1];
-                                        UpdateFile updateFile = new UpdateFile(chemin);
-                                        switch (arg[1]) {
-                                            case "-rn":
-                                                if (arg.length >= 4) {
-                                                    String nouveauChemin = arg[3];
+                                        if (str.startsWith("-m -rn")) {
+                                            String[] argumentsRn = str.split(" ", 4);
+                                            if (argumentsRn.length >= 4) {
+                                                String ancienChemin = argumentsRn[2];
+                                                String nouveauChemin = argumentsRn[3];
+                                                UpdateFile updateFileRn = new UpdateFile(ancienChemin);
+                                                String resultat = updateFileRn.renomerFichier(nouveauChemin);
 
-                                                    String resultat = updateFile.renomerFichier(nouveauChemin);
-                                                    if (resultat.equals("Fichier renommé")) {
-                                                        stockagesDocuments.supprimerDocument(chemin);
-                                                        journal.ecrireSuppression(chemin, System.currentTimeMillis());
-
-                                                        idToPath.addPath(nouveauChemin);
-                                                        indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true, stopWord);
-                                                    }
-
-                                                    out.writeUTF(resultat);
-                                                } else {
-                                                    out.writeUTF("Erreur: arg manquants. Utilisation: -m -rn <ancien> <nouveau>");
+                                                if (resultat.equals("Fichier renommé")) {
+                                                    stockagesDocuments.supprimerDocument(ancienChemin);
+                                                    journal.ecrireSuppression(ancienChemin, System.currentTimeMillis());
+                                                    idToPath.addPath(nouveauChemin);
+                                                    indexerFichier(idToPath.getIdCourant(), nouveauChemin, stockagesDocuments, indexInverse, journal, true, stopWord);
                                                 }
-                                                break;
+                                                out.writeUTF(resultat);
+                                            } else {
+                                                out.writeUTF("Erreur: arguments manquants. Utilisation: -m -rn <ancien> <nouveau>");
+                                            }
+                                        } else if (str.startsWith("-m -rm")) {
+                                            String cheminRm = str.substring(7).trim();
+                                            UpdateFile updateFileRm = new UpdateFile(cheminRm);
+                                            String resultat = updateFileRm.supprimerFichier();
 
-                                            case "-rm":
-                                                String resultat = updateFile.supprimerFichier();
+                                            if (resultat.equals("Fichier supprimé")) {
+                                                stockagesDocuments.supprimerDocument(cheminRm);
+                                                journal.ecrireSuppression(cheminRm, System.currentTimeMillis());
+                                                out.writeUTF("Fichier supprimé avec succès.");
+                                            } else {
+                                                out.writeUTF("Erreur lors de la suppression.");
+                                            }
+                                        } else {
+                                            String cheminMeta = str.substring(3).trim();
+                                            MetaDataDocument meta = stockagesDocuments.getMetaData(cheminMeta);
 
-                                                if (resultat.equals("Fichier supprimé")) {
-                                                    stockagesDocuments.supprimerDocument(chemin);
-                                                    journal.ecrireSuppression(chemin, System.currentTimeMillis());
-                                                } else {
-                                                    out.writeUTF("erreur");
-                                                }
-                                                break;
-
-                                            default:
-                                                out.writeUTF(String.valueOf(stockagesDocuments.getMetaData(arg[1])));
-                                                break;
+                                            if (meta != null) {
+                                                out.writeUTF(meta.toString());
+                                            } else {
+                                                out.writeUTF("Fichier introuvable dans l'index.");
+                                            }
                                         }
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-exif":
-                                        if (arg.length < 2) {
+                                        if (str.length() <= 6) {
                                             out.writeUTF("Erreur: Spécifiez un chemin d'image.");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(arg[1]);
+                                        String cheminImage = str.substring(6).trim();
+                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
                                         String metaExiv = extracteurExiv.extraireTexte();
+
                                         if (metaExiv == null || metaExiv.isEmpty()) {
                                             out.writeUTF("Impossible d'extraire les métadonnées.");
                                         } else {
@@ -276,10 +278,8 @@ public class Main {
                                         } else {
                                             long taille_fichier = monFichier.length();
 
-                                            // 1. On envoie l'entête en texte avec writeUTF
                                             out.writeUTF("File_incomming... " + taille_fichier + " " + monFichier.getName());
 
-                                            // 2. On envoie les octets bruts directement dans le même tuyau !
                                             FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
                                             int quantite_lu;
@@ -287,7 +287,7 @@ public class Main {
                                                 out.write(buffer, 0, quantite_lu);
                                             }
                                             lecteur.close();
-                                            out.flush(); // On force l'envoi des derniers octets
+                                            out.flush();
                                         }
                                         break;
 

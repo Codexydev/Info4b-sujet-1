@@ -26,6 +26,7 @@ public class ExtracteurTexte {
             case "pdf" -> {
                 try {
                     ProcessBuilder processBuilder = new ProcessBuilder("pdftotext", this.cheminFichier, "-");
+                    processBuilder.redirectErrorStream(true);
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
                     process.waitFor();
@@ -69,18 +70,23 @@ public class ExtracteurTexte {
             case "jpg", "jpeg", "png" -> {
                 try {
                     ProcessBuilder processBuilder = new ProcessBuilder("exiv2", this.cheminFichier);
+                    processBuilder.redirectErrorStream(true);
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
 
-                    String out = "";
+                    StringBuilder out = new StringBuilder();
                     String[] texteExtraitTab = texteExtrait.split("\n");
                     for (String ligne : texteExtraitTab) {
-                        if (!ligne.split(":")[1].equals(" "))
-                            out+=ligne+"\n";
+                        if (ligne.contains(":")) {
+                            String valeur = ligne.split(":", 2)[1].trim();
+                            if (!valeur.isEmpty()) {
+                                out.append(ligne).append("\n");
+                            }
+                        }
                     }
 
                     process.waitFor();
-                    return out;
+                    return out.toString();
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
