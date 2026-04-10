@@ -38,7 +38,6 @@ public class Recherche {
      * @return String
      */
     public String effectuerRecherche() {
-        TreeMap<Double, String> scores = new TreeMap<>(Collections.reverseOrder());
         ConcurrentHashMap<String, Double> scoresParChemin = new ConcurrentHashMap<>();
         int totalDocs = stockagesDocuments.getNombreDocuments();
 
@@ -74,18 +73,20 @@ public class Recherche {
                 }
             }
         }
-        for (ConcurrentHashMap.Entry<String, Double> entry : scoresParChemin.entrySet()) {
+        List<Map.Entry<String, Double>> listeTriee = new ArrayList<>(scoresParChemin.entrySet());
+
+        listeTriee.sort(Map.Entry.<String, Double>comparingByValue().reversed());
+
+        StringBuilder reponseText = new StringBuilder();
+        for (Map.Entry<String, Double> entry : listeTriee) {
             double scoreArrondi = Math.round(entry.getValue() * 10000.0) / 10000.0;
-            scores.put(entry.getValue(), "Document: " + ANSI_VERT + entry.getKey() + ANSI_RESET + ", Score TF-IDF: " + ANSI_BLEU + scoreArrondi + ANSI_RESET);
-        }
-        //Itération sur score.values (TreeMap) au lieu de l'ArrayList
-        String reponseText = "";
-        for (String resultat : scores.values()) {
-            reponseText += resultat + "\n";
+            reponseText.append("Document: ").append(ANSI_VERT).append(entry.getKey()).append(ANSI_RESET)
+                    .append(", Score TF-IDF: ").append(ANSI_BLEU).append(scoreArrondi).append(ANSI_RESET)
+                    .append("\n");
         }
 
-        if (reponseText.equals("")) return "Aucun résultat trouvé pour le(s) mot(s) recherché(s).";
-        return reponseText;
+        if (reponseText.length() == 0) return "Aucun résultat trouvé pour le(s) mot(s) recherché(s).";
+        return reponseText.toString();
     }
 
     public String RechercheAvance(){
@@ -125,7 +126,7 @@ public class Recherche {
         for(Integer id: resultatFinal){
             reponse += idVersChemin.getChemin(id) + "\n";
         }
-        return reponse;
+        return ANSI_BLEU+reponse+ANSI_RESET;
 
     }
 }

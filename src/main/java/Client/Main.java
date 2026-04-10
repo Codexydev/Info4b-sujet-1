@@ -1,10 +1,11 @@
 package Client;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
@@ -13,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-/*        System.out.print("IP > ");
+/*      System.out.print("IP > ");
         Scanner scanner = new Scanner(System.in);
         String ip = scanner.nextLine();
         System.out.print("Port > ");
@@ -21,44 +22,67 @@ public class Main {
 
         try {
             System.out.println("Client started...\n");
-            System.out.println(" Commandes disponibles :\n" +
-                    "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
-                    "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
-                    "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
-                    "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
-                    "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
-                    "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
-                    "-m -rn " + ANSI_VERT + "<chemin du document> <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
-                    "-m -update" + ANSI_BLEU + "Permet de modifier les métadonnées\n" + ANSI_RESET +
-                    "-p" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "affiche le texte du document\n" + ANSI_RESET +
-                    "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
-                    "-kw " + ANSI_VERT + "add/remove/list/search : " + ANSI_BLEU + "Gérer les mots-clés utilisateur\n" + ANSI_RESET +
-                    "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
-                    "-sw " + ANSI_VERT + "add/remove <mot> : " + ANSI_BLEU + "Ajouter ou supprimer un stop-word\n" + ANSI_RESET);
-            Socket socket = new Socket("localhost", 12345);
-            /*Socket socket = new Socket(ip, Integer.parseInt(port));*/
 
-            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            Socket socket = new Socket("localhost", 12345);
+
+            Terminal terminal = TerminalBuilder.builder().system(true).build();
+            LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
+
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             String str;
+            String reponse;
+
+            while (true) {
+                reponse = in.readUTF();
+                if (reponse.equals("END_OF_MESSAGE")) break;
+                System.out.println(reponse);
+            }
 
             do {
-                System.out.print("\n > ");
-                str = userInput.readLine(); // lecture entrée utilisateur
+                str = lineReader.readLine("\n > ");
 
-                out.println(str); // envoie str au server
+                out.writeUTF(str);
+                out.flush();
 
-                String reponse; // reponse server
-                while ((reponse = in.readLine()) != null) {
-                    if (reponse.equals("END_OF_MESSAGE")) { // vérifie la fin de la réponse du server
+                while (true) {
+                    reponse = in.readUTF();
+
+                    if (reponse.equals("END_OF_MESSAGE")) {
                         break;
+                    } else if (reponse.startsWith("File_incomming...")) {
+                        String[] donnees = reponse.split(" ", 3);
+                        long taille_fichier = Long.parseLong(donnees[1]);
+                        String nomFichier = donnees[2];
+
+                        System.out.println(ANSI_VERT + "Début du téléchargement : " + ANSI_BLEU + nomFichier + ANSI_RESET);
+
+                        File dossier = new File("downloads");
+                        dossier.mkdirs();
+                        String chemin_sauvegarde = "downloads/" + nomFichier;
+
+                        FileOutputStream ecriture = new FileOutputStream(chemin_sauvegarde);
+                        byte[] buffer = new byte[4096];
+                        long total_lu = 0;
+                        int quantite_lu;
+
+                        while (total_lu < taille_fichier && (quantite_lu = in.read(buffer, 0, (int)Math.min(buffer.length, taille_fichier - total_lu))) != -1) {
+                            ecriture.write(buffer, 0, quantite_lu);
+                            total_lu += quantite_lu;
+                        }
+
+                        ecriture.close();
+                        System.out.println(ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets)" + ANSI_RESET);
+                        break;
+
+                    } else {
+                        System.out.println(reponse);
                     }
-                    System.out.println(reponse);
                 }
-            }
-            while (!(str.equals("q") || str.equals("-q")));
+
+            } while (!(str.equals("q") || str.equals("-q")));
+
             System.out.println("\nFermeture du client...");
             socket.close();
         } catch (Exception e) {

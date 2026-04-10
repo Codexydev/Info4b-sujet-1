@@ -6,7 +6,7 @@ out/
 *.class
 
 # ==========================================
-# 2. Configuration IntelliJ IDEA (Ton environnement local)
+# 2. Configuration IntelliJ IDEA
 # ==========================================
 .idea/
 *.iml
@@ -20,3 +20,11 @@ out/
 Thumbs.db
 
 journal.csv
+downloads/
+
+# ==========================================
+# 2. Configuration vscode
+# ==========================================
+.vscode/
+
+src/main/java/Serveur/stopword.txt

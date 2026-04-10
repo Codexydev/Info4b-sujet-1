@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moteur de Recherche - Projet Info4B</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="website/style.css">
+</head>
+
+<body>
+
+    <div class="header-container">
+        <nav class="header navbar navbar-expand-lg navbar-light shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="#">Moteur de Recherche</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse navbar-container-perso" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#installation">Installation</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#deploiement">Déploiement</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#exemples">Exemples</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" href="website/docs.html">Documentation complète</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text text-dark opacity-75">
+                        Projet académique Info4B
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+
+    <div class="main-perso container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="flex-perso col-md-6">
+                <div class="card card-perso red bg-custom-dark text-light shadow border-0">
+                    <div class="macos-header">
+                        <div class="macos-buttons">
+                            <div class="macos-btn btn-red"></div>
+                            <div class="macos-btn btn-yellow"></div>
+                            <div class="macos-btn btn-green"></div>
+                        </div>
+                        <div class="macos-title">info4b_search_engine</div>
+                    </div>
+
+                    <div class="card-body">
+                        <h3 class="h4 text-accent">Objectif du projet</h3>
+                        <p class="card-text lead text-light">
+                            Ce projet consiste en la création d'un moteur de recherche complet basé sur une
+                            architecture Client-Serveur en Java.
+                            L'application permet d'indexer des documents locaux (TXT, PDF, Images) et de classer les
+                            résultats de recherche par pertinence en utilisant l'algorithme TF-IDF.
+                        </p>
+                        <br>
+                        <a class="card-perso-btn" href="#installation">Let's go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="space"></div> -->
+    <div class="bg-bottom">
+        <br><br>
+        <div class="container text-light">
+
+            <section id="installation" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Installation</h2>
+                        <p>Récupérez le code source depuis le dépôt Git ou utilisez une version pré-compilée.</p>
+
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Via le code source (Recommandé)</h5>
+                                <div class="terminal-block shadow-sm mt-3">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># Cloner le dépôt localement</span>
+git clone https://github.com/Codexydev/Info4b-sujet-1
+cd info4b-sujet-1</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Version Exécutable</h5>
+                                <p class="text-secondary mt-3">Une version <code>.jar</code> standalone sera publiée
+                                    prochainement pour un usage sans environnement de développement.</p>
+                                <button class="btn btn-accent disabled mt-2">Télécharger la release (.jar)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="deploiement" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Déploiement</h2>
+                        <p>Prérequis système obligatoires : <code>Java 17</code>, <code>Maven</code>,
+                            <code>poppler-utils</code>, <code>exiv2</code>.<br>
+                            /!\ <code>poppler-utils</code> et <code>exiv2</code> sont généralement déjà présent sur
+                            Ubuntu/Debian.
+                        </p>
+
+
+                        <div class="row g-4 mt-2 mb-4">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold fs-6 text-secondary">MacOS (via Homebrew)</h5>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body p-3">
+                                        <pre class="m-0"><code><span class="text-comment"># Installation groupée des paquets</span>
+brew install openjdk@17 maven poppler exiv2</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold fs-6 text-secondary">Linux (Ubuntu/Debian)</h5>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body p-3">
+                                        <pre class="m-0"><code><span class="text-comment"># Mise à jour et installation groupée</span>
+sudo apt update
+sudo apt install openjdk-17-jdk maven poppler-utils exiv2</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold fs-6 text-secondary mt-5 mb-3">Lancement du moteur</h5>
+
+                        <div class="row g-4">
+                            <div class="col-md-6 d-flex flex-column">
+                                <h6 class="fw-bold text-accent">Option 1 : Script interactif (Recommandé)</h6>
+                                <p class="text-secondary small mb-2">Utilisez le menu automatisé pour tout gérer depuis
+                                    un
+                                    seul endroit. Le script vérifiera lui-même les prérequis.</p>
+                                <div class="terminal-block shadow-sm flex-grow-1">
+                                    <div class="terminal-body p-3">
+                                        <pre class="m-0"><code><span class="text-comment"># Donner les droits d'exécution au script</span>
+chmod +x run.sh
+
+<span class="text-comment"># Lancer le menu interactif</span>
+./run.sh</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 d-flex flex-column">
+                                <h6 class="fw-bold text-accent">Option 2 : Commandes manuelles</h6>
+                                <p class="text-secondary small mb-2">Pour lancer les composants séparément dans
+                                    différents
+                                    terminaux.</p>
+                                <div class="terminal-block shadow-sm flex-grow-1">
+                                    <div class="terminal-body p-3">
+                                        <pre class="m-0"><code><span class="text-comment"># 1. Compilation</span>
+mvn clean compile
+
+<span class="text-comment"># 2. Serveur (Port 12345)</span>
+mvn exec:java -Dexec.mainClass="Serveur.Main"
+
+<span class="text-comment"># 3. Client (Nouveau terminal)</span>
+mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section id="exemples" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Interface en ligne
+                            de commande (CLI)</h2>
+
+                        <div class="terminal-block mt-4 shadow-sm">
+                            <div class="terminal-header">Session Client interactive</div>
+                            <div class="terminal-body">
+                                <pre class="m-0"><code><span class="text-prompt">></span> -s linux,systeme
+...
+
+<span class="text-prompt">></span> -sw -add le,la,les
+<span class="text-success-cmd">...</span>
+
+<span class="text-prompt">></span> -m src/document.pdf
+...</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="presentation" class="mb-5">
+                <h2 class="border-bottom border-secondary pb-2 mb-4 text-accent">Architecture technique</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div
+                            class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
+                            <div class="card-body">
+                                <h5 class="card-title text-accent">Multi-threading</h5>
+                                <p class="card-text text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing
+                                    elit. Quaerat, vel amet nobis numquam necessitatibus eos beatae recusandae placeat
+                                    est rem!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div
+                            class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
+                            <div class="card-body">
+                                <h5 class="card-title text-accent">journalisation</h5>
+                                <p class="card-text text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing
+                                    elit. Exercitationem, doloremque itaque provident mollitia in dolores dolore natus
+                                    labore. Repellendus, veniam.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div
+                            class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
+                            <div class="card-body">
+                                <h5 class="card-title text-accent">Client - Serveur</h5>
+                                <p class="card-text text-secondary">Lorem ipsum, dolor sit amet consectetur adipisicing
+                                    elit. Fuga consectetur rerum explicabo officia architecto tenetur placeat in
+                                    maiores, accusamus debitis.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <footer class="text-secondary text-center py-4 mt-5">
+            <div class="container border-top border-secondary pt-3">
+                <p class="footer-text mb-0">Projet académique Info4B - Université de Bourgogne</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
