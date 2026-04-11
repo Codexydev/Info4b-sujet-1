@@ -67,7 +67,7 @@
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
                         <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Lancement (run.sh)</h2>
-                        <p>Le script <code>run.sh</code> automatise entièrement la compilation Maven, le lancement des processus en arrière-plan et la gestion des ports réseau (pour éviter l'erreur <em>Address already in use</em>).</p>
+                        <p class="p-perso">Le script <code>run.sh</code> automatise entièrement la compilation Maven, le lancement des processus en arrière-plan et la gestion des ports réseau (pour éviter l'erreur <em>Address already in use</em>).</p>
 
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
@@ -172,6 +172,9 @@ src/testIndexed/rapport.txt</span></code></pre>
 
                         <div class="row g-4 mt-2">
                             <div class="col-md-12">
+                                <span class="f-bold h5 text-accent">TF-IDF : </span>
+                                <div class="text-secondary mt-2 text-secondary-perso">algorithme statistique qui permet de classer les résultats d'une recherche en évaluant l'importance d'un mot-clé dans un document par rapport à sa rareté dans l'ensemble des fichiers. <br>⚠️ -> Score TF-IDF à 0.0 si le mot est présent dans tous les documents</div>
+
                                 <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;mots&gt;</code> (Scan & Indexation)</h5>
                                 <p class="text-secondary">Parcourt les fichiers et garde ceux qui ont le mot recherché par l'utilisateur pour afficher les chemins et le score TF-IDF de ceux-ci.</p>
                                 <div class="terminal-block shadow-sm mt-2">
@@ -219,8 +222,10 @@ Document: src/osi.pdf | Score: 0.1205</span></code></pre>
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
                         <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Gestion de Fichiers Distants</h2>
-                        <p>Commandes réseau utilisant les flux sécurisés pour prévenir la corruption des données lors du transfert.</p>
-
+                        <p class="p-perso">Commandes réseau utilisant les flux sécurisés pour prévenir la corruption des données lors du transfert.</p>
+                        <p class="text-secondary mt-2">
+                            ⚠️ -> Fonctionne uniquement avec les chemins relatifs stockés lors de l'indexation
+                        </p>
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
                                 <h5 class="fw-bold"><code class="text-accent fs-5">-dl &lt;chemin&gt;</code></h5>
@@ -232,6 +237,8 @@ Document: src/osi.pdf | Score: 0.1205</span></code></pre>
 Téléchargement terminé ! (3072 octets)</span></code></pre>
                                     </div>
                                 </div>
+                                <p class="text-secondary small mt-2">⚠️ -> Pas de limite de taille — un fichier de plusieurs Go peut saturer la mémoire</p>
+                                <p class="text-secondary small mt-2">⚠️ -> En cas de coupure, le fichier partiel reste dans <code>downloads/</code></p>
                             </div>
 
                             <div class="col-md-6">
@@ -277,6 +284,8 @@ du fichier texte...</span></code></pre>
 <span class="text-success-cmd">Fichier supprimé avec succès.</span></code></pre>
                                     </div>
                                 </div>
+                                <p class="text-secondary small mt-2">⚠️ -> Pas de confirmation avant suppression</p>
+                                
                             </div>
                         </div>
                     </div>
@@ -353,7 +362,8 @@ du fichier texte...</span></code></pre>
 <span class="text-success-cmd">Réindexation terminée !</span></code></pre>
                                 </div>
                             </div>
-                            <p class="text-secondary small mt-2">⚠️ Irréversible — le journal est supprimé sans confirmation.</p>
+                            <p class="text-secondary small mt-2">⚠️ -> Irréversible — le journal est supprimé sans confirmation.</p>
+                            <p class="text-secondary small mt-2">⚠️ -> Opérations bloquantes — le serveur ne répond plus aux autres clients pendant l'exécution</p>
                         </div>
                     </div>
                 </div>
@@ -368,14 +378,6 @@ du fichier texte...</span></code></pre>
                     <div class="list-group list-group-flush rounded bg-transparent mt-2">
 
                         <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                            <h5 class="fw-bold"><code class="text-accent fs-5">-s</code> — Recherche simple</h5>
-                            <ul class="text-secondary">
-                                <li>Score TF-IDF à 0.0 si le mot est présent dans tous les documents</li>
-                                <li>Pas de suggestion en cas de mot mal orthographié</li>
-                            </ul>
-                        </div>
-
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
                             <h5 class="fw-bold"><code class="text-accent fs-5">-ar</code> — Recherche avancée</h5>
                             <ul class="text-secondary">
                                 <li>Pas de priorité des opérateurs : <code>a OU b ET c</code> n'évalue pas <code>b ET c</code> en premier</li>
@@ -385,61 +387,13 @@ du fichier texte...</span></code></pre>
                         </div>
 
                         <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                            <h5 class="fw-bold"><code class="text-accent fs-5">-m</code> — Métadonnées</h5>
-                            <ul class="text-secondary">
-                                <li>Fonctionne uniquement avec les chemins relatifs stockés lors de l'indexation</li>
-                                <li>Pas de confirmation avant suppression avec <code>-m -rm</code></li>
-                            </ul>
-                        </div>
-
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
                             <h5 class="fw-bold"><code class="text-accent fs-5">-dl</code> — Téléchargement</h5>
                             <ul class="text-secondary">
-                                <li>Pas de limite de taille — un fichier de plusieurs Go peut saturer la mémoire</li>
                                 <li>Pas d'indicateur de progression pour les gros fichiers</li>
-                                <li>En cas de coupure, le fichier partiel reste dans <code>downloads/</code></li>
                             </ul>
                         </div>
 
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                            <h5 class="fw-bold"><code class="text-accent fs-5">-d</code> — Détection de doublons</h5>
-                            <ul class="text-secondary">
-                                <li>Crash probable si un des deux chemins n'existe pas</li>
-                                <li>Basé uniquement sur le hash — deux fichiers quasi-identiques seront considérés différents</li>
-                            </ul>
-                        </div>
-
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                            <h5 class="fw-bold"><code class="text-accent fs-5">-exif</code> — Métadonnées image</h5>
-                            <ul class="text-secondary">
-                                <li>Pas de vérification que le fichier est bien une image avant d'appeler <code>exiv2</code></li>
-                            </ul>
-                        </div>
-
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                            <h5 class="fw-bold"><code class="text-accent fs-5">-sw</code> — Stop Words</h5>
-                            <ul class="text-secondary">
-                                <li><code>-sw -rm</code> déclenche une réindexation complète même si le mot n'était pas indexé</li>
-                            </ul>
-                        </div>
-
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
-                            <h5 class="fw-bold"><code class="text-accent fs-5">-reindex</code> et <code class="text-accent fs-5">-clean</code></h5>
-                            <ul class="text-secondary">
-                                <li>Opérations bloquantes — le serveur ne répond plus aux autres clients pendant l'exécution</li>
-                                <li>Pas de confirmation avant suppression du journal pour <code>-reindex</code></li>
-                            </ul>
-                        </div>
-
-                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary border-bottom-0">
-                            <h5 class="fw-bold">Général</h5>
-                            <ul class="text-secondary">
-                                <li>Les chemins relatifs vs absolus peuvent poser problème selon le répertoire de lancement</li>
-                                <li>Pas de timeout sur les connexions client inactives</li>
-                                <li>Le <code>WatchService</code> peut manquer des événements en cas de création massive de fichiers</li>
-                            </ul>
-                        </div>
-
+                        
                     </div>
                 </div>
             </div>

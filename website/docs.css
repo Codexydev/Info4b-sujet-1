@@ -20,6 +20,10 @@ body {
     color: #e0e0e0;
 }
 
+body::selection{
+    background-color: hsl(223, 50%, 36%);
+}
+
 
 .img-bg{
     background-image: url("img.png");
@@ -185,6 +189,25 @@ body {
 }
 
 /* Contenu */
+.p-perso{
+    margin-top : 7px;
+    margin-bottom: 3px;
+    color: #f8f7f7c9;
+}
+
+h2.card-title {
+    margin-bottom: 0px !important;
+}
+
+div.text-secondary-perso{
+    font-size: 18px;
+    margin-bottom: 15px !important;
+}
+
+p.text-secondary{
+    padding-left : 8px !important;
+    margin-bottom: 8px;
+}
 
 .bg-bottom {
     margin-top: 10vh;
