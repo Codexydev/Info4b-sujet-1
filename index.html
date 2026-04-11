@@ -214,9 +214,9 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Multi-threading</h5>
-                                <p class="card-text text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing
-                                    elit. Quaerat, vel amet nobis numquam necessitatibus eos beatae recusandae placeat
-                                    est rem!</p>
+                                <p class="card-text text-secondary">Le serveur gère plusieurs clients simultanément grâce à un ThreadGroup dédié.
+                                    Le journal utilise un pattern Producteur/Consommateur avec un thread écrivain asynchrone, évitant tout blocage
+                                    des opérations d'indexation.</p>
                             </div>
                         </div>
                     </div>
@@ -225,9 +225,9 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">journalisation</h5>
-                                <p class="card-text text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing
-                                    elit. Exercitationem, doloremque itaque provident mollitia in dolores dolore natus
-                                    labore. Repellendus, veniam.</p>
+                                <p class="card-text text-secondary">Chaque opération (ajout, modification, suppression)
+                                    est persistée dans un fichier journal.csv. Au redémarrage, l'état complet est restauré
+                                    depuis ce journal sans réindexation, garantissant la continuité du service.</p>
                             </div>
                         </div>
                     </div>
@@ -236,9 +236,9 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Client - Serveur</h5>
-                                <p class="card-text text-secondary">Lorem ipsum, dolor sit amet consectetur adipisicing
-                                    elit. Fuga consectetur rerum explicabo officia architecto tenetur placeat in
-                                    maiores, accusamus debitis.
+                                <p class="card-text text-secondary">Architecture TCP/IP sur le port 12345. Le client interactif propose
+                                    un ensemble de commandes (-s, -ar, -dl, -m, -sw...) pour interroger le serveur, télécharger des fichiers
+                                    et gérer l'index à distance.</p>
                                 </p>
                             </div>
                         </div>
