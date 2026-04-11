@@ -290,11 +290,13 @@ public class Main {
                                             FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
                                             int quantite_lu;
+
                                             while ((quantite_lu = lecteur.read(buffer)) != -1) {
                                                 out.write(buffer, 0, quantite_lu);
                                             }
                                             lecteur.close();
                                             out.flush();
+                                            out.writeUTF("END_OF_MESSAGE");
                                         }
                                         break;
 

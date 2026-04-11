@@ -1,11 +1,15 @@
 package Client;
 
-import java.io.*;
-import java.net.Socket;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.Socket;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
@@ -67,15 +71,31 @@ public class Main {
                         long total_lu = 0;
                         int quantite_lu;
 
+                        int dernierPourcentage = -1;
+                        long debutTemps = System.currentTimeMillis();
+
                         while (total_lu < taille_fichier && (quantite_lu = in.read(buffer, 0, (int)Math.min(buffer.length, taille_fichier - total_lu))) != -1) {
                             ecriture.write(buffer, 0, quantite_lu);
                             total_lu += quantite_lu;
+
+                            int pourcentage = (int) ((total_lu * 100) / taille_fichier);
+
+                            if (pourcentage != dernierPourcentage) {
+                                int nbBlocsRemplis = pourcentage / 5;
+                                int nbBlocsVides = 20 - nbBlocsRemplis;
+
+                                String barreRemplie = new String(new char[nbBlocsRemplis]).replace("\0", "█");
+                                String barreVide = new String(new char[nbBlocsVides]).replace("\0", "░");
+
+                                System.out.print("\r\033[K" + ANSI_BLEU + "Progression : [" + ANSI_VERT + barreRemplie + ANSI_RESET + barreVide + ANSI_BLEU + "] " + pourcentage + "%" + ANSI_RESET);
+                                dernierPourcentage = pourcentage;
+                            }
                         }
 
                         ecriture.close();
-                        System.out.println(ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets)" + ANSI_RESET);
-                        break;
 
+                        long tempsEcoule = System.currentTimeMillis() - debutTemps;
+                        System.out.println("\n" + ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets en " + tempsEcoule + " ms)" + ANSI_RESET);
                     } else {
                         System.out.println(reponse);
                     }
