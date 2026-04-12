@@ -58,9 +58,12 @@ public class Main {
 
                         System.out.println(ANSI_VERT + "Début du téléchargement : " + ANSI_BLEU + nomFichier + ANSI_RESET);
 
-                        File dossier = new File("downloads");
-                        dossier.mkdirs();
-                        String chemin_sauvegarde = "downloads/" + nomFichier;
+                        String racine = System.getProperty("user.home"); //permet de recuperer le dossier racine de l'utilisateur
+                        File dossier = new File(racine, "Downloads"); //on se met ensuite sur le dossier des telechargements
+                        if (!dossier.exists()) { //creer le dosssier au cas ou il existe pas
+                            dossier.mkdirs();
+                        }
+                        String chemin_sauvegarde = dossier.getAbsolutePath() + File.separator + nomFichier; //Construit le chemin absolu final avec File.separator pour gérer les \ ou /
 
                         FileOutputStream ecriture = new FileOutputStream(chemin_sauvegarde);
                         byte[] buffer = new byte[4096];
