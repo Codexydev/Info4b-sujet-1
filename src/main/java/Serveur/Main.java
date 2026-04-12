@@ -103,6 +103,7 @@ public class Main {
                         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
                         String help = "Commandes disponibles :\n" +
+                                "Site web : " + ANSI_BLEU + "searchengine.antoineragot.com\n" + ANSI_RESET +
                                 "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
                                 "-l : " + ANSI_BLEU + "liste tous les fichiers indexés\n" + ANSI_RESET +
                                 "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
@@ -289,11 +290,13 @@ public class Main {
                                             FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
                                             int quantite_lu;
+
                                             while ((quantite_lu = lecteur.read(buffer)) != -1) {
                                                 out.write(buffer, 0, quantite_lu);
                                             }
                                             lecteur.close();
                                             out.flush();
+                                            out.writeUTF("END_OF_MESSAGE");
                                         }
                                         break;
 

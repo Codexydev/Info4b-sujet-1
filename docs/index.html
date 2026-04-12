@@ -26,16 +26,25 @@
                             <a class="nav-link" href="../index.html">← Accueil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#orchestration">Le script run.sh</a>
+                            <a class="nav-link" href="#orchestration">Run.sh</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#basique">Base</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#recherche">Recherche</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#fichiers">Fichiers & Réseau</a>
+                            <a class="nav-link" href="#fichiers">Fichiers </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-semibold text-accent" href="#avance">Outils Avancés</a>
+                            <a class="nav-link" href="#avance">Outils Avancés</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#maintenance">Maintenance</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#limites">Limites</a>
                         </li>
                     </ul>
                     <span class="navbar-text text-dark opacity-75">
@@ -58,7 +67,7 @@
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
                         <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Lancement (run.sh)</h2>
-                        <p>Le script <code>run.sh</code> automatise entièrement la compilation Maven, le lancement des processus en arrière-plan et la gestion des ports réseau (pour éviter l'erreur <em>Address already in use</em>).</p>
+                        <p class="p-perso">Le script <code>run.sh</code> automatise entièrement la compilation Maven, le lancement des processus en arrière-plan et la gestion des ports réseau (pour éviter l'erreur <em>Address already in use</em>).</p>
 
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
@@ -95,30 +104,97 @@ chmod +x run.sh
                 </div>
             </section>
 
-            <section id="recherche" class="mb-5">
+            <section id="basique" class="mb-5">
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
-                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Indexation & Moteur TF-IDF</h2>
-                        
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Commandes de base</h2>
+
                         <div class="row g-4 mt-2">
-                            <div class="col-md-12">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;dossier&gt;</code> (Scan & Indexation)</h5>
-                                <p class="text-secondary">Parcourt récursivement un dossier, extrait le texte des fichiers (PDF, TXT) et peuple l'index inversé en mémoire (RAM).</p>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-h</code> — Aide</h5>
+                                <p class="text-secondary">Affiche la liste complète des commandes disponibles avec leur description.</p>
                                 <div class="terminal-block shadow-sm mt-2">
                                     <div class="terminal-body">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -s src/documents
-<span class="text-success-cmd">Dossier indexé avec succès. Surveillance temps réel activée.</span></code></pre>
+                            <pre class="m-0"><code><span class="text-prompt">></span> -h
+<span class="text-light">Commandes disponibles :
+-h : afficher l'aide
+-s &lt;mot&gt; : rechercher...
+...</span></code></pre>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <h5 class="fw-bold mt-4"><code class="text-accent fs-5">-r &lt;mots&gt;</code></h5>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-l</code> — Liste des fichiers</h5>
+                                <p class="text-secondary">Affiche la liste de tous les fichiers actuellement indexés dans le moteur de recherche.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+            <pre class="m-0"><code><span class="text-prompt">></span> -l
+<span class="text-light">src/testIndexed/cours.txt
+src/testIndexed/notes.pdf
+src/testIndexed/rapport.txt</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-t &lt;message&gt;</code> — Test de communication</h5>
+                                <p class="text-secondary">Envoie un message au serveur et reçoit un écho en retour. Utile pour vérifier que la connexion client-serveur fonctionne correctement.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -t bonjour
+<span class="text-success-cmd">Message reçu : bonjour</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-q</code> — Quitter</h5>
+                                <p class="text-secondary">Ferme proprement la connexion entre le client et le serveur. Le serveur reste actif et peut accepter de nouvelles connexions.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -q
+<span class="text-light">Fermeture du client...</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recherche" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Indexation & Moteur TF-IDF</h2>
+
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-12">
+                                <span class="f-bold h5 text-accent">TF-IDF : </span>
+                                <div class="text-secondary mt-2 text-secondary-perso">algorithme statistique qui permet de classer les résultats d'une recherche en évaluant l'importance d'un mot-clé dans un document par rapport à sa rareté dans l'ensemble des fichiers. <br>⚠️ -> Score TF-IDF à 0.0 si le mot est présent dans tous les documents</div>
+
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;mots&gt;</code> (Scan & Indexation)</h5>
+                                <p class="text-secondary">Parcourt les fichiers et garde ceux qui ont le mot recherché par l'utilisateur pour afficher les chemins et le score TF-IDF de ceux-ci.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                       <pre class="m-0"><code><span class="text-prompt">></span> -s coucou
+<span class="text-light">Document: src/testIndexed/coucou.txt, Score TF-IDF: 0.231
+Document: src/testIndexed/coucou2.txt, Score TF-IDF: 0.1386
+Document: src/testIndexed/test.txt, Score TF-IDF: 0.0495
+Document: src/testIndexed/millionsWords.txt, Score TF-IDF: 0.0</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold mt-4"><code class="text-accent fs-5">-s &lt;mots&gt;</code></h5>
                                 <p class="text-secondary">Recherche standard calculée via TF-IDF. Vous pouvez exclure des mots stricts avec le double tiret <code>--</code>.</p>
                                 <div class="terminal-block shadow-sm mt-2">
                                     <div class="terminal-body">
                                         <pre class="m-0"><code><span class="text-comment"># Recherche "réseau" sans "cloud"</span>
-<span class="text-prompt">></span> -r reseau -- cloud
+<span class="text-prompt">></span> -s reseau -- cloud
 <span class="text-light">Document: src/tcp.txt | Score: 0.8452
 Document: src/osi.pdf | Score: 0.1205</span></code></pre>
                                     </div>
@@ -146,8 +222,10 @@ Document: src/osi.pdf | Score: 0.1205</span></code></pre>
                 <div class="card bg-custom-dark text-light shadow border-0">
                     <div class="card-body">
                         <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Gestion de Fichiers Distants</h2>
-                        <p>Commandes réseau utilisant les flux sécurisés pour prévenir la corruption des données lors du transfert.</p>
-
+                        <p class="p-perso">Commandes réseau utilisant les flux sécurisés pour prévenir la corruption des données lors du transfert.</p>
+                        <p class="text-secondary mt-2">
+                            ⚠️ -> Fonctionne uniquement avec les chemins relatifs stockés lors de l'indexation
+                        </p>
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
                                 <h5 class="fw-bold"><code class="text-accent fs-5">-dl &lt;chemin&gt;</code></h5>
@@ -159,6 +237,8 @@ Document: src/osi.pdf | Score: 0.1205</span></code></pre>
 Téléchargement terminé ! (3072 octets)</span></code></pre>
                                     </div>
                                 </div>
+                                <p class="text-secondary small mt-2">⚠️ -> Pas de limite de taille — un fichier de plusieurs Go peut saturer la mémoire</p>
+                                <p class="text-secondary small mt-2">⚠️ -> En cas de coupure, le fichier partiel reste dans <code>downloads/</code></p>
                             </div>
 
                             <div class="col-md-6">
@@ -184,6 +264,18 @@ Téléchargement terminé ! (3072 octets)</span></code></pre>
                             </div>
 
                             <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-r &lt;chemin&gt;</code> — Lire un fichier</h5>
+                                <p class="text-secondary mb-2">Affiche le contenu textuel d'un fichier directement dans le terminal client. Fonctionne sur les fichiers TXT et PDF (nécessite <code>pdftotext</code>).</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+            <pre class="m-0"><code><span class="text-prompt">></span> -r src/testIndexed/cours.txt
+<span class="text-light">Bonjour, voici le contenu
+du fichier texte...</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
                                 <h5 class="fw-bold"><code class="text-accent fs-5">-m -rm &lt;chemin&gt;</code></h5>
                                 <p class="text-secondary mb-2">Supprime définitivement le fichier du serveur physique et purge l'index inversé.</p>
                                 <div class="terminal-block shadow-sm">
@@ -192,6 +284,8 @@ Téléchargement terminé ! (3072 octets)</span></code></pre>
 <span class="text-success-cmd">Fichier supprimé avec succès.</span></code></pre>
                                     </div>
                                 </div>
+                                <p class="text-secondary small mt-2">⚠️ -> Pas de confirmation avant suppression</p>
+                                
                             </div>
                         </div>
                     </div>
@@ -241,8 +335,64 @@ Téléchargement terminé ! (3072 octets)</span></code></pre>
                 </div>
             </section>
 
-        </div>
+        <section id="maintenance" class="mb-5">
+            <div class="card bg-custom-dark text-light shadow border-0">
+                <div class="card-body">
+                    <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Maintenance de l'index</h2>
 
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold"><code class="text-accent fs-5">-clean</code> — Compacter le journal</h5>
+                            <p class="text-secondary mb-2">Réécrit le fichier <code>journal.csv</code> en ne gardant que l'état actuel de chaque document. Réduit la taille du journal qui grossit à chaque opération.</p>
+                            <div class="terminal-block shadow-sm">
+                                <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -clean
+<span class="text-success-cmd">Journal compacté avec succès.</span></code></pre>
+                                </div>
+                            </div>
+                            <p class="text-secondary small mt-2">⚠️ Opération bloquante — le serveur ne répond plus pendant la compaction.</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="fw-bold"><code class="text-accent fs-5">-reindex</code> — Réindexation complète</h5>
+                            <p class="text-secondary mb-2">Supprime entièrement le journal et relance une indexation complète depuis zéro. Utile si l'index est corrompu ou si les stop words ont été modifiés massivement.</p>
+                            <div class="terminal-block shadow-sm">
+                                <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -reindex
+<span class="text-success-cmd">Réindexation terminée !</span></code></pre>
+                                </div>
+                            </div>
+                            <p class="text-secondary small mt-2">⚠️ -> Irréversible — le journal est supprimé sans confirmation.</p>
+                            <p class="text-secondary small mt-2">⚠️ -> Opérations bloquantes — le serveur ne répond plus aux autres clients pendant l'exécution</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="limites" class="mb-5">
+            <div class="card bg-custom-dark text-light shadow border-0">
+                <div class="card-body">
+                    <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Limites connues</h2>
+
+                    <div class="list-group list-group-flush rounded bg-transparent mt-2">
+
+                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                            <h5 class="fw-bold"><code class="text-accent fs-5">-ar</code> — Recherche avancée</h5>
+                            <ul class="text-secondary">
+                                <li>Pas de priorité des opérateurs : <code>a OU b ET c</code> n'évalue pas <code>b ET c</code> en premier</li>
+                                <li><code>mot SAUF mot</code> retourne toujours un résultat vide</li>
+                                <li>Les résultats ne sont pas triés par score TF-IDF (contrairement à <code>-s</code>)</li>
+                            </ul>
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        </div>
         <footer class="text-secondary text-center py-4 mt-5">
             <div class="container border-top border-secondary pt-3">
                 <p class="footer-text mb-0">Projet académique Info4B - Université de Bourgogne</p>
