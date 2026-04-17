@@ -220,6 +220,11 @@ public class Main {
                                                 out.writeUTF("Erreur: arguments manquants. Utilisation: -m -rn <ancien> <nouveau>");
                                             }
                                         } else if (str.startsWith("-m -rm")) {
+                                            if (str.length() <= 6) {
+                                                out.writeUTF("Erreur : Spécifiez un chemin à supprimer.");
+                                                out.writeUTF("END_OF_MESSAGE");
+                                                break;
+                                            }
                                             String cheminRm = str.substring(7).trim();
                                             UpdateFile updateFileRm = new UpdateFile(cheminRm);
                                             String resultat = updateFileRm.supprimerFichier();
