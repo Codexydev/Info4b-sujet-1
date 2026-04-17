@@ -16,6 +16,7 @@ public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_MAGENTA = "\u001B[35m";
 
     public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal, StopWord stopWord) {
         Path start = Paths.get(cheminRepertoire);
@@ -103,7 +104,6 @@ public class Main {
                         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
                         String help = "Commandes disponibles :\n" +
-                                "Site web : " + ANSI_BLEU + "searchengine.antoineragot.com\n" + ANSI_RESET +
                                 "-h : " + ANSI_BLEU + "afficher l'aide\n" + ANSI_RESET +
                                 "-l : " + ANSI_BLEU + "liste tous les fichiers indexés\n" + ANSI_RESET +
                                 "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
@@ -122,7 +122,8 @@ public class Main {
                                 "-reindex " + ANSI_BLEU + "permet de supprimer le journal et refaire une indexation\n" + ANSI_RESET +
                                 "-sw -l" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'afficher la liste des stop words\n" + ANSI_RESET +
                                 "-sw -rm" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'enlever un mot de la liste des stop words\n" + ANSI_RESET +
-                                "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET;
+                                "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET +
+                                "Site web pour plus d'informations: " + ANSI_MAGENTA + "https://searchengine.antoineragot.com\n" + ANSI_RESET;
 
                         out.writeUTF(help);
                         out.writeUTF("END_OF_MESSAGE");
