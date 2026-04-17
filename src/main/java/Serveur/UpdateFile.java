@@ -22,6 +22,10 @@ public class UpdateFile {
             return "Erreur : Le fichier source n'existe pas.";
         }
 
+        if (file2.getParentFile() != null) {
+            file2.getParentFile().mkdirs();
+        }
+
         boolean status = file.renameTo(file2);
         if (status) {
             return "Fichier renommé";
