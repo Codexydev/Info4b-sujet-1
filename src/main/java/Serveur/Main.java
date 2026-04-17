@@ -352,7 +352,7 @@ public class Main {
                                         break;
 
                                     case "-sw":
-                                        if (arg.length < 3 && !arg[1].equals("-l")) {
+                                        if (arg.length < 2 || (arg.length < 3 && !arg[1].equals("-l"))) {
                                             out.writeUTF("Erreur : Arguments manquants. Exemple : -sw -add le,la");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
