@@ -283,8 +283,8 @@ public class Main {
                                         }
                                         String fichier = str.substring(4).trim();
                                         File monFichier = new File(fichier);
-                                        if (!monFichier.exists()) {
-                                            out.writeUTF("fichier inexistant");
+                                        if (!monFichier.exists() || !monFichier.isFile()) {
+                                            out.writeUTF("Erreur : Fichier introuvable ou il s'agit d'un dossier.");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         } else {
