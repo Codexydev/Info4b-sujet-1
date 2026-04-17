@@ -20,8 +20,19 @@ body {
     color: #e0e0e0;
 }
 
-body::selection{
-    background-color: hsl(223, 50%, 36%);
+*:not(p.text-secondary, span.text-comment)::selection{
+    background-color: hsl(190, 100%, 50%);
+    color : white;
+}
+
+p.text-secondary::selection{
+    background-color: hsl(190, 100%, 50%);
+    color: #4b4b4c;
+}
+
+span.text-comment::selection{
+    background-color: hsl(190, 100%, 50%);
+    color: hsl(129, 100%, 63%);
 }
 
 
