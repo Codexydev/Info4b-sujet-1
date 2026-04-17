@@ -147,7 +147,7 @@ span.text-comment::selection{
     .main-perso {
         position: fixed;
         z-index: -1;
-        background-image: url("img5.png");
+        background-image: url("img5.webp");
         background-position: 5px -40px !important;
         background-size: cover;
         margin: 0;
@@ -173,7 +173,8 @@ span.text-comment::selection{
 .main-perso {
     position: fixed;
     z-index: -1;
-    background-image: url("img5.png");
+    background-color: #569cd6;
+    background-image: url("img5.webp");
     background-position: center center;
     background-size: cover;
     margin: 0;
