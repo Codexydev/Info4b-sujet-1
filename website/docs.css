@@ -288,3 +288,15 @@ p.text-secondary{
 .footer-text {
     color: white;
 }
+
+.legals {
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid white;
+}
+
+.site-perso {
+    color: rgb(0, 174, 255);
+    text-decoration: none;
+    border-bottom: 1px solid rgb(78, 199, 255);
+}
