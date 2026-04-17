@@ -253,11 +253,12 @@ Téléchargement terminé ! (3072 octets)</span></code></pre>
                             </div>
 
                             <div class="col-md-6">
-                                <h5 class="fw-bold"><code class="text-accent fs-5">-m -rn &lt;ancien&gt; &lt;nouveau&gt;</code></h5>
-                                <p class="text-secondary mb-2">Renomme le fichier sur le serveur. Met à jour l'index et consigne l'action dans <code>journal.csv</code>.</p>
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m -rn &lt;ancien&gt; &lt;nouv&gt;</code></h5>
+                                <p class="text-secondary mb-2">Renomme ou <strong>déplace</strong> le fichier sur le serveur. Met à jour l'index et consigne l'action dans <code>journal.csv</code>.</p>
                                 <div class="terminal-block shadow-sm">
                                     <div class="terminal-body">
-                                        <pre class="m-0"><code><span class="text-prompt">></span> -m -rn src/old.txt src/new.txt
+                                        <pre class="m-0"><code><span class="text-comment"># Exemple de déplacement :</span>
+<span class="text-prompt">></span> -m -rn src/test.txt archives/test.txt
 <span class="text-success-cmd">Fichier renommé avec succès.</span></code></pre>
                                     </div>
                                 </div>
