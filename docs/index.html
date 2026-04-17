@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs - Projet Info4B</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../website/docs.css">
+</head>
+
+<body>
+    <div class="img-bg"></div>
+
+    <div class="header-container">
+        <nav class="header navbar navbar-expand-lg navbar-light shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="#">Moteur de Recherche</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse navbar-container-perso" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.html">← Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#orchestration">Run.sh</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#basique">Base</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#recherche">Recherche</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#fichiers">Fichiers </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#avance">Outils Avancés</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#maintenance">Maintenance</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#limites">Limites</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text text-dark opacity-75">
+                        Projet académique Info4B
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="bg-docs-page">
+        <div class="container text-light">
+
+            <div class="mb-5 mt-4">
+                <h1 class="fw-bold text-accent">Documentation Technique Complète</h1>
+                <p class="text-secondary">Manuel d'utilisation détaillé de l'interface en ligne de commande (CLI) et de l'orchestration du serveur.</p>
+            </div>
+
+            <section id="orchestration" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Lancement (run.sh)</h2>
+                        <p class="p-perso">Le script <code>run.sh</code> automatise entièrement la compilation Maven, le lancement des processus en arrière-plan et la gestion des ports réseau (pour éviter l'erreur <em>Address already in use</em>).</p>
+
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Utilisation du menu interactif</h5>
+                                <p class="text-secondary mt-3">Exécutez le script à la racine du projet. Un menu vous guidera pour lancer le serveur et le client sans avoir à mémoriser les commandes Maven.</p>
+                                <div class="terminal-block shadow-sm mt-3">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># 1. Rendre le script exécutable (Linux/Mac)</span>
+chmod +x run.sh
+
+<span class="text-comment"># 2. Lancement</span>
+./run.sh</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Options du menu</h5>
+                                <div class="terminal-block shadow-sm mt-3">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-light">========================================
+ MENU DE LANCEMENT - PROJET INFO4B 
+========================================
+1) Recompiler tout le projet (Maven)
+2) Démarrer le Serveur
+3) Démarrer le Client interactif
+4) Quitter
+========================================
+-> Entrez votre choix (1-4) : </span><span class="text-prompt">3</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="basique" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Commandes de base</h2>
+
+                        <div class="row g-4 mt-2">
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-h</code> — Aide</h5>
+                                <p class="text-secondary">Affiche la liste complète des commandes disponibles avec leur description.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -h
+<span class="text-light">Commandes disponibles :
+-h : afficher l'aide
+-s &lt;mot&gt; : rechercher...
+...</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-l</code> — Liste des fichiers</h5>
+                                <p class="text-secondary">Affiche la liste de tous les fichiers actuellement indexés dans le moteur de recherche.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+            <pre class="m-0"><code><span class="text-prompt">></span> -l
+<span class="text-light">src/testIndexed/cours.txt
+src/testIndexed/notes.pdf
+src/testIndexed/rapport.txt</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-t &lt;message&gt;</code> — Test de communication</h5>
+                                <p class="text-secondary">Envoie un message au serveur et reçoit un écho en retour. Utile pour vérifier que la connexion client-serveur fonctionne correctement.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -t bonjour
+<span class="text-success-cmd">Message reçu : bonjour</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-q</code> — Quitter</h5>
+                                <p class="text-secondary">Ferme proprement la connexion entre le client et le serveur. Le serveur reste actif et peut accepter de nouvelles connexions.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -q
+<span class="text-light">Fermeture du client...</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recherche" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Indexation & Moteur TF-IDF</h2>
+
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-12">
+                                <span class="f-bold h5 text-accent">TF-IDF : </span>
+                                <div class="text-secondary mt-2 text-secondary-perso">algorithme statistique qui permet de classer les résultats d'une recherche en évaluant l'importance d'un mot-clé dans un document par rapport à sa rareté dans l'ensemble des fichiers. <br>⚠️ -> Score TF-IDF à 0.0 si le mot est présent dans tous les documents</div>
+
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;mots&gt;</code> (Scan & Indexation)</h5>
+                                <p class="text-secondary">Parcourt les fichiers et garde ceux qui ont le mot recherché par l'utilisateur pour afficher les chemins et le score TF-IDF de ceux-ci.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                       <pre class="m-0"><code><span class="text-prompt">></span> -s coucou
+<span class="text-light">Document: src/testIndexed/coucou.txt, Score TF-IDF: 0.231
+Document: src/testIndexed/coucou2.txt, Score TF-IDF: 0.1386
+Document: src/testIndexed/test.txt, Score TF-IDF: 0.0495
+Document: src/testIndexed/millionsWords.txt, Score TF-IDF: 0.0</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold mt-4"><code class="text-accent fs-5">-s &lt;mots&gt;</code></h5>
+                                <p class="text-secondary">Recherche standard calculée via TF-IDF. Vous pouvez exclure des mots stricts avec le double tiret <code>--</code>.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># Recherche "réseau" sans "cloud"</span>
+<span class="text-prompt">></span> -s reseau -- cloud
+<span class="text-light">Document: src/tcp.txt | Score: 0.8452
+Document: src/osi.pdf | Score: 0.1205</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold mt-4"><code class="text-accent fs-5">-ar &lt;requête&gt;</code></h5>
+                                <p class="text-secondary">Recherche avancée supportant les opérateurs logiques complexes : <code>ET</code>, <code>OU</code>, <code>SAUF</code>.</p>
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># Doit contenir java ET réseau, sans C++</span>
+<span class="text-prompt">></span> -ar java ET reseau SAUF cpp
+<span class="text-light">Document: src/sockets.txt | Score: 1.1042</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section id="fichiers" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Gestion de Fichiers Distants</h2>
+                        <p class="p-perso">Commandes réseau utilisant les flux sécurisés pour prévenir la corruption des données lors du transfert.</p>
+                        <p class="text-secondary mt-2">
+                            ⚠️ -> Fonctionne uniquement avec les chemins relatifs stockés lors de l'indexation
+                        </p>
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-dl &lt;chemin&gt;</code></h5>
+                                <p class="text-secondary mb-2">Télécharge un fichier binaire (PDF, Image, etc.) depuis le serveur vers le dossier local <code>downloads/</code>.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -dl src/cours_maths.pdf
+<span class="text-success-cmd">Début du téléchargement : cours_maths.pdf
+Téléchargement terminé ! (3072 octets)</span></code></pre>
+                                    </div>
+                                </div>
+                                <p class="text-secondary small mt-2">⚠️ -> Pas de limite de taille — un fichier de plusieurs Go peut saturer la mémoire</p>
+                                <p class="text-secondary small mt-2">⚠️ -> En cas de coupure, le fichier partiel reste dans <code>downloads/</code></p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m &lt;chemin&gt;</code></h5>
+                                <p class="text-secondary mb-2">Affiche les métadonnées internes du moteur (Date d'indexation, taille exacte, nombre de mots).</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -m src/notes.txt
+<span class="text-light">Chemin: src/notes.txt | Poids: 14Kb</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m -rn &lt;ancien&gt; &lt;nouv&gt;</code></h5>
+                                <p class="text-secondary mb-2">Renomme ou <strong>déplace</strong> le fichier sur le serveur. Met à jour l'index et consigne l'action dans <code>journal.csv</code>.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-comment"># Exemple de déplacement :</span>
+<span class="text-prompt">></span> -m -rn src/test.txt archives/test.txt
+<span class="text-success-cmd">Fichier renommé avec succès.</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-r &lt;chemin&gt;</code> — Lire un fichier</h5>
+                                <p class="text-secondary mb-2">Affiche le contenu textuel d'un fichier directement dans le terminal client. Fonctionne sur les fichiers TXT et PDF (nécessite <code>pdftotext</code>).</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+            <pre class="m-0"><code><span class="text-prompt">></span> -r src/testIndexed/cours.txt
+<span class="text-light">Bonjour, voici le contenu
+du fichier texte...</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-m -rm &lt;chemin&gt;</code></h5>
+                                <p class="text-secondary mb-2">Supprime définitivement le fichier du serveur physique et purge l'index inversé.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -m -rm src/secret.pdf
+<span class="text-success-cmd">Fichier supprimé avec succès.</span></code></pre>
+                                    </div>
+                                </div>
+                                <p class="text-secondary small mt-2">⚠️ -> Pas de confirmation avant suppression</p>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="avance" class="mb-5">
+                <div class="card bg-custom-dark text-light shadow border-0">
+                    <div class="card-body">
+                        <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Outils d'Analyse Avancés</h2>
+                        
+                        <div class="list-group list-group-flush rounded bg-transparent mt-2">
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-exif &lt;image.jpg&gt;</code> : Extraction EXIF</h5>
+                                <p class="text-secondary mb-2">S'interface avec <code>exiv2</code> pour extraire les données cachées (GPS, Appareil photo, Date) d'une image distante.</p>
+                                <div class="terminal-block shadow-sm w-75">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -exif images/photo.jpg</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-d &lt;fich1&gt; &lt;fich2&gt;</code> : Doublons stricts</h5>
+                                <p class="text-secondary mb-2">Vérifie algorithmiquement si deux fichiers sont des copies conformes au niveau du contenu.</p>
+                                <div class="terminal-block shadow-sm w-75">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -d doc1.txt doc2.txt
+<span class="text-success-cmd">Ces fichiers sont similaires.</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary border-bottom-0">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-sw -add / -rm &lt;mots&gt;</code> : Stop Words</h5>
+                                <p class="text-secondary mb-2">Modifie la liste des Stop-Words (mots exclus du calcul TF-IDF). L'ajout ou la suppression déclenche une réindexation automatique.</p>
+                                <div class="terminal-block shadow-sm w-75">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -sw -add cependant,néanmoins
+<span class="text-success-cmd">Mots ajoutés à la liste d'exclusion avec succès.</span></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        <section id="maintenance" class="mb-5">
+            <div class="card bg-custom-dark text-light shadow border-0">
+                <div class="card-body">
+                    <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Maintenance de l'index</h2>
+
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold"><code class="text-accent fs-5">-clean</code> — Compacter le journal</h5>
+                            <p class="text-secondary mb-2">Réécrit le fichier <code>journal.csv</code> en ne gardant que l'état actuel de chaque document. Réduit la taille du journal qui grossit à chaque opération.</p>
+                            <div class="terminal-block shadow-sm">
+                                <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -clean
+<span class="text-success-cmd">Journal compacté avec succès.</span></code></pre>
+                                </div>
+                            </div>
+                            <p class="text-secondary small mt-2">⚠️ Opération bloquante — le serveur ne répond plus pendant la compaction.</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="fw-bold"><code class="text-accent fs-5">-reindex</code> — Réindexation complète</h5>
+                            <p class="text-secondary mb-2">Supprime entièrement le journal et relance une indexation complète depuis zéro. Utile si l'index est corrompu ou si les stop words ont été modifiés massivement.</p>
+                            <div class="terminal-block shadow-sm">
+                                <div class="terminal-body">
+                            <pre class="m-0"><code><span class="text-prompt">></span> -reindex
+<span class="text-success-cmd">Réindexation terminée !</span></code></pre>
+                                </div>
+                            </div>
+                            <p class="text-secondary small mt-2">⚠️ -> Irréversible — le journal est supprimé sans confirmation.</p>
+                            <p class="text-secondary small mt-2">⚠️ -> Opérations bloquantes — le serveur ne répond plus aux autres clients pendant l'exécution</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="limites" class="mb-5">
+            <div class="card bg-custom-dark text-light shadow border-0">
+                <div class="card-body">
+                    <h2 class="card-title border-bottom border-secondary pb-2 mb-4 text-accent">Limites connues</h2>
+
+                    <div class="list-group list-group-flush rounded bg-transparent mt-2">
+
+                        <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                            <h5 class="fw-bold"><code class="text-accent fs-5">-ar</code> — Recherche avancée</h5>
+                            <ul class="text-secondary">
+                                <li>Pas de priorité des opérateurs : <code>a OU b ET c</code> n'évalue pas <code>b ET c</code> en premier</li>
+                                <li><code>mot SAUF mot</code> retourne toujours un résultat vide</li>
+                                <li>Les résultats ne sont pas triés par score TF-IDF (contrairement à <code>-s</code>)</li>
+                            </ul>
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        </div>
+        <footer class="text-secondary text-center py-4 mt-5">
+            <div class="container border-top border-secondary pt-3">
+                <p class="footer-text mb-0">
+                    Projet académique Info4B - Université de Bourgogne | 
+                    <a href="../../mentions-legales.html" class="legals">Mentions Légales</a> |
+                    <a href="https://antoineragot.com" target="_blank" class="site-perso">Antoine Ragot</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,85 +1,72 @@
-# 🔍 Moteur de Recherche Local - Projet Info4B
+# Moteur de Recherche Info4B - Release v1.0
 
-Un moteur de recherche de fichiers locaux léger et performant développé en Java. Ce projet implémente une architecture **Client-Serveur** communiquant via des Sockets TCP et repose sur un **Index Inversé** pour effectuer des recherches textuelles optimisées (avec calcul de pertinence TF-IDF).
+Un moteur de recherche de fichiers locaux (PDF, TXT, Images) performant, basé sur une architecture **Client-Serveur** robuste et un système d'indexation intelligent.
 
-![Java](https://img.shields.io/badge/Java-17-orange.svg)
-![Maven](https://img.shields.io/badge/Build-Maven-blue.svg)
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
+[![Maven](https://img.shields.io/badge/Build-Maven-blue.svg)](https://maven.apache.org/)
+[![Website](https://img.shields.io/badge/Documentation-Web-brightgreen.svg)](https://searchengine.antoineragot.com)
 
-## Fonctionnalités Principales
+## Site Web et Documentation
 
-- **Indexation automatique** : Parcours et indexe le contenu des fichiers `.txt` et `.pdf` (nécessite `pdftotext`).
-- **Recherche avancée (TF-IDF)** : Recherche de mots-clés avec tri par pertinence.
-- **Filtres d'exclusion** : Possibilité de rechercher des mots tout en excluant certains résultats.
-- **Persistance des données** : Système de journalisation (`journal.csv`) fonctionnant en arrière-plan (Producteur/Consommateur) pour sauvegarder et restaurer l'état de l'index sans ralentir le serveur.
-- **Client interactif CLI** : Interface en ligne de commande pour interroger le serveur en temps réel.
+Le projet dispose d'un site web officielle et d'une documentation interactive accessible à l'adresse suivante :  
+[https://searchengine.antoineragot.com](https://searchengine.antoineragot.com)
 
 ---
 
-## Prérequis
+## Fonctionnalités Majeures
 
-Avant de lancer le projet, assurez-vous d'avoir installé :
-- **Java JDK 17** (ou version supérieure)
-- **Maven** (pour la gestion des dépendances et la compilation)
-- **Poppler-utils / pdftotext** (nécessaire pour l'extraction du texte des fichiers PDF)
-
-### Installation des prérequis
-
-- **Java JDK 17** (Environnement de développement et d'exécution) :
-    - Mac OS (via Homebrew) : `brew install openjdk@17`
-    - Linux (Ubuntu/Debian) : `sudo apt install openjdk-17-jdk`
-
-
-- **Maven** (Outil de gestion des dépendances et de compilation) :
-    - Mac OS (via Homebrew) : `brew install maven`
-    - Linux (Ubuntu/Debian) : `sudo apt install maven`
-
-
-- **Poppler-utils / pdftotext** (Nécessaire pour l'indexation des fichiers PDF) :
-    - Mac OS (via Homebrew) : `brew install poppler`
-    - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install poppler-utils`
-
-
-- **exiv2** (Nécessaire pour obtenir les données exif des images) :
-  - Mac OS (via Homebrew) : `brew install exiv2`
-  - Linux (Ubuntu/Debian) : Généralement présent par défaut. Si ce n'est pas le cas : `sudo apt install exiv2`
+- **Recherche de mot clé et analyse de Pertinence TF-IDF** : Algorithme de tri des résultats par score d'importance des mots-clés.
+- **Recherche Avancée** : Support des opérateurs logiques `ET`, `OU` et `SAUF` pour des requêtes précises.
+- **Surveillance en Temps Réel** : Détection automatique des nouveaux fichiers ou des modifications dans le répertoire indexé via un `WatchService` dédié.
+- **Téléchargement de fichiers** : Téléchargement sécurisé de fichiers du serveur vers le client avec un retour visuel fluide dans la console.
+- **Gestion Distante de Fichiers** : Possibilité de renommer, déplacer ou supprimer des fichiers directement depuis le client.
+- **Persistance par Journalisation** : Sauvegarde de l'état de l'index dans `journal.csv` permettant une restauration instantanée sans ré-indexation complète au démarrage.
+- **Extraction Multimédia** : Lecture du texte des PDF et extraction des métadonnées EXIF des images.
 
 ---
 
-## Compilation et Exécution
+## Lancement Rapide
 
-### 1. Compiler le projet
-`mvn clean compile`
+Le projet inclut un script d'orchestration `run.sh` pour automatiser toutes les étapes.
 
-### 2. Démarrer le Serveur
-*`mvn exec:java -Dexec.mainClass="Serveur.Main"`*
+### 1. Prérequis
+- Java JDK 17+
+- Maven
+- `pdftotext` (Poppler) et `exiv2` pour les fonctionnalités avancées.
 
-Le serveur démarrera sur le port `12345` et lancera la restauration/l'indexation du répertoire cible.
+### 2. Utilisation du script
 
-### 3. Démarrer le Client
-Ouvrez un nouveau terminal et lancez le client :
-*`mvn exec:java -Dexec.mainClass="Client.Main"`*
+    chmod +x run.sh
+    ./run.sh
 
-Par défaut le client démarrera et se connectera sur `localhost` port `12345`
+*Le script propose un menu interactif pour compiler, lancer le serveur et démarrer le client.*
 
 ---
-### 4. Script automatisé
-*`chmod +x run.sh`*
 
-*`./run.sh`*
+## Guide des Commandes Client
 
-## Guide des Commandes (Client)
+Une fois connecté, utilisez les commandes suivantes :
 
-Une fois le client connecté, utilisez l'interface en ligne de commande (`>`) :
-
+### Recherche et Indexation
 | Commande | Action | Exemple |
 | :--- | :--- | :--- |
-| `-h` | Affiche le menu d'aide complet. | `> -h` |
-| `-s <mots>` | Recherche un ou plusieurs mots (séparés par des virgules). | `> -s linux,systeme` |
-| `-s <mots> -- <exclus>` | Recherche des mots en excluant les documents contenant les mots après le `--`. | `> -s reseau -- windows` |
-| `-m <chemin>` | Affiche les métadonnées d'un document indexé (poids, date, mots totaux). | `> -m src/test.txt` |
-| `-p <chemin>` | Affiche le texte brut extrait du document. | `> -p src/test.pdf` |
-| `-t <msg>` | Test (Ping) de la communication avec le serveur. | `> -t Bonjour Serveur` |
-| `q` | Quitte proprement le client et ferme la connexion. | `> q` |
+| `-s <mots>` | Recherche TF-IDF (séparateur `,`) | `> -s reseau,java` |
+| `-ar <requête>` | Recherche logique (ET, OU, SAUF) | `> -ar java ET reseau SAUF cpp` |
+| `-l` | Liste tous les fichiers indexés | `> -l` |
+
+### Gestion de fichiers
+| Commande | Action | Exemple |
+| :--- | :--- | :--- |
+| `-dl <chemin>` | **Télécharger** un fichier avec barre de progression | `> -dl src/docs/cours.pdf` |
+| `-m -rn <old> <new>` | **Renommer ou Déplacer** un fichier | `> -m -rn test.txt archive/test.txt` |
+| `-m -rm <chemin>` | **Supprimer** un fichier du serveur | `> -m -rm src/temp.txt` |
+
+### Outils
+| Commande | Action | Exemple |
+| :--- | :--- | :--- |
+| `-exif <image>` | Extraire les métadonnées d'une image | `> -exif photo.jpg` |
+| `-d <f1> <f2>` | Détecter si deux fichiers sont des **doublons** | `> -d a.txt b.txt` |
+| `-sw -add <mot>` | Ajouter un mot à la liste des **Stop Words** | `> -sw -add donc` |
 
 ---
-*Projet réalisé dans le cadre de l'UE Info4B (L2).*
+*Projet réalisé dans le cadre de l'UE Info4B - Université de Bourgogne.*

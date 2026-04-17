@@ -1,11 +1,15 @@
 package Client;
 
-import java.io.*;
-import java.net.Socket;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.Socket;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
@@ -58,24 +62,43 @@ public class Main {
 
                         System.out.println(ANSI_VERT + "Début du téléchargement : " + ANSI_BLEU + nomFichier + ANSI_RESET);
 
-                        File dossier = new File("downloads");
-                        dossier.mkdirs();
-                        String chemin_sauvegarde = "downloads/" + nomFichier;
+                        String racine = System.getProperty("user.home"); //permet de recuperer le dossier racine de l'utilisateur
+                        File dossier = new File(racine, "Downloads"); //on se met ensuite sur le dossier des telechargements
+                        if (!dossier.exists()) { //creer le dosssier au cas ou il existe pas
+                            dossier.mkdirs();
+                        }
+                        String chemin_sauvegarde = dossier.getAbsolutePath() + File.separator + nomFichier; //Construit le chemin absolu final avec File.separator pour gérer les \ ou /
 
                         FileOutputStream ecriture = new FileOutputStream(chemin_sauvegarde);
                         byte[] buffer = new byte[4096];
                         long total_lu = 0;
                         int quantite_lu;
 
+                        int dernierPourcentage = -1;
+                        long debutTemps = System.currentTimeMillis();
+
                         while (total_lu < taille_fichier && (quantite_lu = in.read(buffer, 0, (int)Math.min(buffer.length, taille_fichier - total_lu))) != -1) {
                             ecriture.write(buffer, 0, quantite_lu);
                             total_lu += quantite_lu;
+
+                            int pourcentage = (int) ((total_lu * 100) / taille_fichier);
+
+                            if (pourcentage != dernierPourcentage) {
+                                int nbBlocsRemplis = pourcentage / 5;
+                                int nbBlocsVides = 20 - nbBlocsRemplis;
+
+                                String barreRemplie = new String(new char[nbBlocsRemplis]).replace("\0", "█");
+                                String barreVide = new String(new char[nbBlocsVides]).replace("\0", "░");
+
+                                System.out.print("\r\033[K" + ANSI_BLEU + "Progression : [" + ANSI_VERT + barreRemplie + ANSI_RESET + barreVide + ANSI_BLEU + "] " + pourcentage + "%" + ANSI_RESET);
+                                dernierPourcentage = pourcentage;
+                            }
                         }
 
                         ecriture.close();
-                        System.out.println(ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets)" + ANSI_RESET);
-                        break;
 
+                        long tempsEcoule = System.currentTimeMillis() - debutTemps;
+                        System.out.println("\n" + ANSI_VERT + "Téléchargement terminé ! (" + total_lu + " octets en " + tempsEcoule + " ms)" + ANSI_RESET);
                     } else {
                         System.out.println(reponse);
                     }

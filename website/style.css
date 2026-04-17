@@ -20,6 +20,23 @@ body {
     color: #e0e0e0;
 }
 
+*:not(p.text-secondary, span.text-comment)::selection{
+    background-color: hsl(190, 100%, 50%);
+    color : white;
+}
+
+p.text-secondary::selection{
+    background-color: hsl(190, 100%, 50%);
+    color: #4b4b4c;
+}
+
+span.text-comment::selection{
+    background-color: hsl(190, 100%, 50%);
+    color: hsl(129, 100%, 63%);
+}
+
+
+
 .header-container {
     top: 0px;
     backdrop-filter: blur(8px);
@@ -130,7 +147,7 @@ body {
     .main-perso {
         position: fixed;
         z-index: -1;
-        background-image: url("website/img2.png");
+        background-image: url("img5.webp");
         background-position: 5px -40px !important;
         background-size: cover;
         margin: 0;
@@ -156,7 +173,8 @@ body {
 .main-perso {
     position: fixed;
     z-index: -1;
-    background-image: url("img2.png");
+    background-color: #569cd6;
+    background-image: url("img5.webp");
     background-position: center center;
     background-size: cover;
     margin: 0;
@@ -345,4 +363,16 @@ body {
 
 .footer-text {
     color: white;
+}
+
+.legals {
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid white;
+}
+
+.site-perso {
+    color: rgb(0, 174, 255);
+    text-decoration: none;
+    border-bottom: 1px solid rgb(78, 199, 255);
 }

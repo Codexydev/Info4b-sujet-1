@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moteur de Recherche - Projet Info4B</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="website/style.css">
+    <link rel="stylesheet" href="website/style.css?v=2">
 </head>
 
 <body>
@@ -31,7 +31,7 @@
                             <a class="nav-link" href="#exemples">Exemples</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-semibold" href="website/docs.html">Documentation complète</a>
+                            <a class="nav-link fw-semibold" href="docs">Documentation complète</a>
                         </li>
                     </ul>
                     <span class="navbar-text text-dark opacity-75">
@@ -214,9 +214,9 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Multi-threading</h5>
-                                <p class="card-text text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing
-                                    elit. Quaerat, vel amet nobis numquam necessitatibus eos beatae recusandae placeat
-                                    est rem!</p>
+                                <p class="card-text text-secondary">Le serveur gère plusieurs clients simultanément grâce à un ThreadGroup dédié.
+                                    Le journal utilise un pattern Producteur/Consommateur avec un thread écrivain asynchrone, évitant tout blocage
+                                    des opérations d'indexation.</p>
                             </div>
                         </div>
                     </div>
@@ -225,9 +225,9 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">journalisation</h5>
-                                <p class="card-text text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing
-                                    elit. Exercitationem, doloremque itaque provident mollitia in dolores dolore natus
-                                    labore. Repellendus, veniam.</p>
+                                <p class="card-text text-secondary">Chaque opération (ajout, modification, suppression)
+                                    est persistée dans un fichier journal.csv. Au redémarrage, l'état complet est restauré
+                                    depuis ce journal sans réindexation, garantissant la continuité du service.</p>
                             </div>
                         </div>
                     </div>
@@ -236,9 +236,9 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Client - Serveur</h5>
-                                <p class="card-text text-secondary">Lorem ipsum, dolor sit amet consectetur adipisicing
-                                    elit. Fuga consectetur rerum explicabo officia architecto tenetur placeat in
-                                    maiores, accusamus debitis.
+                                <p class="card-text text-secondary">Architecture TCP/IP sur le port 12345. Le client interactif propose
+                                    un ensemble de commandes (-s, -ar, -dl, -m, -sw...) pour interroger le serveur, télécharger des fichiers
+                                    et gérer l'index à distance.</p>
                                 </p>
                             </div>
                         </div>
@@ -250,7 +250,11 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
 
         <footer class="text-secondary text-center py-4 mt-5">
             <div class="container border-top border-secondary pt-3">
-                <p class="footer-text mb-0">Projet académique Info4B - Université de Bourgogne</p>
+                <p class="footer-text mb-0">
+                    Projet académique Info4B - Université de Bourgogne | 
+                    <a href="mentions-legales.html" class="legals">Mentions Légales</a> | 
+                    <a href="https://antoineragot.com" target="_blank" class="site-perso">Antoine Ragot</a>
+                </p>
             </div>
         </footer>
     </div>

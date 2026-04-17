@@ -16,6 +16,7 @@ public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_MAGENTA = "\u001B[35m";
 
     public static void parcoursFichiers(String cheminRepertoire, StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin, Journal journal, StopWord stopWord) {
         Path start = Paths.get(cheminRepertoire);
@@ -110,8 +111,8 @@ public class Main {
                                 "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
                                 "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
                                 "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
-                                "-m -rn" + ANSI_VERT + " <chemin du document> " + ANSI_BLEU + "Renommé un fichier\n" + ANSI_RESET +
                                 "-m -rm" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Supprimer fichier \n" + ANSI_RESET +
+                                "-m -rn" + ANSI_VERT + " <ancien_chemin> <nouveau_chemin> : " + ANSI_BLEU + "Renommer ou déplacer un fichier\n" + ANSI_RESET +
                                 "-d" + ANSI_VERT + " <chemin du document> <chemin du document>" + ANSI_BLEU + " Permet de détecté sont deux fichiers sont les même \n" + ANSI_RESET +
                                 "-r" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Affiche le contenu du fichier \n" + ANSI_RESET +
                                 "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
@@ -121,7 +122,8 @@ public class Main {
                                 "-reindex " + ANSI_BLEU + "permet de supprimer le journal et refaire une indexation\n" + ANSI_RESET +
                                 "-sw -l" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'afficher la liste des stop words\n" + ANSI_RESET +
                                 "-sw -rm" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'enlever un mot de la liste des stop words\n" + ANSI_RESET +
-                                "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET;
+                                "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET +
+                                "Site web pour plus d'informations: " + ANSI_MAGENTA + "https://searchengine.antoineragot.com\n" + ANSI_RESET;
 
                         out.writeUTF(help);
                         out.writeUTF("END_OF_MESSAGE");
@@ -174,10 +176,10 @@ public class Main {
                                         Recherche recherche;
                                         if (arg.length >= 4 && arg[2].equals("--")) {
                                             String[] motsNonRecherches = arg[3].split(",");
-                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches);
+                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, motsNonRecherches, stopWord);
 
                                         } else {
-                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots);
+                                            recherche = new Recherche(indexInverse, stockagesDocuments, idToPath, mots, stopWord);
                                         }
 
                                         out.writeUTF(recherche.effectuerRecherche());
@@ -193,7 +195,7 @@ public class Main {
                                         String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
                                         String[] motsAvances = requete.split(" "); //découpage avec les espaces
 
-                                        Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0]);
+                                        Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0], stopWord);
                                         out.writeUTF(maRecherche.RechercheAvance());
 
                                         out.writeUTF("END_OF_MESSAGE");
@@ -219,6 +221,11 @@ public class Main {
                                                 out.writeUTF("Erreur: arguments manquants. Utilisation: -m -rn <ancien> <nouveau>");
                                             }
                                         } else if (str.startsWith("-m -rm")) {
+                                            if (str.length() <= 6) {
+                                                out.writeUTF("Erreur : Spécifiez un chemin à supprimer.");
+                                                out.writeUTF("END_OF_MESSAGE");
+                                                break;
+                                            }
                                             String cheminRm = str.substring(7).trim();
                                             UpdateFile updateFileRm = new UpdateFile(cheminRm);
                                             String resultat = updateFileRm.supprimerFichier();
@@ -270,10 +277,15 @@ public class Main {
                                         break;
 
                                     case "-dl":
+                                        if (str.length() <= 4) {
+                                            out.writeUTF("Erreur : Spécifiez un nom de fichier. (ex: -dl monfichier.txt)");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
                                         String fichier = str.substring(4).trim();
                                         File monFichier = new File(fichier);
-                                        if (!monFichier.exists()) {
-                                            out.writeUTF("fichier inexistant");
+                                        if (!monFichier.exists() || !monFichier.isFile()) {
+                                            out.writeUTF("Erreur : Fichier introuvable ou il s'agit d'un dossier.");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         } else {
@@ -284,11 +296,13 @@ public class Main {
                                             FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
                                             int quantite_lu;
+
                                             while ((quantite_lu = lecteur.read(buffer)) != -1) {
                                                 out.write(buffer, 0, quantite_lu);
                                             }
                                             lecteur.close();
                                             out.flush();
+                                            out.writeUTF("END_OF_MESSAGE");
                                         }
                                         break;
 
@@ -309,15 +323,42 @@ public class Main {
                                         break;
 
                                     case "-d":
-                                        Doublon doublon = new Doublon(arg[1], arg[2]);
+                                        if (arg.length < 3) {
+                                            out.writeUTF("Erreur : arguments manquants. Utilisation : -d <chemin_fichier_1> <chemin_fichier_2>");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        String chemin1 = arg[1];
+                                        String chemin2 = arg[2];
+                                        File fichier1 = new File(chemin1);
+                                        File fichier2 = new File(chemin2);
+
+                                        if (!fichier1.exists() || !fichier1.isFile()) {
+                                            out.writeUTF("Erreur : Le premier fichier est introuvable ou est un dossier (" + chemin1 + ").");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+                                        if (!fichier2.exists() || !fichier2.isFile()) {
+                                            out.writeUTF("Erreur : Le deuxième fichier est introuvable ou est un dossier (" + chemin2 + ").");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        Doublon doublon = new Doublon(chemin1, chemin2);
                                         boolean estDublon = doublon.EstDoublon();
-                                        if (estDublon) out.writeUTF("C'est fichier sont similaire");
-                                        else out.writeUTF("fichier différents");
+
+                                        if (estDublon) {
+                                            out.writeUTF("Ces fichiers sont similaires.");
+                                        } else {
+                                            out.writeUTF("Ces fichiers sont différents.");
+                                        }
+
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
                                     case "-sw":
-                                        if (arg.length < 3 && !arg[1].equals("-l")) {
+                                        if (arg.length < 2 || (arg.length < 3 && !arg[1].equals("-l"))) {
                                             out.writeUTF("Erreur : Arguments manquants. Exemple : -sw -add le,la");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
@@ -328,10 +369,17 @@ public class Main {
                                                     String[] motsAAjouter = arg[2].split(",");
                                                     stopWord.addMot(motsAAjouter);
 
-                                                    for (String m : motsAAjouter) {
-                                                        indexInverse.supprimerMot(m);
+                                                    out.writeUTF("Mot ajouté aux Stop Words !");
+                                                    out.writeUTF("Lancement de la réindexation...");
+                                                    Journal.resetJournal(stockagesDocuments, indexInverse, idToPath);
+                                                    try {
+                                                        journal.supprimerJournal();
+                                                    } catch (IOException e){
+                                                        System.out.println("Erreur lors de la suppression du journal.");
                                                     }
-                                                    out.writeUTF("Mot ajouté aux stopwords et supprimé de l'index !");
+                                                    parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
+
+                                                    out.writeUTF("Réindexation terminée !");
                                                 } catch (IOException e) {
                                                     out.writeUTF("Erreur d'écriture dans le fichier stopword");
                                                 }
@@ -383,7 +431,10 @@ public class Main {
                             }
                         }
                         socket.close();
+                    } catch (java.io.EOFException | java.net.SocketException e) {
+                        System.out.println("Un client s'est déconnecté brutalement.");
                     } catch (IOException e) {
+                        System.err.println("Erreur d'entrée/sortie avec le client :");
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
                         throw new RuntimeException(e);
