@@ -37,14 +37,14 @@ public class ExtracteurTexte {
             }
             case "docx" -> {
                 try {
-                    java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(this.cheminFichier); //ouvre les fichiers docx comme des zip
-                    java.util.zip.ZipEntry documentXML = zipFile.getEntry("word/document.xml"); //et on recup le fichier xml
+                    java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(this.cheminFichier); // Ouvre les fichiers docx comme des zip
+                    java.util.zip.ZipEntry documentXML = zipFile.getEntry("word/document.xml"); // Et on récupère le fichier xml
 
                     if (documentXML != null) {
-                        java.io.InputStream chaine = zipFile.getInputStream(documentXML); //on met tout sous forme de chaine de caractères
-                        String contenuXML = new String(chaine.readAllBytes()); //on lit
+                        java.io.InputStream chaine = zipFile.getInputStream(documentXML); // On met tout sous forme de chaine de caractères
+                        String contenuXML = new String(chaine.readAllBytes());
                         zipFile.close();
-                        String textePur = contenuXML.replaceAll("<[^>]+>", " "); //permet d'enlever toutes les balises dont on a pas besoin
+                        String textePur = contenuXML.replaceAll("<[^>]+>", " "); // Permet d'enlever toutes les balises dont on n'a pas besoin
 
                         return textePur;
                     }
@@ -57,9 +57,9 @@ public class ExtracteurTexte {
             case "html", "htm" -> {
                 try {
                     String contenuHTML = new String(Files.readAllBytes(Paths.get(this.cheminFichier)));
-                    String sansScript = contenuHTML.replaceAll("(?s)<script.*?</script>", " "); //on enelve les balises
-                    String sansStyle = sansScript.replaceAll("(?s)<style.*?</style>", " "); //idem (le ?s permet au regex de fonctionner sur plusieurs lignes)
-                    String textePur = sansStyle.replaceAll("<[^>]+>", " "); //on garde le texte pur
+                    String sansScript = contenuHTML.replaceAll("(?s)<script.*?</script>", " "); // On enlève les balises
+                    String sansStyle = sansScript.replaceAll("(?s)<style.*?</style>", " "); // Idem (le ?s permet au regex de fonctionner sur plusieurs lignes.)
+                    String textePur = sansStyle.replaceAll("<[^>]+>", " "); // On garde le texte pur
 
                     return textePur;
                 } catch (IOException e) {
@@ -67,31 +67,36 @@ public class ExtracteurTexte {
                 }
                 return "";
             }
+
             case "jpg", "jpeg", "png" -> {
                 try {
-                    ProcessBuilder processBuilder = new ProcessBuilder("exiv2", this.cheminFichier);
+                    ProcessBuilder processBuilder = new ProcessBuilder("exiv2", "-pa", this.cheminFichier);
                     processBuilder.redirectErrorStream(true);
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
-
-                    StringBuilder out = new StringBuilder();
-                    String[] texteExtraitTab = texteExtrait.split("\n");
-                    for (String ligne : texteExtraitTab) {
-                        if (ligne.contains(":")) {
-                            String valeur = ligne.split(":", 2)[1].trim();
-                            if (!valeur.isEmpty()) {
-                                out.append(ligne).append("\n");
-                            }
-                        }
-                    }
-
                     process.waitFor();
-                    return out.toString();
+
+                    return texteExtrait;
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
         return "";
+    }
+
+    public static void modifierMetadataPhysique(String chemin, String champ, String valeur) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "exiv2",
+                    "-M", "set Iptc.Application2.Caption String " + valeur,
+                    chemin
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+            p.waitFor();
+        } catch (Exception e) {
+            System.err.println("Erreur d'écriture EXIF : " + e.getMessage());
+        }
     }
 }

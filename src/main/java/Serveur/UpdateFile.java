@@ -1,13 +1,10 @@
 package Serveur;
 
 import java.io.*;
-import java.net.Socket;
 
 public class UpdateFile {
-    StockagesDocuments stockagesDocuments;
     File file;
     File file2;
-    String out;
     String in = "";
 
 
@@ -42,9 +39,5 @@ public class UpdateFile {
             return "Fichier supprimé";
         }
         return "erreur";
-    }
-
-    public String getIn() {
-        return this.in;
     }
 }

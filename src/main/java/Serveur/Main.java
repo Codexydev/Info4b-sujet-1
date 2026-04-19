@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.net.InetAddress;
+import java.net.DatagramSocket;
 
 
 public class Main {
@@ -27,7 +29,7 @@ public class Main {
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         if (path.getFileName().toString().startsWith(".")) {
-                            return; //permet d'eviter les fihciers .DS_store qui ne serve pas à l'indexation
+                            return;
                         }
                         String cheminFichier = path.toString();
 
@@ -90,8 +92,16 @@ public class Main {
 
     public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire) {
         try {
-            System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
+            String ipServeur;
+            try (final DatagramSocket socketIP = new DatagramSocket()) {
+                socketIP.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                ipServeur = socketIP.getLocalAddress().getHostAddress();
+            } catch (Exception e) {
+                ipServeur = "Impossible de récupérer l'IP";
+            }
+            System.out.println("Server is running...");
+            System.out.println("Adresse IP du serveur : " + ipServeur + ":" + server.getLocalPort());
 
             while (true) {
                 Socket socket = server.accept();
@@ -108,8 +118,8 @@ public class Main {
                                 "-l : " + ANSI_BLEU + "liste tous les fichiers indexés\n" + ANSI_RESET +
                                 "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
                                 "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
-                                "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
-                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
+                                "-s" + ANSI_VERT + " <mot(s) (séparation (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
+                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "séparateur de mot ,\n" + ANSI_RESET +
                                 "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
                                 "-m -rm" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Supprimer fichier \n" + ANSI_RESET +
                                 "-m -rn" + ANSI_VERT + " <ancien_chemin> <nouveau_chemin> : " + ANSI_BLEU + "Renommer ou déplacer un fichier\n" + ANSI_RESET +
@@ -117,12 +127,16 @@ public class Main {
                                 "-r" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Affiche le contenu du fichier \n" + ANSI_RESET +
                                 "-ar" + ANSI_VERT + " <mot1 ET/OU/SAUF mot2 ET/OU/SAUF mots3 etc...> : " + ANSI_BLEU + "rechercher les fichiers de plusieurs mots (ET), d'un mot OU l'autre (OU), d'un fichier contenant un mot mais pas un autre(SAUF)\n" + ANSI_RESET +
                                 "-exif " + ANSI_VERT + "<chemin> : " + ANSI_BLEU + "Afficher les métadonnées EXIF d'une image\n" + ANSI_RESET +
+                                "-exif -set <image.jpg> <description>" + ANSI_BLEU + "Modification physique et persistante de la description dans le fichier.\n" + ANSI_RESET +
                                 "-dl" + ANSI_VERT + " <chemin du document> : " + ANSI_BLEU + "Permet au client de télécharger le fichier duquel on écrit le chemin\n" + ANSI_RESET+
                                 "-clean : " + ANSI_BLEU + "Compacter le journal (garde uniquement l'état actuel)\n" + ANSI_RESET +
                                 "-reindex " + ANSI_BLEU + "permet de supprimer le journal et refaire une indexation\n" + ANSI_RESET +
                                 "-sw -l" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'afficher la liste des stop words\n" + ANSI_RESET +
                                 "-sw -rm" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'enlever un mot de la liste des stop words\n" + ANSI_RESET +
                                 "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET +
+                                "-tag -add" + ANSI_VERT + " <chemin> <tags> : " + ANSI_BLEU + "Ajouter des tags (ex: -tag -add img.jpg chat,plage)\n" + ANSI_RESET +
+                                "-tag -rm " + ANSI_VERT + " <chemin> <tags> : " + ANSI_BLEU + "Retirer des tags\n" + ANSI_RESET +
+                                "-tag -l  " + ANSI_VERT + " <chemin> : " + ANSI_BLEU + "Lister les tags d'un fichier\n" + ANSI_RESET +
                                 "Site web pour plus d'informations: " + ANSI_MAGENTA + "https://searchengine.antoineragot.com\n" + ANSI_RESET;
 
                         out.writeUTF(help);
@@ -187,13 +201,13 @@ public class Main {
                                         break;
 
                                     case "-ar":
-                                        if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
-                                            out.writeUTF("Erreur: Specifiez un/des mot(s) à chercher");
+                                        if (str.length() <= 4) {
+                                            out.writeUTF("Erreur: Spécifiez un/des mot(s) à chercher");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
-                                        String[] motsAvances = requete.split(" "); //découpage avec les espaces
+                                        String requete = str.substring(4).trim(); // Phrase après les 4 premiers caractères
+                                        String[] motsAvances = requete.split(" ");
 
                                         Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0], stopWord);
                                         out.writeUTF(maRecherche.RechercheAvance());
@@ -251,19 +265,35 @@ public class Main {
                                         break;
 
                                     case "-exif":
-                                        if (str.length() <= 6) {
-                                            out.writeUTF("Erreur: Spécifiez un chemin d'image.");
+                                        if (arg.length < 2) {
+                                            out.writeUTF("Erreur: Spécifiez un chemin d'image (ex: -exif img.jpg) ou (-exif -set img.jpg \"texte\").");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        String cheminImage = str.substring(6).trim();
-                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
-                                        String metaExiv = extracteurExiv.extraireTexte();
 
-                                        if (metaExiv == null || metaExiv.isEmpty()) {
-                                            out.writeUTF("Impossible d'extraire les métadonnées.");
-                                        } else {
-                                            out.writeUTF(metaExiv);
+                                        if (arg[1].equals("-set")) {
+                                            if (arg.length < 4) {
+                                                out.writeUTF("Erreur: Description manquante. Exemple: -exif -set img.jpg Photo de vacances");
+                                            } else {
+                                                String cheminImage = arg[2];
+                                                // On récupère tout le texte tapé après le chemin
+                                                String nouvelleDesc = str.substring(str.indexOf(arg[3]));
+
+                                                ExtracteurTexte.modifierMetadataPhysique(cheminImage, "description", nouvelleDesc);
+                                                out.writeUTF("Description incrustée physiquement dans l'image avec succès !");
+                                            }
+                                        }
+                                        else {
+                                            String cheminImage = arg[1];
+                                            ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
+                                            String metaExiv = extracteurExiv.extraireTexte();
+
+                                            if (metaExiv == null || metaExiv.isEmpty()) {
+                                                out.writeUTF("Impossible d'extraire les métadonnées.");
+                                            } else {
+                                                out.writeUTF(ANSI_BLEU + "--- Données EXIF/IPTC de l'image ---" + ANSI_RESET);
+                                                out.writeUTF(metaExiv);
+                                            }
                                         }
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
@@ -291,7 +321,7 @@ public class Main {
                                         } else {
                                             long taille_fichier = monFichier.length();
 
-                                            out.writeUTF("File_incomming... " + taille_fichier + " " + monFichier.getName());
+                                            out.writeUTF("File_incoming... " + taille_fichier + " " + monFichier.getName());
 
                                             FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
@@ -411,10 +441,6 @@ public class Main {
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
-                                    default:
-                                        out.writeUTF("Commande inconnuee. Tapez -h pour afficher l'aide.");
-                                        out.writeUTF("END_OF_MESSAGE");
-                                        break;
                                     case "-clean":
                                         try {
                                             journal.compacter(stockagesDocuments, indexInverse);
@@ -424,9 +450,85 @@ public class Main {
                                         }
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
+
+                                    case "-tag":
+                                        if (arg.length < 3) {
+                                            out.writeUTF("Erreur : Arguments manquants. Exemple: -tag -add <chemin> <mots> ou -tag -l <chemin>");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        String actionTag = arg[1];
+                                        String cheminFichier = arg[2];
+
+                                        int idDuFichier = idToPath.getIdFromPath(cheminFichier);
+                                        if (idDuFichier == -1) {
+                                            out.writeUTF("Erreur : Ce fichier n'est pas indexé.");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        MetaDataDocument meta = stockagesDocuments.getMetaDataById(idDuFichier);
+                                        if (meta == null) {
+                                            out.writeUTF("Erreur : Métadonnées introuvables pour ce fichier.");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        if (actionTag.equals("-l")) {
+                                            if (meta.getTags() == null || meta.getTags().isEmpty()) {
+                                                out.writeUTF("Aucun tag associé à ce fichier.");
+                                            } else {
+                                                out.writeUTF(ANSI_BLEU + "Tags actuels du fichier : "+ANSI_VERT +"[Tags: " +String.join(", ", meta.getTags()) + "]" + ANSI_RESET);
+                                            }
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        if (arg.length < 4) {
+                                            out.writeUTF("Erreur : Mots-clés manquants. Exemple: -tag " + actionTag + " <chemin> <mot1,mot2>");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        String[] motsCles = arg[3].toLowerCase().split(",");
+
+                                        if (actionTag.equals("-add")) {
+                                            meta.ajouterTags(motsCles);
+                                            for (String mot : motsCles) {
+                                                if (!stopWord.getWords().contains(mot)) {
+                                                    indexInverse.indexerMot(mot, idDuFichier);
+                                                }
+                                            }
+                                            out.writeUTF("Tags ajoutés avec succès !");
+
+                                        } else if (actionTag.equals("-rm")) {
+                                            meta.retirerTags(motsCles);
+                                            for (String mot : motsCles) {
+                                                if (indexInverse.getDocumentsByMot(mot) != null) {
+                                                    indexInverse.getDocumentsByMot(mot).remove(idDuFichier);
+                                                }
+                                            }
+                                            out.writeUTF("Tags retirés avec succès !");
+
+                                        } else {
+                                            out.writeUTF("Erreur : Action inconnue. Utilisez -add, -rm ou -l.");
+                                        }
+
+                                        if (actionTag.equals("-add") || actionTag.equals("-rm")) {
+                                            journal.ecrireTag(actionTag, cheminFichier, arg[3]);
+                                        }
+
+                                        out.writeUTF("END_OF_MESSAGE");
+                                        break;
+
+                                    default:
+                                        out.writeUTF("Commande inconnue. Tapez -h pour afficher l'aide.");
+                                        out.writeUTF("END_OF_MESSAGE");
+                                        break;
                                 }
                             } else {
-                                out.writeUTF("donnez le(s) parametre(s)");
+                                out.writeUTF("donnez le(s) paramètre(s)");
                                 out.writeUTF("END_OF_MESSAGE");
                             }
                         }

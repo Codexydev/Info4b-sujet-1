@@ -8,9 +8,9 @@ public class Journal {
 
     private final String chemin;
     private final String cheminRepertoire;
-    private BufferedWriter writer; //pas final pour pouvoir le réouvrir après compaction
+    private BufferedWriter writer; // Pas final pour pouvoir le réouvrir après compaction
 
-    // buffer borné
+    // Buffer borné
     private final ArrayList<String> fileOperations = new ArrayList<>();
     private static final int CAPACITE_MAX = 100;
     private volatile boolean actif = true;
@@ -52,14 +52,12 @@ public class Journal {
                     if (!actif && fileOperations.isEmpty()) {
                         break;
                     }
-
-                    // On consomme le premier élément
                     operation = fileOperations.remove(0);
 
                     fileOperations.notifyAll();
                 }
 
-                // Écriture sur disque
+                // Écriture sur le disque
                 if (operation != null) {
                     try {
                         synchronized (Journal.this) {
@@ -81,10 +79,8 @@ public class Journal {
      * @param operation La chaîne de caractères formatée représentant l'opération à loguer.
      */
     private void ajouterOperation(String operation) {
-        // Synchronized(o) pr assurer exclusion mutuelle sur le buffer partagé
         synchronized (fileOperations) {
-            // Si buffer plein -> producteurs bloqués
-            // o.wait() pr attente passive tant que buffer plein
+            // Attente passive si le buffer est plein (évite le débordement)
             while (fileOperations.size() >= CAPACITE_MAX && actif) {
                 try {
                     fileOperations.wait();
@@ -94,14 +90,9 @@ public class Journal {
                     return;
                 }
             }
-
-            // si le journal a été fermé pendant l'ajout on annule l'ajout
             if (!actif) return;
-
             fileOperations.add(operation);
-
-            // réveille le consommateur
-            fileOperations.notifyAll();
+            fileOperations.notifyAll(); // Réveille le thread consommateur
         }
     }
 
@@ -133,13 +124,18 @@ public class Journal {
     public void ecrireMiseAJour(String chemin, long datemodif, long taille, ConcurrentHashMap<String, Integer> mots) {
         ajouterOperation("MISE_A_JOUR;" + chemin + ";" + datemodif + ";" + taille + ";" + formaterMots(mots));
     }
-    public static void resetJournal(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin){
+
+    public void ecrireTag(String action, String chemin, String tags) {
+        ajouterOperation("TAG;" + action + ";" + chemin + ";" + tags);
+    }
+
+    public static void resetJournal(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, IdVersChemin idVersChemin) {
         stockagesDocuments.clear();
         indexInverse.reinitialiserIndex();
         idVersChemin.clear();
     }
 
-    public synchronized void supprimerJournal() throws IOException{
+    public synchronized void supprimerJournal() throws IOException {
         this.writer.close();
         FileWriter fw = new FileWriter(this.chemin, false);
         fw.write("PATH;" + this.cheminRepertoire + "\n");
@@ -148,7 +144,7 @@ public class Journal {
     }
 
     public void fermer() {
-        // notifyAll() pr débloquer thread s'il est en wait()
+        // NotifyAll() pr débloquer thread s'il est en wait()
         synchronized (fileOperations) {
             actif = false;
             fileOperations.notifyAll();
@@ -183,12 +179,14 @@ public class Journal {
         try (BufferedReader br = new BufferedReader(new FileReader(fichier))) {
             String ligne;
             String ligneEntete = br.readLine();
-            if(ligneEntete == null) return;
+            if (ligneEntete == null) return;
 
             String cheminStocke = ligneEntete.split(";")[1].trim();
             String nouveauCheminNettoye = nouveauChemin.trim();
-            if (cheminStocke.endsWith("/") || cheminStocke.endsWith("\\")) cheminStocke = cheminStocke.substring(0, cheminStocke.length() - 1);
-            if (nouveauCheminNettoye.endsWith("/") || nouveauCheminNettoye.endsWith("\\")) nouveauCheminNettoye = nouveauCheminNettoye.substring(0, nouveauCheminNettoye.length() - 1);
+            if (cheminStocke.endsWith("/") || cheminStocke.endsWith("\\"))
+                cheminStocke = cheminStocke.substring(0, cheminStocke.length() - 1);
+            if (nouveauCheminNettoye.endsWith("/") || nouveauCheminNettoye.endsWith("\\"))
+                nouveauCheminNettoye = nouveauCheminNettoye.substring(0, nouveauCheminNettoye.length() - 1);
 
             if (cheminStocke.equals(nouveauCheminNettoye)) {
                 while ((ligne = br.readLine()) != null) {
@@ -221,6 +219,49 @@ public class Journal {
 
                     } else if (typeAction.equals("SUPPRESSION")) {
                         stockagesDocuments.supprimerDocument(chemin);
+                    } else if (champs[0].equals("TAG")) {
+                        String action = champs[1];
+                        String chemin2 = champs[2];
+
+                        // Sécurité : au cas où un tag serait vide
+                        String[] tags = (champs.length > 3 && !champs[3].isEmpty()) ? champs[3].split(",") : new String[0];
+
+                        int id = idVersChemin.getIdFromPath(chemin2);
+
+                        if (id != -1) { // Si le fichier existe bien dans notre base
+                            MetaDataDocument m = stockagesDocuments.getMetaDataById(id);
+
+                            if (m != null) {
+                                if (action.equals("-add")) {
+                                    m.ajouterTags(tags);
+                                    // On remet les mots dans l'Index pour qu'ils soient trouvables
+                                    for (String t : tags) {
+                                        indexInverse.indexerMot(t, id);
+                                    }
+                                } else if (action.equals("-rm")) {
+                                    m.retirerTags(tags);
+                                    // On nettoie l'index
+                                    for (String t : tags) {
+                                        if (indexInverse.getDocumentsByMot(t) != null) {
+                                            indexInverse.getDocumentsByMot(t).remove(id);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if (typeAction.equals("TAG_VISUEL")) {
+                        String cheminDoc = champs[1];
+                        // Sécurité : au cas où la ligne serait mal formatée
+                        String[] tags = (champs.length > 2 && !champs[2].isEmpty()) ? champs[2].split(",") : new String[0];
+
+                        int id = idVersChemin.getIdFromPath(cheminDoc);
+                        if (id != -1) {
+                            MetaDataDocument m = stockagesDocuments.getMetaDataById(id);
+                            // On restaure UNIQUEMENT la liste pour l'affichage (pas de IndexerMot ici !)
+                            if (m != null) {
+                                m.ajouterTags(tags);
+                            }
+                        }
                     }
                 }
             } else {
@@ -239,29 +280,29 @@ public class Journal {
      * Détecte les fichiers supprimés ou modifiés hors ligne et met à jour le système
      *
      * @param stockagesDocuments stockageDocument
-     * @param indexInverse       indexinverse
+     * @param indexInverse       indexinversé
      * @param journal            journal
      */
     public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, StopWord stopWord) {
         for (String chemin : new ArrayList<>(stockagesDocuments.getStockagesDocuments().keySet())) {
-                File fichier = new File(chemin);
-                if (!fichier.exists()) {
-                    stockagesDocuments.supprimerDocument(chemin);
-                    journal.ecrireSuppression(chemin, 0); // appel producteur
-                } else {
-                    long dateOS = fichier.lastModified();
-                    MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
+            File fichier = new File(chemin);
+            if (!fichier.exists()) {
+                stockagesDocuments.supprimerDocument(chemin);
+                journal.ecrireSuppression(chemin, 0); // Appel producteur
+            } else {
+                long dateOS = fichier.lastModified();
+                MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
 
-                    if (meta != null) {
-                        long dateStockee = meta.getDateModification();
+                if (meta != null) {
+                    long dateStockee = meta.getDateModification();
 
-                        if (dateOS > dateStockee) {
-                            int vraiId = meta.getId();
+                    if (dateOS > dateStockee) {
+                        int vraiId = meta.getId();
 
-                            Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false, stopWord);
-                        }
+                        Main.indexerFichier(vraiId, chemin, stockagesDocuments, indexInverse, journal, false, stopWord);
                     }
                 }
+            }
         }
     }
 
@@ -284,6 +325,11 @@ public class Journal {
 
             tmpWriter.write(ligne);
             tmpWriter.newLine();
+
+            if (meta.getTags() != null && !meta.getTags().isEmpty()) {
+                tmpWriter.write("TAG_VISUEL;" + cheminDoc + ";" + String.join(",", meta.getTags()));
+                tmpWriter.newLine();
+            }
         }
         tmpWriter.close();
         this.writer.close();
