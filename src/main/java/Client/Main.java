@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Main {
     public static final String ANSI_BLEU = "\u001B[34m";
@@ -27,7 +28,12 @@ public class Main {
         try {
             System.out.println("Client started...\n");
 
-            Socket socket = new Socket("localhost", 12345);
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Adresse IP du serveur > ");
+            String ip = scanner.nextLine().trim();
+            System.out.print("Port > ");
+            String port = scanner.nextLine().trim();
+            Socket socket = new Socket(ip, Integer.parseInt(port));
 
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();

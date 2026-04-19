@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.net.InetAddress;
+import java.net.DatagramSocket;
 
 
 public class Main {
@@ -90,8 +92,16 @@ public class Main {
 
     public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire) {
         try {
-            System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
+            String ipServeur;
+            try (final DatagramSocket socketIP = new DatagramSocket()) {
+                socketIP.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                ipServeur = socketIP.getLocalAddress().getHostAddress();
+            } catch (Exception e) {
+                ipServeur = "Impossible de récupérer l'IP";
+            }
+            System.out.println("Server is running...");
+            System.out.println("Adresse IP du serveur : " + ipServeur + ":" + server.getLocalPort());
 
             while (true) {
                 Socket socket = server.accept();
