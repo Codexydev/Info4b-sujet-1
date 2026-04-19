@@ -31,7 +31,7 @@ public class Main {
             Scanner scanner = new Scanner(System.in);
             System.out.print("Adresse IP du serveur > ");
             String ip = scanner.nextLine().trim();
-            System.out.print("Port > ");
+            System.out.print("Port (12345 default) > ");
             String port = scanner.nextLine().trim();
             Socket socket = new Socket(ip, Integer.parseInt(port));
 

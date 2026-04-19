@@ -321,7 +321,7 @@ public class Main {
                                         } else {
                                             long taille_fichier = monFichier.length();
 
-                                            out.writeUTF("File_incomming... " + taille_fichier + " " + monFichier.getName());
+                                            out.writeUTF("File_incoming... " + taille_fichier + " " + monFichier.getName());
 
                                             FileInputStream lecteur = new FileInputStream(monFichier);
                                             byte[] buffer = new byte[4096];
