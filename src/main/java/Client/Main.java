@@ -46,10 +46,10 @@ public class Main {
 
             do {
                 str = lineReader.readLine("\n > ");
-
                 out.writeUTF(str);
                 out.flush();
 
+                if (str.equals("-q") || str.equals("q")) break;
                 while (true) {
                     reponse = in.readUTF();
 
