@@ -88,7 +88,7 @@ public class Main {
         }
     }
 
-    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire, MetaModif metaModif) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -553,7 +553,6 @@ public class Main {
         String cheminJournal = "journal.csv";
         StopWord stopWord = new StopWord();
         Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin, path);
-        MetaModif metaModif = new MetaModif();
         try {
             journal = new Journal(cheminJournal, path);
         } catch (IOException e) {
@@ -578,7 +577,7 @@ public class Main {
         threadSurveillance.setDaemon(true);
         threadSurveillance.start();
 
-        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path,metaModif);
+        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path);
         journal.fermer();
     }
 }
