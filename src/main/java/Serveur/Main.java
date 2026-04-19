@@ -123,6 +123,9 @@ public class Main {
                                 "-sw -l" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'afficher la liste des stop words\n" + ANSI_RESET +
                                 "-sw -rm" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'enlever un mot de la liste des stop words\n" + ANSI_RESET +
                                 "-sw -add" + ANSI_VERT + " <mot> : " + ANSI_BLEU + "permet d'ajouter un mot à la liste des stop words\n" + ANSI_RESET +
+                                "-tag -add" + ANSI_VERT + " <chemin> <tags> : " + ANSI_BLEU + "Ajouter des tags (ex: -tag -add img.jpg chat,plage)\n" + ANSI_RESET +
+                                "-tag -rm " + ANSI_VERT + " <chemin> <tags> : " + ANSI_BLEU + "Retirer des tags\n" + ANSI_RESET +
+                                "-tag -l  " + ANSI_VERT + " <chemin> : " + ANSI_BLEU + "Lister les tags d'un fichier\n" + ANSI_RESET +
                                 "Site web pour plus d'informations: " + ANSI_MAGENTA + "https://searchengine.antoineragot.com\n" + ANSI_RESET;
 
                         out.writeUTF(help);
@@ -411,10 +414,6 @@ public class Main {
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
-                                    default:
-                                        out.writeUTF("Commande inconnuee. Tapez -h pour afficher l'aide.");
-                                        out.writeUTF("END_OF_MESSAGE");
-                                        break;
                                     case "-clean":
                                         try {
                                             journal.compacter(stockagesDocuments, indexInverse);
@@ -422,6 +421,78 @@ public class Main {
                                         } catch (IOException e) {
                                             out.writeUTF("Erreur lors de la compaction : " + e.getMessage());
                                         }
+                                        out.writeUTF("END_OF_MESSAGE");
+                                        break;
+
+                                    case "-tag":
+                                        if (arg.length < 3) {
+                                            out.writeUTF("Erreur : Arguments manquants. Exemple: -tag -add <chemin> <mots> ou -tag -l <chemin>");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        String actionTag = arg[1];
+                                        String cheminFichier = arg[2];
+
+                                        int idDuFichier = idToPath.getIdFromPath(cheminFichier);
+                                        if (idDuFichier == -1) {
+                                            out.writeUTF("Erreur : Ce fichier n'est pas indexé.");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        MetaDataDocument meta = stockagesDocuments.getMetaDataById(idDuFichier);
+                                        if (meta == null) {
+                                            out.writeUTF("Erreur : Métadonnées introuvables pour ce fichier.");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        if (actionTag.equals("-l")) {
+                                            if (meta.getTags() == null || meta.getTags().isEmpty()) {
+                                                out.writeUTF("Aucun tag associé à ce fichier.");
+                                            } else {
+                                                out.writeUTF(ANSI_BLEU + "Tags actuels du fichier : "+ANSI_VERT +"[Tags: " +String.join(", ", meta.getTags()) + "]" + ANSI_RESET);
+                                            }
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        if (arg.length < 4) {
+                                            out.writeUTF("Erreur : Mots-clés manquants. Exemple: -tag " + actionTag + " <chemin> <mot1,mot2>");
+                                            out.writeUTF("END_OF_MESSAGE");
+                                            break;
+                                        }
+
+                                        String[] motsCles = arg[3].toLowerCase().split(",");
+
+                                        if (actionTag.equals("-add")) {
+                                            meta.ajouterTags(motsCles);
+                                            for (String mot : motsCles) {
+                                                if (!stopWord.getWords().contains(mot)) {
+                                                    indexInverse.indexerMot(mot, idDuFichier);
+                                                }
+                                            }
+                                            out.writeUTF("Tags ajoutés avec succès !");
+
+                                        } else if (actionTag.equals("-rm")) {
+                                            meta.retirerTags(motsCles);
+                                            for (String mot : motsCles) {
+                                                if (indexInverse.getDocumentsByMot(mot) != null) {
+                                                    indexInverse.getDocumentsByMot(mot).remove(idDuFichier);
+                                                }
+                                            }
+                                            out.writeUTF("Tags retirés avec succès !");
+
+                                        } else {
+                                            out.writeUTF("Erreur : Action inconnue. Utilisez -add, -rm ou -l.");
+                                        }
+
+                                        out.writeUTF("END_OF_MESSAGE");
+                                        break;
+
+                                    default:
+                                        out.writeUTF("Commande inconnuee. Tapez -h pour afficher l'aide.");
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
                                 }

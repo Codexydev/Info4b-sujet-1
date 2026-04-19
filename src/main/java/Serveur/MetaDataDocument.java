@@ -1,11 +1,15 @@
 package Serveur;
 
+import java.util.HashSet;
+
 public class MetaDataDocument {
     private final String chemin;
     private final long poids;
     private final long dateModification;
     private final long totalMots;
     private final int id;
+
+    private HashSet<String> tags = new HashSet<>();
 
     public static final String ANSI_BLEU = "\u001B[34m";
     public static final String ANSI_VERT = "\u001B[32m";
@@ -37,6 +41,22 @@ public class MetaDataDocument {
 
     public long getDateModification() {
         return dateModification;
+    }
+
+    public void ajouterTags(String[] nouveauxTags) {
+        for (String tag : nouveauxTags) {
+            tags.add(tag);
+        }
+    }
+
+    public void retirerTags(String[] tagsARetirer) {
+        for (String tag : tagsARetirer) {
+            tags.remove(tag);
+        }
+    }
+
+    public HashSet<String> getTags() {
+        return tags;
     }
 
     @Override

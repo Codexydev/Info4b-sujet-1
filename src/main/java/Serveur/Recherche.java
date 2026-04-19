@@ -97,10 +97,22 @@ public class Recherche {
 
         StringBuilder reponseText = new StringBuilder();
         for (Map.Entry<String, Double> entry : listeTriee) {
-            double scoreArrondi = Math.round(entry.getValue() * 10000.0) / 10000.0;
-            reponseText.append("Document: ").append(ANSI_VERT).append(entry.getKey()).append(ANSI_RESET)
-                    .append(", Score TF-IDF: ").append(ANSI_BLEU).append(scoreArrondi).append(ANSI_RESET)
-                    .append("\n");
+            String chemin = entry.getKey();
+            Double score = entry.getValue();
+
+            // On récupère les métadonnées pour lire les tags
+            int id = idVersChemin.getIdFromPath(chemin);
+            MetaDataDocument metaData = stockagesDocuments.getMetaDataById(id);
+
+            // Construction de la ligne de résultat
+            String ligne = "Document: " + chemin + ", Score TF-IDF: " + String.format("%.4f", score);
+
+            // Si le document a des tags, on les affiche !
+            if (metaData != null && !metaData.getTags().isEmpty()) {
+                ligne += " " + ANSI_VERT + "[Tags: " + String.join(", ", metaData.getTags()) + "]" + ANSI_RESET;
+            }
+
+            reponseText.append(ligne).append("\n");
         }
 
         return reponseText.toString();
