@@ -143,6 +143,7 @@ public class Recherche {
                 if(operateur.equals("sauf")){
                     resultatFinal.removeAll(resultat);
                 }
+                operateur = "ou";
                 resultat.clear();
             }
             operateur = "ou";
