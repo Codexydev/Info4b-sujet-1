@@ -488,6 +488,10 @@ public class Main {
                                             out.writeUTF("Erreur : Action inconnue. Utilisez -add, -rm ou -l.");
                                         }
 
+                                        if (actionTag.equals("-add") || actionTag.equals("-rm")) {
+                                            journal.ecrireTag(actionTag, cheminFichier, arg[3]);
+                                        }
+
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
