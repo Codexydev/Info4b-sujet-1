@@ -105,7 +105,7 @@ public class Recherche {
             MetaDataDocument metaData = stockagesDocuments.getMetaDataById(id);
 
             // Construction de la ligne de résultat
-            String ligne = "Document: " + chemin + ", Score TF-IDF: " + String.format("%.4f", score);
+            String ligne = "Document: " + chemin + ", Score TF-IDF: " + score;
 
             // Si le document a des tags, on les affiche !
             if (metaData != null && !metaData.getTags().isEmpty()) {
