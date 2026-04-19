@@ -55,11 +55,12 @@ Une fois connecté, utilisez les commandes suivantes :
 | `-l` | Liste tous les fichiers indexés | `> -l` |
 
 ### Gestion de fichiers
-| Commande | Action | Exemple |
-| :--- | :--- | :--- |
-| `-dl <chemin>` | **Télécharger** un fichier avec barre de progression | `> -dl src/docs/cours.pdf` |
-| `-m -rn <old> <new>` | **Renommer ou Déplacer** un fichier | `> -m -rn test.txt archive/test.txt` |
-| `-m -rm <chemin>` | **Supprimer** un fichier du serveur | `> -m -rm src/temp.txt` |
+| Commande                       | Action | Exemple |
+|:-------------------------------| :--- | :--- |
+| `-dl <chemin>`                 | **Télécharger** un fichier avec barre de progression | `> -dl src/docs/cours.pdf` |
+| `-m -rn <old> <new>`           | **Renommer ou Déplacer** un fichier | `> -m -rn test.txt archive/test.txt` |
+| `-m -rm <chemin>`              | **Supprimer** un fichier du serveur | `> -m -rm src/temp.txt` |
+| `-tag <action> <chemin> [tags]`| **Annoter des fichiers** (-add, -rm, -l) pour la recherche sémantique. | `> -tag -add image.jpg vacances` |
 
 ### Outils
 | Commande | Action | Exemple |
