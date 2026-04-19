@@ -254,19 +254,35 @@ public class Main {
                                         break;
 
                                     case "-exif":
-                                        if (str.length() <= 6) {
-                                            out.writeUTF("Erreur: Spécifiez un chemin d'image.");
+                                        if (arg.length < 2) {
+                                            out.writeUTF("Erreur: Spécifiez un chemin d'image (ex: -exif img.jpg) ou (-exif -set img.jpg \"texte\").");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        String cheminImage = str.substring(6).trim();
-                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
-                                        String metaExiv = extracteurExiv.extraireTexte();
 
-                                        if (metaExiv == null || metaExiv.isEmpty()) {
-                                            out.writeUTF("Impossible d'extraire les métadonnées.");
-                                        } else {
-                                            out.writeUTF(metaExiv);
+                                        if (arg[1].equals("-set")) {
+                                            if (arg.length < 4) {
+                                                out.writeUTF("Erreur: Description manquante. Exemple: -exif -set img.jpg Photo de vacances");
+                                            } else {
+                                                String cheminImage = arg[2];
+                                                // On récupère tout le texte tapé après le chemin
+                                                String nouvelleDesc = str.substring(str.indexOf(arg[3]));
+
+                                                ExtracteurTexte.modifierMetadataPhysique(cheminImage, "description", nouvelleDesc);
+                                                out.writeUTF("Description incrustée physiquement dans l'image avec succès !");
+                                            }
+                                        }
+                                        else {
+                                            String cheminImage = arg[1];
+                                            ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
+                                            String metaExiv = extracteurExiv.extraireTexte();
+
+                                            if (metaExiv == null || metaExiv.isEmpty()) {
+                                                out.writeUTF("Impossible d'extraire les métadonnées.");
+                                            } else {
+                                                out.writeUTF(ANSI_BLEU + "--- Données EXIF/IPTC de l'image ---" + ANSI_RESET);
+                                                out.writeUTF(metaExiv);
+                                            }
                                         }
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
@@ -315,10 +331,10 @@ public class Main {
                                         break;
 
                                     case "-reindex":
-                                        Journal.resetJournal(stockagesDocuments, indexInverse, idToPath); // On supprime uniquement la RAM ici
+                                        Journal.resetJournal(stockagesDocuments, indexInverse, idToPath); //on suppr que la RAM ici
                                         try {journal.supprimerJournal();
                                         }catch (IOException e){
-                                            System.out.println("Erreur lors de la réindexation du journal.");
+                                            System.out.println("Erreur lors de la reindexation du journal.");
                                         }
                                         parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
                                         out.writeUTF("Réindexation terminée !");
@@ -393,11 +409,11 @@ public class Main {
                                                     String[] motsASupprimer = arg[2].split(",");
                                                     stopWord.removeMot(motsASupprimer);
                                                     out.writeUTF("Mot retiré des Stop Words !");
-                                                    out.writeUTF("Lancement de la réindexation!");
+                                                    out.writeUTF("Lancement de la reindexation!");
                                                     Journal.resetJournal(stockagesDocuments, indexInverse, idToPath);
                                                     try {journal.supprimerJournal();
                                                     }catch (IOException e){
-                                                        System.out.println("Erreur lors de la réindexation du journal.");
+                                                        System.out.println("Erreur lors de la reindexation du journal.");
                                                     }
                                                     parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
                                                     out.writeUTF("Réindexation terminée !");
@@ -524,7 +540,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        /*System.out.print("Chemin du répertoire à indexer : ");
+        /*System.out.print("Chemin du repertoire à indexer : ");
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();*/
 
@@ -543,7 +559,7 @@ public class Main {
             return;
         }
 
-        // Réconciliation + parcoursFichiers
+        // réconciliation + parcoursFichiers
         Journal.reconcilier(stockagesDocuments, indexInverse, journal, stopWord);
 
         parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);

@@ -63,11 +63,12 @@ Une fois connecté, utilisez les commandes suivantes :
 | `-tag <action> <chemin> [tags]`| **Annoter des fichiers** (-add, -rm, -l) pour la recherche sémantique. | `> -tag -add image.jpg vacances` |
 
 ### Outils
-| Commande | Action | Exemple |
-| :--- | :--- | :--- |
-| `-exif <image>` | Extraire les métadonnées d'une image | `> -exif photo.jpg` |
-| `-d <f1> <f2>` | Détecter si deux fichiers sont des **doublons** | `> -d a.txt b.txt` |
-| `-sw -add <mot>` | Ajouter un mot à la liste des **Stop Words** | `> -sw -add donc` |
+| Commande              | Action                                                       | Exemple |
+|:----------------------|:-------------------------------------------------------------| :--- |
+| `-exif <image>`       | Extraire les métadonnées d'une image                         | `> -exif photo.jpg` |
+| `-exif -set <chemin>` | **modifier** les métadonnées (EXIF/IPTC) d'une image | `> -exif -set photo.jpg "Plage"` |
+| `-d <f1> <f2>`        | Détecter si deux fichiers sont des **doublons**              | `> -d a.txt b.txt` |
+| `-sw -add <mot>`      | Ajouter un mot à la liste des **Stop Words**                 | `> -sw -add donc` |
 
 ---
 *Projet réalisé dans le cadre de l'UE Info4B - Université de Bourgogne.*

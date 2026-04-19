@@ -357,13 +357,39 @@ du fichier texte...</span></code></pre>
                                 <div class="terminal-block shadow-sm w-75">
                                     <div class="terminal-body">
                                         <pre
-                                            class="m-0"><code><span class="text-prompt">></span> -exif images/photo.jpg</code></pre>
+                                            class="m-0"><code><span class="text-prompt">></span> -exif images/photo.jpg
+Exif.Image.Orientation                       Short       1  top, left
+Exif.Image.XResolution                       Rational    1  72
+Exif.Image.YResolution                       Rational    1  72
+Exif.Image.ResolutionUnit                    Short       1  inch
+Exif.Image.ExifTag                           Long        1  90
+Exif.Photo.PixelXDimension                   Long        1  1200
+Exif.Photo.PixelYDimension                   Long        1  2323
+Iptc.Application2.Caption                    String      6  heyyyy
+                                            </code></pre>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
+                                <h5 class="fw-bold"><code class="text-accent fs-5">-exif -set &lt;image.jpg&gt; &lt;description&gt;</code></h5>
+                                <p class="text-secondary mb-2">Lecture complète (option <code>-pa</code>) et
+                                    modification physique des métadonnées des images. L'option <code>-set</code> utilise
+                                    l'outil système pour incruster une description de manière persistante.</p>
+                                <div class="terminal-block shadow-sm">
+                                    <div class="terminal-body">
+                                        <pre class="m-0"><code><span class="text-prompt">></span> -exif -set src/photo.jpg "Plage en Corse"
+<span class="text-success-cmd">Description incrustée physiquement dans l'image avec succès !</span>
+<span class="text-prompt">></span> -exif src/photo.jpg
+<span class="text-blue">--- Données EXIF/IPTC de l'image ---</span>
+<span class="text-light">Iptc.Application2.Caption      String      6  heyyyy</span>
+...
+</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item list-group-item-perso bg-transparent text-light border-secondary">
                                 <h5 class="fw-bold"><code class="text-accent fs-5">-d &lt;fich1&gt; &lt;fich2&gt;</code>
                                     : Doublons stricts</h5>
                                 <p class="text-secondary mb-2">Vérifie algorithmiquement si deux fichiers sont des
