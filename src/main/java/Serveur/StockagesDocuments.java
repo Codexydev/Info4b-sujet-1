@@ -9,7 +9,7 @@ public class StockagesDocuments {
 
     public synchronized void ajouterDocument(int idDocument, String cheminRepertoire, long poids, long dateModification, long nombreTotalMots) {
         MetaDataDocument metaData = new MetaDataDocument(idDocument, cheminRepertoire, poids, dateModification, nombreTotalMots);
-        stockagesDocuments.put(cheminRepertoire, metaData); // ajouter les metaData d'un document au stockages de tous les documents
+        stockagesDocuments.put(cheminRepertoire, metaData); // Ajouter les metaData d'un document au stockage de tous les documents
     }
 
     public synchronized MetaDataDocument getMetaData(String cheminRepertoire) {

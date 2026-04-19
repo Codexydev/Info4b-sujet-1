@@ -22,10 +22,10 @@ public class Recherche {
         this.stopWord = stopWord;
         this.motsRecherches = new String[motsRecherches.length];
 
-        for (int i = 0; i < motsRecherches.length; i++) { // passage en minuscule
+        for (int i = 0; i < motsRecherches.length; i++) { // Passage en minuscule
             this.motsRecherches[i] = motsRecherches[i].toLowerCase();
         }
-        for (String motExclu : motsNonRecherches) { // idem avec les mots exclu
+        for (String motExclu : motsNonRecherches) { // Idem avec les mots exclus
             this.motsNonRecherches.add(motExclu.toLowerCase());
         }
     }
@@ -37,7 +37,7 @@ public class Recherche {
         this.stopWord = stopWord;
         this.motsRecherches = new String[motsRecherches.length];
 
-        for (int i = 0; i < motsRecherches.length; i++) { // passage en minuscule
+        for (int i = 0; i < motsRecherches.length; i++) { // Passage en minuscule
             this.motsRecherches[i] = motsRecherches[i].toLowerCase();
         }
     }
@@ -52,7 +52,7 @@ public class Recherche {
             ConcurrentHashMap<Integer, Integer> indexDuMot = indexInverse.getDocumentsByMot(mot);
             if (indexDuMot == null || indexDuMot.isEmpty()) continue;
 
-            // calcul IDF
+            // Calcul IDF
             int nbDocsAvecMot = indexDuMot.size();
             if (nbDocsAvecMot == 0) continue;
             double idf = Math.log((double) totalDocs / nbDocsAvecMot);
@@ -84,7 +84,7 @@ public class Recherche {
 
         if (listeTriee.isEmpty()) {
             List<String> motsVidesTrouves = new ArrayList<>();
-            for (String mot : motsRecherches) { //permet de verif si les mots sont dans la liste des stopwords
+            for (String mot : motsRecherches) { // Permet de vérifier si les mots sont dans la liste des stopwords
                 if (stopWord.getWords().contains(mot)) {
                     motsVidesTrouves.add(mot);
                 }
@@ -143,7 +143,6 @@ public class Recherche {
                 if(operateur.equals("sauf")){
                     resultatFinal.removeAll(resultat);
                 }
-                operateur = "ou";
                 resultat.clear();
             }
             operateur = "ou";

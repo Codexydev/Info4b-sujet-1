@@ -55,19 +55,19 @@ public class Main {
 
                     if (reponse.equals("END_OF_MESSAGE")) {
                         break;
-                    } else if (reponse.startsWith("File_incomming...")) {
+                    } else if (reponse.startsWith("File_incoming...")) {
                         String[] donnees = reponse.split(" ", 3);
                         long taille_fichier = Long.parseLong(donnees[1]);
                         String nomFichier = donnees[2];
 
                         System.out.println(ANSI_VERT + "Début du téléchargement : " + ANSI_BLEU + nomFichier + ANSI_RESET);
 
-                        String racine = System.getProperty("user.home"); //permet de recuperer le dossier racine de l'utilisateur
-                        File dossier = new File(racine, "Downloads"); //on se met ensuite sur le dossier des telechargements
-                        if (!dossier.exists()) { //creer le dosssier au cas ou il existe pas
+                        String racine = System.getProperty("user.home"); // Permet de récupérer le dossier racine de l'utilisateur
+                        File dossier = new File(racine, "Downloads"); // On se met ensuite sur le dossier des téléchargements
+                        if (!dossier.exists()) {
                             dossier.mkdirs();
                         }
-                        String chemin_sauvegarde = dossier.getAbsolutePath() + File.separator + nomFichier; //Construit le chemin absolu final avec File.separator pour gérer les \ ou /
+                        String chemin_sauvegarde = dossier.getAbsolutePath() + File.separator + nomFichier; // Construit le chemin absolu final avec File.separator pour gérer les \ ou /
 
                         FileOutputStream ecriture = new FileOutputStream(chemin_sauvegarde);
                         byte[] buffer = new byte[4096];
@@ -76,7 +76,7 @@ public class Main {
 
                         int dernierPourcentage = -1;
                         long debutTemps = System.currentTimeMillis();
-
+                        // Boucle bornée par la taille exacte déclarée par le serveur
                         while (total_lu < taille_fichier && (quantite_lu = in.read(buffer, 0, (int)Math.min(buffer.length, taille_fichier - total_lu))) != -1) {
                             ecriture.write(buffer, 0, quantite_lu);
                             total_lu += quantite_lu;
@@ -93,6 +93,7 @@ public class Main {
                                 System.out.print("\r\033[K" + ANSI_BLEU + "Progression : [" + ANSI_VERT + barreRemplie + ANSI_RESET + barreVide + ANSI_BLEU + "] " + pourcentage + "%" + ANSI_RESET);
                                 dernierPourcentage = pourcentage;
                             }
+
                         }
 
                         ecriture.close();

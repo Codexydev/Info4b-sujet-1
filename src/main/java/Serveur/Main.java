@@ -27,7 +27,7 @@ public class Main {
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         if (path.getFileName().toString().startsWith(".")) {
-                            return; //permet d'eviter les fihciers .DS_store qui ne serve pas à l'indexation
+                            return;
                         }
                         String cheminFichier = path.toString();
 
@@ -108,8 +108,8 @@ public class Main {
                                 "-l : " + ANSI_BLEU + "liste tous les fichiers indexés\n" + ANSI_RESET +
                                 "-t" + ANSI_VERT + " <message> : " + ANSI_BLEU + "Afficher le message reçu pour tester la communication\n" + ANSI_RESET +
                                 "-q : " + ANSI_BLEU + "Quitter la connexion\n" + ANSI_RESET +
-                                "-s" + ANSI_VERT + " <mot(s) (sépration (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
-                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "separateur de mot ,\n" + ANSI_RESET +
+                                "-s" + ANSI_VERT + " <mot(s) (séparation (,) ) > : " + ANSI_BLEU + "Rechercher un mot dans l'index et afficher les documents associés\n" + ANSI_RESET +
+                                "-s " + ANSI_VERT + "<mot(s)> -- <mot(s) qui ne sera pas présent dans les fichier trouvé> : " + ANSI_BLEU + "séparateur de mot ,\n" + ANSI_RESET +
                                 "-m " + ANSI_VERT + "<chemin du document> : " + ANSI_BLEU + "Afficher les métadonnées d'un document donné\n" + ANSI_RESET +
                                 "-m -rm" + ANSI_VERT + " <chemin du document>" + ANSI_BLEU + " Supprimer fichier \n" + ANSI_RESET +
                                 "-m -rn" + ANSI_VERT + " <ancien_chemin> <nouveau_chemin> : " + ANSI_BLEU + "Renommer ou déplacer un fichier\n" + ANSI_RESET +
@@ -190,13 +190,13 @@ public class Main {
                                         break;
 
                                     case "-ar":
-                                        if (str.length() <= 4) { // 4 car "-as " fait 4 caractères
-                                            out.writeUTF("Erreur: Specifiez un/des mot(s) à chercher");
+                                        if (str.length() <= 4) {
+                                            out.writeUTF("Erreur: Spécifiez un/des mot(s) à chercher");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        String requete = str.substring(4).trim(); //phrase après les 4 prem caractères
-                                        String[] motsAvances = requete.split(" "); //découpage avec les espaces
+                                        String requete = str.substring(4).trim(); // Phrase après les 4 premiers caractères
+                                        String[] motsAvances = requete.split(" ");
 
                                         Recherche maRecherche = new Recherche(indexInverse, stockagesDocuments, idToPath, motsAvances, new String[0], stopWord);
                                         out.writeUTF(maRecherche.RechercheAvance());
@@ -315,10 +315,10 @@ public class Main {
                                         break;
 
                                     case "-reindex":
-                                        Journal.resetJournal(stockagesDocuments, indexInverse, idToPath); //on suppr que la RAM ici
+                                        Journal.resetJournal(stockagesDocuments, indexInverse, idToPath); // On supprime uniquement la RAM ici
                                         try {journal.supprimerJournal();
                                         }catch (IOException e){
-                                            System.out.println("Erreur lors de la reindexation du journal.");
+                                            System.out.println("Erreur lors de la réindexation du journal.");
                                         }
                                         parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
                                         out.writeUTF("Réindexation terminée !");
@@ -393,11 +393,11 @@ public class Main {
                                                     String[] motsASupprimer = arg[2].split(",");
                                                     stopWord.removeMot(motsASupprimer);
                                                     out.writeUTF("Mot retiré des Stop Words !");
-                                                    out.writeUTF("Lancement de la reindexation!");
+                                                    out.writeUTF("Lancement de la réindexation!");
                                                     Journal.resetJournal(stockagesDocuments, indexInverse, idToPath);
                                                     try {journal.supprimerJournal();
                                                     }catch (IOException e){
-                                                        System.out.println("Erreur lors de la reindexation du journal.");
+                                                        System.out.println("Erreur lors de la réindexation du journal.");
                                                     }
                                                     parcoursFichiers(cheminRepertoire, stockagesDocuments, indexInverse, idToPath, journal, stopWord);
                                                     out.writeUTF("Réindexation terminée !");
@@ -496,12 +496,12 @@ public class Main {
                                         break;
 
                                     default:
-                                        out.writeUTF("Commande inconnuee. Tapez -h pour afficher l'aide.");
+                                        out.writeUTF("Commande inconnue. Tapez -h pour afficher l'aide.");
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
                                 }
                             } else {
-                                out.writeUTF("donnez le(s) parametre(s)");
+                                out.writeUTF("donnez le(s) paramètre(s)");
                                 out.writeUTF("END_OF_MESSAGE");
                             }
                         }
@@ -524,7 +524,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        /*System.out.print("Chemin du repertoire à indexer : ");
+        /*System.out.print("Chemin du répertoire à indexer : ");
         Scanner scanner = new Scanner(System.in);
         String path = scanner.nextLine();*/
 
@@ -543,7 +543,7 @@ public class Main {
             return;
         }
 
-        // réconciliation + parcoursFichiers
+        // Réconciliation + parcoursFichiers
         Journal.reconcilier(stockagesDocuments, indexInverse, journal, stopWord);
 
         parcoursFichiers(path, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord);

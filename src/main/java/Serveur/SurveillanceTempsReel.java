@@ -39,14 +39,14 @@ public class SurveillanceTempsReel implements Runnable {
     public void run() {
         try{
             WatchService watchservice = FileSystems.getDefault().newWatchService();
-            Path chemin = Paths.get(cheminRepertoire); //faut un chemin et pas juste un string sinon il sera pas utilisable pour faire des actions dessus avec NIO
-            enregistrerDossiers(chemin, watchservice); // permet de notifier le watchservice en cas de creation, modif ou suppression
+            Path chemin = Paths.get(cheminRepertoire); // Il faut un chemin et pas juste un string sinon il ne sera pas utilisable pour faire des actions dessus avec NIO.
+            enregistrerDossiers(chemin, watchservice); // Permet de notifier le watchservice en cas de creation, modif ou suppression
             System.out.println("Lancement du watchservice sur le dossier: " + cheminRepertoire);
 
             while(true){
-                WatchKey info = watchservice.take(); //boucle infinie mais avec un emethode bloquante, et on est notifier que si besoin
+                WatchKey info = watchservice.take(); // Boucle infinie, mais avec une méthode bloquante
                 for(WatchEvent<?> action : info.pollEvents()){
-                    WatchEvent.Kind<?> typeAction = action.kind(); //type d'evenement (si on creeer?modifie?supprime?)
+                    WatchEvent.Kind<?> typeAction = action.kind(); // Type d'évènements
 
                     if (typeAction == StandardWatchEventKinds.OVERFLOW) {
                         continue;
@@ -57,17 +57,17 @@ public class SurveillanceTempsReel implements Runnable {
                     Path dossierConcerne = (Path) info.watchable();
                     String cheminComplet = dossierConcerne.resolve(nomDuFichier).toString();
                     if (nomDuFichier.toString().startsWith(".")) {
-                        continue; //condition qui permet d'ignorer les fichiers cachés
+                        continue; // Condition qui permet d'ignorer les fichiers cachés
                     }
                     try {
                         Thread.sleep(150); // On laisse le temps à l'éditeur de texte de sauvegarder
                     } catch (InterruptedException ignored) {}
                     System.out.println("L'action " + typeAction + " a été réalisée sur " + nomDuFichier);
                     if(typeAction == StandardWatchEventKinds.ENTRY_CREATE){
-                        if (Files.isDirectory(Paths.get(cheminComplet))) { //permet de verif si c'est un dossier au lieu d'un fichier
+                        if (Files.isDirectory(Paths.get(cheminComplet))) { // Permet de vérifier si c'est un dossier au lieu d'un fichier
                             enregistrerDossiers(Paths.get(cheminComplet), watchservice);
                             System.out.println("Nouveau dossier  : " + cheminComplet);
-                            Main.parcoursFichiers(cheminComplet, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord); //scan si on ajoute un dossier deja plein
+                            Main.parcoursFichiers(cheminComplet, stockagesDocuments, indexInverse, idVersChemin, journal, stopWord); // Scan si on ajoute un dossier deja plein
                         }
                         else {
                             if(stockagesDocuments.getMetaData(cheminComplet) == null){
@@ -92,7 +92,7 @@ public class SurveillanceTempsReel implements Runnable {
                                     listeDocsDuMot.remove(vraiId);
                                 }
                             }
-                            Main.indexerFichier(vraiId, cheminComplet, stockagesDocuments, indexInverse, journal, false, stopWord); //on met false car c'est pas un ajout mais une modif
+                            Main.indexerFichier(vraiId, cheminComplet, stockagesDocuments, indexInverse, journal, false, stopWord); // On met false, ce n'est pas un ajout mais plutôt une modif
                             System.out.println("fichier mis à jour");
                         }
 

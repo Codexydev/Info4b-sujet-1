@@ -8,9 +8,9 @@ public class Journal {
 
     private final String chemin;
     private final String cheminRepertoire;
-    private BufferedWriter writer; //pas final pour pouvoir le réouvrir après compaction
+    private BufferedWriter writer; // Pas final pour pouvoir le réouvrir après compaction
 
-    // buffer borné
+    // Buffer borné
     private final ArrayList<String> fileOperations = new ArrayList<>();
     private static final int CAPACITE_MAX = 100;
     private volatile boolean actif = true;
@@ -52,14 +52,12 @@ public class Journal {
                     if (!actif && fileOperations.isEmpty()) {
                         break;
                     }
-
-                    // On consomme le premier élément
                     operation = fileOperations.remove(0);
 
                     fileOperations.notifyAll();
                 }
 
-                // Écriture sur disque
+                // Écriture sur le disque
                 if (operation != null) {
                     try {
                         synchronized (Journal.this) {
@@ -81,10 +79,8 @@ public class Journal {
      * @param operation La chaîne de caractères formatée représentant l'opération à loguer.
      */
     private void ajouterOperation(String operation) {
-        // Synchronized(o) pr assurer exclusion mutuelle sur le buffer partagé
         synchronized (fileOperations) {
-            // Si buffer plein -> producteurs bloqués
-            // o.wait() pr attente passive tant que buffer plein
+            // Attente passive si le buffer est plein (évite le débordement)
             while (fileOperations.size() >= CAPACITE_MAX && actif) {
                 try {
                     fileOperations.wait();
@@ -94,14 +90,9 @@ public class Journal {
                     return;
                 }
             }
-
-            // si le journal a été fermé pendant l'ajout on annule l'ajout
             if (!actif) return;
-
             fileOperations.add(operation);
-
-            // réveille le consommateur
-            fileOperations.notifyAll();
+            fileOperations.notifyAll(); // Réveille le thread consommateur
         }
     }
 
@@ -153,7 +144,7 @@ public class Journal {
     }
 
     public void fermer() {
-        // notifyAll() pr débloquer thread s'il est en wait()
+        // NotifyAll() pr débloquer thread s'il est en wait()
         synchronized (fileOperations) {
             actif = false;
             fileOperations.notifyAll();
@@ -249,7 +240,7 @@ public class Journal {
                                     }
                                 } else if (action.equals("-rm")) {
                                     m.retirerTags(tags);
-                                    // On nettoie l'Index
+                                    // On nettoie l'index
                                     for (String t : tags) {
                                         if (indexInverse.getDocumentsByMot(t) != null) {
                                             indexInverse.getDocumentsByMot(t).remove(id);
@@ -266,7 +257,7 @@ public class Journal {
                         int id = idVersChemin.getIdFromPath(cheminDoc);
                         if (id != -1) {
                             MetaDataDocument m = stockagesDocuments.getMetaDataById(id);
-                            // On restaure UNIQUEMENT la liste pour l'affichage (pas de indexerMot ici !)
+                            // On restaure UNIQUEMENT la liste pour l'affichage (pas de IndexerMot ici !)
                             if (m != null) {
                                 m.ajouterTags(tags);
                             }
@@ -289,7 +280,7 @@ public class Journal {
      * Détecte les fichiers supprimés ou modifiés hors ligne et met à jour le système
      *
      * @param stockagesDocuments stockageDocument
-     * @param indexInverse       indexinverse
+     * @param indexInverse       indexinversé
      * @param journal            journal
      */
     public static synchronized void reconcilier(StockagesDocuments stockagesDocuments, IndexInverse indexInverse, Journal journal, StopWord stopWord) {
@@ -297,7 +288,7 @@ public class Journal {
             File fichier = new File(chemin);
             if (!fichier.exists()) {
                 stockagesDocuments.supprimerDocument(chemin);
-                journal.ecrireSuppression(chemin, 0); // appel producteur
+                journal.ecrireSuppression(chemin, 0); // Appel producteur
             } else {
                 long dateOS = fichier.lastModified();
                 MetaDataDocument meta = stockagesDocuments.getMetaData(chemin);
@@ -335,7 +326,6 @@ public class Journal {
             tmpWriter.write(ligne);
             tmpWriter.newLine();
 
-            // --- DÉBUT DE L'AJOUT : Sauvegarde des tags purement visuels ---
             if (meta.getTags() != null && !meta.getTags().isEmpty()) {
                 tmpWriter.write("TAG_VISUEL;" + cheminDoc + ";" + String.join(",", meta.getTags()));
                 tmpWriter.newLine();
