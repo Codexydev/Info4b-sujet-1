@@ -335,7 +335,6 @@ public class Journal {
             tmpWriter.write(ligne);
             tmpWriter.newLine();
 
-            // --- DÉBUT DE L'AJOUT : Sauvegarde des tags purement visuels ---
             if (meta.getTags() != null && !meta.getTags().isEmpty()) {
                 tmpWriter.write("TAG_VISUEL;" + cheminDoc + ";" + String.join(",", meta.getTags()));
                 tmpWriter.newLine();

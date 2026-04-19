@@ -88,7 +88,7 @@ public class Main {
         }
     }
 
-    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire) {
+    public static void server(IndexInverse indexInverse, StockagesDocuments stockagesDocuments, IdVersChemin idToPath, Journal journal, StopWord stopWord, String cheminRepertoire, MetaModif metaModif) {
         try {
             System.out.println("Server is running...");
             ServerSocket server = new ServerSocket(12345);
@@ -254,20 +254,37 @@ public class Main {
                                         break;
 
                                     case "-exif":
-                                        if (str.length() <= 6) {
-                                            out.writeUTF("Erreur: Spécifiez un chemin d'image.");
+                                        if (arg.length < 2) {
+                                            out.writeUTF("Erreur: Spécifiez un chemin d'image (ex: -exif img.jpg) ou (-exif -set img.jpg \"texte\").");
                                             out.writeUTF("END_OF_MESSAGE");
                                             break;
                                         }
-                                        String cheminImage = str.substring(6).trim();
-                                        ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
-                                        String metaExiv = extracteurExiv.extraireTexte();
 
-                                        if (metaExiv == null || metaExiv.isEmpty()) {
-                                            out.writeUTF("Impossible d'extraire les métadonnées.");
-                                        } else {
-                                            out.writeUTF(metaExiv);
+                                        if (arg[1].equals("-set")) {
+                                            if (arg.length < 4) {
+                                                out.writeUTF("Erreur: Description manquante. Exemple: -exif -set img.jpg Photo de vacances");
+                                            } else {
+                                                String cheminImage = arg[2];
+                                                // On récupère tout le texte tapé après le chemin
+                                                String nouvelleDesc = str.substring(str.indexOf(arg[3]));
+
+                                                ExtracteurTexte.modifierMetadataPhysique(cheminImage, "description", nouvelleDesc);
+                                                out.writeUTF("Description incrustée physiquement dans l'image avec succès !");
+                                            }
                                         }
+                                        else {
+                                            String cheminImage = arg[1];
+                                            ExtracteurTexte extracteurExiv = new ExtracteurTexte(cheminImage);
+                                            String metaExiv = extracteurExiv.extraireTexte();
+
+                                            if (metaExiv == null || metaExiv.isEmpty()) {
+                                                out.writeUTF("Impossible d'extraire les métadonnées.");
+                                            } else {
+                                                out.writeUTF(ANSI_BLEU + "--- Données EXIF/IPTC de l'image ---" + ANSI_RESET);
+                                                out.writeUTF(metaExiv);
+                                            }
+                                        }
+
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
@@ -495,7 +512,7 @@ public class Main {
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
 
-                                    default:
+                                        default:
                                         out.writeUTF("Commande inconnuee. Tapez -h pour afficher l'aide.");
                                         out.writeUTF("END_OF_MESSAGE");
                                         break;
@@ -536,6 +553,7 @@ public class Main {
         String cheminJournal = "journal.csv";
         StopWord stopWord = new StopWord();
         Journal.restaurerDepuisJournal(cheminJournal, stockagesDocuments, indexInverse, idVersChemin, path);
+        MetaModif metaModif = new MetaModif();
         try {
             journal = new Journal(cheminJournal, path);
         } catch (IOException e) {
@@ -560,7 +578,7 @@ public class Main {
         threadSurveillance.setDaemon(true);
         threadSurveillance.start();
 
-        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path);
+        server(indexInverse, stockagesDocuments, idVersChemin, journal, stopWord, path,metaModif);
         journal.fermer();
     }
 }

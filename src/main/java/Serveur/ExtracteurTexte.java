@@ -67,31 +67,36 @@ public class ExtracteurTexte {
                 }
                 return "";
             }
+
             case "jpg", "jpeg", "png" -> {
                 try {
-                    ProcessBuilder processBuilder = new ProcessBuilder("exiv2", this.cheminFichier);
+                    ProcessBuilder processBuilder = new ProcessBuilder("exiv2", "-pa", this.cheminFichier);
                     processBuilder.redirectErrorStream(true);
                     Process process = processBuilder.start();
                     String texteExtrait = new String(process.getInputStream().readAllBytes());
-
-                    StringBuilder out = new StringBuilder();
-                    String[] texteExtraitTab = texteExtrait.split("\n");
-                    for (String ligne : texteExtraitTab) {
-                        if (ligne.contains(":")) {
-                            String valeur = ligne.split(":", 2)[1].trim();
-                            if (!valeur.isEmpty()) {
-                                out.append(ligne).append("\n");
-                            }
-                        }
-                    }
-
                     process.waitFor();
-                    return out.toString();
+
+                    return texteExtrait;
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
         return "";
+    }
+
+    public static void modifierMetadataPhysique(String chemin, String champ, String valeur) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "exiv2",
+                    "-M", "set Iptc.Application2.Caption String " + valeur,
+                    chemin
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+            p.waitFor();
+        } catch (Exception e) {
+            System.err.println("Erreur d'écriture EXIF : " + e.getMessage());
+        }
     }
 }
