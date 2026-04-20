@@ -50,6 +50,24 @@ span.text-comment::selection{
     padding: 15px;
 }
 
+.github-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    padding-right: 0px !important;
+    color: var(--bg-main);
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.github-icon-link:hover {
+    color: var(--bg-card);
+    transform: scale(1.1);
+}
+
+
+
 /* --- Menu Mobile (Smartphone & Tablette) --- */
 @media (max-width: 991.98px) {
     /* Nav bar */
