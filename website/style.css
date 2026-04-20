@@ -184,6 +184,35 @@ span.text-comment::selection{
     height: 100vh;
 }
 
+.download-section{
+    display: flex;
+    align-items: center;
+    gap : 15px;
+    
+}
+
+.download{
+    background-color: #609df7a7;
+    color : white;
+    
+    
+    font-weight: bold;
+    border: none;
+    margin : 10px 10px;
+    padding: 10px 15px !important;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    display: inline-block;
+    transition: .2s ease-in-out;
+}
+
+.download:hover{
+    background-color: var(--color-accent);
+    color: #2c2c2c;
+    transform: scale(1.03);
+}
+
 .red {
     background-color: red;
     z-index: 10;

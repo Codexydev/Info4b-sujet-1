@@ -88,6 +88,8 @@
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
                                 <h5 class="fw-bold">Via le code source (Recommandé)</h5>
+                                <p class="text-secondary mt-3">L'outil git est requis pour cloner le dépôt.</p>
+
                                 <div class="terminal-block shadow-sm mt-3">
                                     <div class="terminal-body">
                                         <pre class="m-0"><code><span class="text-comment"># Cloner le dépôt localement</span>
@@ -96,12 +98,27 @@ cd info4b-sujet-1</code></pre>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-md-6">
-                                <h5 class="fw-bold">Version Exécutable</h5>
-                                <p class="text-secondary mt-3">Une version <code>.jar</code> standalone sera publiée
-                                    prochainement pour un usage sans environnement de développement.</p>
-                                <button class="btn btn-accent disabled mt-2">Télécharger la release (.jar)</button>
+                                <div class="download-section">
+                                    <h5 class="fw-bold">Version Exécutable</h5>
+                                    <a class="download mt-2" href="website/projet.jar" download="website/projet.jar">Télécharger la release (.jar)</a>
+                                </div>
+
+
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body p-3">
+                                        <pre class="m-0">
+<code><span class="text-comment"># Déploiement du Serveur</span>
+java -cp projet.jar Serveur.Main
+<span class="text-comment"># Déploiement du Client</span>
+java -cp projet.jar Client.Main
+</code></pre>
+                                    </div>
+                                </div>
+
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -214,8 +231,10 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Multi-threading</h5>
-                                <p class="card-text text-secondary">Le serveur gère plusieurs clients simultanément grâce à un ThreadGroup dédié.
-                                    Le journal utilise un pattern Producteur/Consommateur avec un thread écrivain asynchrone, évitant tout blocage
+                                <p class="card-text text-secondary">Le serveur gère plusieurs clients simultanément
+                                    grâce à un ThreadGroup dédié.
+                                    Le journal utilise un pattern Producteur/Consommateur avec un thread écrivain
+                                    asynchrone, évitant tout blocage
                                     des opérations d'indexation.</p>
                             </div>
                         </div>
@@ -226,7 +245,8 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             <div class="card-body">
                                 <h5 class="card-title text-accent">journalisation</h5>
                                 <p class="card-text text-secondary">Chaque opération (ajout, modification, suppression)
-                                    est persistée dans un fichier journal.csv. Au redémarrage, l'état complet est restauré
+                                    est persistée dans un fichier journal.csv. Au redémarrage, l'état complet est
+                                    restauré
                                     depuis ce journal sans réindexation, garantissant la continuité du service.</p>
                             </div>
                         </div>
@@ -236,8 +256,10 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Client - Serveur</h5>
-                                <p class="card-text text-secondary">Architecture TCP/IP sur le port 12345. Le client interactif propose
-                                    un ensemble de commandes (-s, -ar, -dl, -m, -sw...) pour interroger le serveur, télécharger des fichiers
+                                <p class="card-text text-secondary">Architecture TCP/IP sur le port 12345. Le client
+                                    interactif propose
+                                    un ensemble de commandes (-s, -ar, -dl, -m, -sw...) pour interroger le serveur,
+                                    télécharger des fichiers
                                     et gérer l'index à distance.</p>
                                 </p>
                             </div>
@@ -251,8 +273,8 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
         <footer class="text-secondary text-center py-4 mt-5">
             <div class="container border-top border-secondary pt-3">
                 <p class="footer-text mb-0">
-                    Projet académique Info4B - Université de Bourgogne | 
-                    <a href="mentions-legales.html" class="legals">Mentions Légales</a> | 
+                    Projet académique Info4B - Université de Bourgogne |
+                    <a href="mentions-legales.html" class="legals">Mentions Légales</a> |
                     <a href="https://antoineragot.com" target="_blank" class="site-perso">Antoine Ragot</a>
                 </p>
             </div>
