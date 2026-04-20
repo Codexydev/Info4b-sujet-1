@@ -189,8 +189,7 @@ src/testIndexed/rapport.txt</span></code></pre>
                                 <span class="f-bold h5 text-accent">TF-IDF : </span>
                                 <div class="text-secondary mt-2 text-secondary-perso">algorithme statistique qui permet
                                     de classer les résultats d'une recherche en évaluant l'importance d'un mot-clé dans
-                                    un document par rapport à sa rareté dans l'ensemble des fichiers. <br>⚠️ -> Score
-                                    TF-IDF à 0.0 si le mot est présent dans tous les documents</div>
+                                    un document par rapport à sa rareté dans l'ensemble des fichiers.</div>
 
                                 <h5 class="fw-bold"><code class="text-accent fs-5">-s &lt;mots&gt;</code> (Scan &
                                     Indexation)</h5>
@@ -199,10 +198,10 @@ src/testIndexed/rapport.txt</span></code></pre>
                                 <div class="terminal-block shadow-sm mt-2">
                                     <div class="terminal-body">
                                         <pre class="m-0"><code><span class="text-prompt">></span> -s coucou
-<span class="text-light">Document: src/testIndexed/coucou.txt, Score TF-IDF: 0.231
-Document: src/testIndexed/coucou2.txt, Score TF-IDF: 0.1386
-Document: src/testIndexed/test.txt, Score TF-IDF: 0.0495
-Document: src/testIndexed/millionsWords.txt, Score TF-IDF: 0.0</span></code></pre>
+<span class="text-light">Document: src/testIndexed/coucou.txt, Score TF-IDF: 0.23138452642
+Document: src/testIndexed/coucou2.txt, Score TF-IDF: 0.13863457335
+Document: src/testIndexed/test.txt, Score TF-IDF: 0.04953753245
+Document: src/testIndexed/millionsWords.txt, Score TF-IDF: 5.99356380828E-7</span></code></pre>
                                     </div>
                                 </div>
                             </div>
@@ -215,8 +214,8 @@ Document: src/testIndexed/millionsWords.txt, Score TF-IDF: 0.0</span></code></pr
                                     <div class="terminal-body">
                                         <pre class="m-0"><code><span class="text-comment"># Recherche "réseau" sans "cloud"</span>
 <span class="text-prompt">></span> -s reseau -- cloud
-<span class="text-light">Document: src/tcp.txt | Score: 0.8452
-Document: src/osi.pdf | Score: 0.1205</span></code></pre>
+<span class="text-light">Document: src/tcp.txt | Score: 0.84527396774
+Document: src/osi.pdf | Score: 0.12052765589</span></code></pre>
                                     </div>
                                 </div>
                             </div>
@@ -229,7 +228,7 @@ Document: src/osi.pdf | Score: 0.1205</span></code></pre>
                                     <div class="terminal-body">
                                         <pre class="m-0"><code><span class="text-comment"># Doit contenir java ET réseau, sans C++</span>
 <span class="text-prompt">></span> -ar java ET reseau SAUF cpp
-<span class="text-light">Document: src/sockets.txt | Score: 1.1042</span></code></pre>
+<span class="text-light">Document: src/sockets.txt | Score: 1.10425679264</span></code></pre>
                                     </div>
                                 </div>
                             </div>
