@@ -50,6 +50,24 @@ span.text-comment::selection{
     padding: 15px;
 }
 
+.github-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    padding-right: 0px !important;
+    color: var(--bg-main);
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.github-icon-link:hover {
+    color: var(--bg-card);
+    transform: scale(1.1);
+}
+
+
+
 /* --- Menu Mobile (Smartphone & Tablette) --- */
 @media (max-width: 991.98px) {
     /* Nav bar */
@@ -182,6 +200,35 @@ span.text-comment::selection{
     left: 0;
     padding: 0;
     height: 100vh;
+}
+
+.download-section{
+    display: flex;
+    align-items: center;
+    gap : 15px;
+    
+}
+
+.download{
+    background-color: #609df7a7;
+    color : white;
+    
+    
+    font-weight: bold;
+    border: none;
+    margin : 10px 10px;
+    padding: 10px 15px !important;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    display: inline-block;
+    transition: .2s ease-in-out;
+}
+
+.download:hover{
+    background-color: var(--color-accent);
+    color: #2c2c2c;
+    transform: scale(1.03);
 }
 
 .red {

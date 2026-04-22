@@ -25,14 +25,30 @@ Le projet dispose d'un site web officielle et d'une documentation interactive ac
 
 ---
 
-## Lancement Rapide
+# Guide d'exécution du Moteur de Recherche (Projet Info4B)
+
+Ce guide détaille la procédure pour lancer le serveur et le client à partir de l'archive `.jar` unique générée par Maven.
+
+## 1. Prérequis
+* Avoir installé le **Java Development Kit (JDK)** version 17 ou supérieure.
+* S'assurer que les outils système nécessaires (`pdftotext`, `exiv2`) sont installés et accessibles dans le PATH de la machine.
+* Le répertoire cible à indexer (par défaut `src/testIndexed`) doit exister au même niveau que le `.jar`.
+
+## 2. Lancement (via jar)
+Le serveur doit être lancé en premier pour initialiser l'**Index Inversé** et le **Journal (WAL)**. Comme le `.jar` pointe par défaut sur le client, vous devez spécifier la classe de démarrage.
+
+Ouvrez un terminal et tapez :
+```bash
+java -cp projet.jar Serveur.Main
+```
+puis pour le côté client tapez :
+```bash
+java -cp projet.jar Client.Main
+```
+
+## Lancement Rapide (via run.sh)
 
 Le projet inclut un script d'orchestration `run.sh` pour automatiser toutes les étapes.
-
-### 1. Prérequis
-- Java JDK 17+
-- Maven
-- `pdftotext` (Poppler) et `exiv2` pour les fonctionnalités avancées.
 
 ### 2. Utilisation du script
 

@@ -37,6 +37,14 @@
                     <span class="navbar-text text-dark opacity-75">
                         Projet académique Info4B
                     </span>
+                    <a href="https://github.com/Codexydev/Info4b-sujet-1/" target="_blank"
+                        rel="noopener noreferrer" class="github-icon-link" aria-label="Voir le code source sur GitHub">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -88,20 +96,38 @@
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
                                 <h5 class="fw-bold">Via le code source (Recommandé)</h5>
+                                <p class="text-secondary mt-3">L'outil git est requis pour cloner le dépôt.</p>
+
                                 <div class="terminal-block shadow-sm mt-3">
                                     <div class="terminal-body">
                                         <pre class="m-0"><code><span class="text-comment"># Cloner le dépôt localement</span>
-git clone https://github.com/Codexydev/Info4b-sujet-1
+git clone https://github.com/Codexydev/Info4b-sujet-1.git
 cd info4b-sujet-1</code></pre>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-md-6">
-                                <h5 class="fw-bold">Version Exécutable</h5>
-                                <p class="text-secondary mt-3">Une version <code>.jar</code> standalone sera publiée
-                                    prochainement pour un usage sans environnement de développement.</p>
-                                <button class="btn btn-accent disabled mt-2">Télécharger la release (.jar)</button>
+                                <div class="download-section">
+                                    <h5 class="fw-bold">Version Exécutable</h5>
+                                    <a class="download mt-2" href="website/projet.jar"
+                                        download="website/projet.jar">Télécharger la release (.jar)</a>
+                                </div>
+
+
+                                <div class="terminal-block shadow-sm mt-2">
+                                    <div class="terminal-body p-3">
+                                        <pre class="m-0">
+<code><span class="text-comment"># Déploiement du Serveur</span>
+java -cp projet.jar Serveur.Main
+<span class="text-comment"># Déploiement du Client</span>
+java -cp projet.jar Client.Main
+</code></pre>
+                                    </div>
+                                </div>
+
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -196,7 +222,7 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
 ...
 
 <span class="text-prompt">></span> -sw -add le,la,les
-<span class="text-success-cmd">...</span>
+...
 
 <span class="text-prompt">></span> -m src/document.pdf
 ...</code></pre>
@@ -214,8 +240,10 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Multi-threading</h5>
-                                <p class="card-text text-secondary">Le serveur gère plusieurs clients simultanément grâce à un ThreadGroup dédié.
-                                    Le journal utilise un pattern Producteur/Consommateur avec un thread écrivain asynchrone, évitant tout blocage
+                                <p class="card-text text-secondary">Le serveur gère plusieurs clients simultanément
+                                    grâce à un ThreadGroup dédié.
+                                    Le journal utilise un pattern Producteur/Consommateur avec un thread écrivain
+                                    asynchrone, évitant tout blocage
                                     des opérations d'indexation.</p>
                             </div>
                         </div>
@@ -226,7 +254,8 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             <div class="card-body">
                                 <h5 class="card-title text-accent">journalisation</h5>
                                 <p class="card-text text-secondary">Chaque opération (ajout, modification, suppression)
-                                    est persistée dans un fichier journal.csv. Au redémarrage, l'état complet est restauré
+                                    est persistée dans un fichier journal.csv. Au redémarrage, l'état complet est
+                                    restauré
                                     depuis ce journal sans réindexation, garantissant la continuité du service.</p>
                             </div>
                         </div>
@@ -236,8 +265,10 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
                             class="card h-100 bg-custom-dark text-light shadow border-0 border-start border-4 border-accent">
                             <div class="card-body">
                                 <h5 class="card-title text-accent">Client - Serveur</h5>
-                                <p class="card-text text-secondary">Architecture TCP/IP sur le port 12345. Le client interactif propose
-                                    un ensemble de commandes (-s, -ar, -dl, -m, -sw...) pour interroger le serveur, télécharger des fichiers
+                                <p class="card-text text-secondary">Architecture TCP/IP sur le port 12345. Le client
+                                    interactif propose
+                                    un ensemble de commandes (-s, -ar, -dl, -m, -sw...) pour interroger le serveur,
+                                    télécharger des fichiers
                                     et gérer l'index à distance.</p>
                                 </p>
                             </div>
@@ -251,8 +282,8 @@ mvn exec:java -Dexec.mainClass="Client.Main"</code></pre>
         <footer class="text-secondary text-center py-4 mt-5">
             <div class="container border-top border-secondary pt-3">
                 <p class="footer-text mb-0">
-                    Projet académique Info4B - Université de Bourgogne | 
-                    <a href="mentions-legales.html" class="legals">Mentions Légales</a> | 
+                    Projet académique Info4B - Université de Bourgogne |
+                    <a href="mentions-legales.html" class="legals">Mentions Légales</a> |
                     <a href="https://antoineragot.com" target="_blank" class="site-perso">Antoine Ragot</a>
                 </p>
             </div>
